@@ -16,6 +16,10 @@
     },
     "clean": {
       "cache": false
+    },
+    "check-exports": {
+      "dependsOn": ["build"],
+      "cache": false
     }
   }
 }

@@ -33,7 +33,8 @@
     "test": "vitest run",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "check-exports": "attw --pack ."
   },
   "dependencies": {
     "@mahoraga/core": "workspace:*",
