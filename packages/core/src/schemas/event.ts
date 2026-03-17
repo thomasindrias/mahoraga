@@ -47,7 +47,7 @@ export const FormPayloadSchema = z.object({
 export const CustomPayloadSchema = z.object({
   type: z.literal('custom'),
   name: z.string(),
-  properties: z.record(z.unknown()),
+  properties: z.record(z.string(), z.unknown()),
 });
 
 /** Discriminated union of all event payload types */

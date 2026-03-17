@@ -38,7 +38,7 @@ export const AgentConfigSchema = z.object({
   maxDispatchesPerRun: z.number().int().positive().default(5),
   timeoutMs: z.number().int().positive().default(300_000),
   maxRetries: z.number().int().nonnegative().default(3),
-  postChecks: PostChecksSchema.default({}),
+  postChecks: PostChecksSchema.prefault({}),
   /** Paths the agent is allowed to modify */
   allowedPaths: z.array(z.string()).default([]),
   /** Paths the agent must not modify */
@@ -65,10 +65,10 @@ export const LoggingConfigSchema = z.object({
  */
 export const MahoragaConfigSchema = z.object({
   sources: z.array(SourceConfigSchema),
-  analysis: AnalysisConfigSchema.default({}),
-  agent: AgentConfigSchema.default({}),
-  storage: StorageConfigSchema.default({}),
-  logging: LoggingConfigSchema.default({}),
+  analysis: AnalysisConfigSchema.prefault({}),
+  agent: AgentConfigSchema.prefault({}),
+  storage: StorageConfigSchema.prefault({}),
+  logging: LoggingConfigSchema.prefault({}),
 });
 
 /**
