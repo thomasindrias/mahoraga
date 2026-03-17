@@ -46,7 +46,7 @@
     "mahoraga-sources": "workspace:*",
     "mahoraga-analyzer": "workspace:*",
     "mahoraga-agent": "workspace:*",
-    "@clack/prompts": "^0.8.0"
+    "@clack/prompts": "^1.1.0"
   },
   "devDependencies": {
     "typescript": "^5.5.0",
