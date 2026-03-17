@@ -23,8 +23,9 @@ The `mahoraga-core/testing` subpath exports test factories:
 import {
   createEvent,
   createSession,
-  createTimeWindow,
   createRageClickSequence,
+  createErrorEvent,
+  resetEventCounter,
 } from 'mahoraga-core/testing';
 ```
 

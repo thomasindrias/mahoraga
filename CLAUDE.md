@@ -35,14 +35,14 @@ Human Review -> Merge
 ### Package Dependency Graph
 
 ```
-cli -> agent -> analyzer -> sources -> core
-         |         |           |
-       mapper     core        core
-         |
-        core
+cli -> agent -> core, mapper
+  |-> analyzer -> core
+  |-> sources -> core
+  |-> mapper -> core
+agent -> core, mapper
 ```
 
-`mahoraga-core` is the leaf dependency. All packages depend on it.
+`mahoraga-core` is the leaf dependency. The CLI acts as the composition root, depending on all packages directly.
 
 ### Packages
 
@@ -140,7 +140,7 @@ Credentials are never stored in SQLite or logged.
 - **E2E tests** -- gated behind `MAHORAGA_INTEGRATION_TESTS=true`, not run on every PR
 
 ### Test Factories
-`mahoraga-core/testing` exports: `createEvent()`, `createSession()`, `createTimeWindow()`, `createRageClickSequence()`.
+`mahoraga-core/testing` exports: `createEvent()`, `createSession()`, `createRageClickSequence()`, `createErrorEvent()`, `resetEventCounter()`.
 
 ### Coverage
 Target 80% line coverage minimum per package.

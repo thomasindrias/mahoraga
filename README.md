@@ -12,6 +12,7 @@
 
 Ingests user behavior data from your existing analytics stack, detects UI issues through automated analysis, and dispatches AI agents to fix them — creating pull requests automatically.
 
+[![npm](https://img.shields.io/npm/v/mahoraga-cli.svg)](https://www.npmjs.com/package/mahoraga-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-D4A336.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/Node-%3E%3D20-333.svg)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-333.svg)](https://www.typescriptlang.org)
@@ -157,11 +158,11 @@ npx mahoraga-cli gc
 ### Dependency Graph
 
 ```
-cli -> agent -> analyzer -> sources -> core
-         |         |           |
-       mapper     core        core
-         |
-        core
+cli -> agent -> core, mapper
+  |-> analyzer -> core
+  |-> sources -> core
+  |-> mapper -> core
+agent -> core, mapper
 ```
 
 ## Development
