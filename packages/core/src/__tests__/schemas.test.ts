@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { MahoragaEventSchema } from '../schemas/event.js';
 import { IssueSchema } from '../schemas/issue.js';
-import { MahoragaConfigSchema, defineConfig } from '../schemas/config.js';
+import { defineConfig } from '../schemas/config.js';
 
 describe('MahoragaEventSchema', () => {
   it('should validate a valid click event', () => {

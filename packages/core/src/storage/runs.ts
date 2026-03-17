@@ -29,6 +29,9 @@ export class RunStore {
    * Update run counters incrementally.
    * @param id - Run ID
    * @param updates - Fields to update
+   * @param updates.eventsPulled - Number of events pulled to add
+   * @param updates.issuesDetected - Number of issues detected to add
+   * @param updates.prsCreated - Number of PRs created to add
    */
   update(
     id: string,

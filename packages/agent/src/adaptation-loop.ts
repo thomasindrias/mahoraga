@@ -37,7 +37,6 @@ export interface AdaptationOptions {
  * 3. Run the test
  * 4. If test fails → feed error back to agent → retry
  * 5. Only succeed if test passes
- *
  * @param executor - AI agent executor
  * @param prompt - Initial prompt for the agent
  * @param issue - Issue being fixed

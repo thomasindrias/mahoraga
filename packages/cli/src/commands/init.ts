@@ -164,7 +164,7 @@ function updateGitignore(cwd: string): void {
   }
 }
 
-function buildGitHubWorkflow(baseBranch: string): string {
+function buildGitHubWorkflow(_baseBranch: string): string {
   return `name: Mahoraga Analysis
 on:
   schedule:

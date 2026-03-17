@@ -5,6 +5,7 @@ import type { MahoragaConfig } from '@mahoraga/core';
  * Show recent run history and outcomes.
  * @param config - Mahoraga configuration
  * @param options - Display options
+ * @param options.limit - Maximum number of runs to display
  */
 export async function runStatus(
   config: MahoragaConfig,

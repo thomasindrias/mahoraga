@@ -51,9 +51,9 @@ describe('RageClickRule', () => {
 
     const issues = await rule.analyze(makeContext());
     expect(issues).toHaveLength(1);
-    expect(issues[0].ruleId).toBe('rage-clicks');
-    expect(issues[0].title).toContain('#frustrating-btn');
-    expect(issues[0].evidence[0].type).toBe('event_cluster');
+    expect(issues[0]!.ruleId).toBe('rage-clicks');
+    expect(issues[0]!.title).toContain('#frustrating-btn');
+    expect(issues[0]!.evidence[0]!.type).toBe('event_cluster');
   });
 
   it('does not detect slow clicks (5 clicks over 10 seconds)', async () => {
@@ -101,7 +101,7 @@ describe('RageClickRule', () => {
 
     const issues = await rule.analyze(makeContext());
     expect(issues).toHaveLength(1);
-    expect(issues[0].severity).toBe('critical'); // 1/1 = 100% >= 25%
+    expect(issues[0]!.severity).toBe('critical'); // 1/1 = 100% >= 25%
   });
 
   it('assigns low severity when few sessions affected', async () => {
@@ -143,7 +143,7 @@ describe('RageClickRule', () => {
 
     const issues = await rule.analyze(makeContext());
     expect(issues).toHaveLength(1);
-    expect(issues[0].severity).toBe('low'); // 1/31 ~= 3.2% < 5%
+    expect(issues[0]!.severity).toBe('low'); // 1/31 ~= 3.2% < 5%
   });
 
   it('deduplicates by fingerprint', async () => {
@@ -171,7 +171,7 @@ describe('RageClickRule', () => {
     const issues = await rule.analyze(makeContext());
     // Should produce exactly 1 issue for #same-btn, not 2
     expect(issues).toHaveLength(1);
-    expect(issues[0].frequency).toBe(2); // 2 sessions affected
+    expect(issues[0]!.frequency).toBe(2); // 2 sessions affected
   });
 });
 
@@ -199,9 +199,9 @@ describe('ErrorSpikeRule', () => {
 
     const issues = await rule.analyze(makeContext());
     expect(issues).toHaveLength(1);
-    expect(issues[0].ruleId).toBe('error-spikes');
-    expect(issues[0].evidence[0].type).toBe('frequency_spike');
-    expect(issues[0].title).toContain('TypeError');
+    expect(issues[0]!.ruleId).toBe('error-spikes');
+    expect(issues[0]!.evidence[0]!.type).toBe('frequency_spike');
+    expect(issues[0]!.title).toContain('TypeError');
   });
 
   it('does not flag stable error rates', async () => {
@@ -257,7 +257,7 @@ describe('ErrorSpikeRule', () => {
 
     const issues = await rule.analyze(makeContext());
     expect(issues).toHaveLength(1);
-    expect(issues[0].severity).toBe('critical'); // 10x ratio >= 10
+    expect(issues[0]!.severity).toBe('critical'); // 10x ratio >= 10
   });
 });
 
@@ -344,7 +344,7 @@ describe('AnalysisEngine', () => {
     const issues = await engine.analyze(makeContext());
 
     expect(issues).toHaveLength(1);
-    expect(issues[0].ruleId).toBe('passing-rule');
+    expect(issues[0]!.ruleId).toBe('passing-rule');
     expect(consoleSpy).toHaveBeenCalledWith(
       'Rule "failing-rule" failed:',
       'Rule exploded',

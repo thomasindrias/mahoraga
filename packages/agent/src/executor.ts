@@ -1,5 +1,3 @@
-import type { IssueGroup, DispatchResult } from '@mahoraga/core';
-
 /**
  * Result from a single agent execution (before post-checks).
  */
@@ -123,7 +121,11 @@ export class MockAgentExecutor implements AgentExecutor {
   }
 
   /** @inheritdoc */
-  async execute(): Promise<AgentExecutionResult> {
+  async execute(
+    _prompt?: string,
+    _workDir?: string,
+    _options?: AgentExecuteOptions,
+  ): Promise<AgentExecutionResult> {
     const result = this.results[this.callCount % this.results.length]!;
     this.callCount++;
     return result;

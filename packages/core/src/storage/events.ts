@@ -52,6 +52,11 @@ export class EventStore {
   /**
    * Query events by type and time range.
    * @param options - Query options
+   * @param options.type - Filter by event type
+   * @param options.start - Start timestamp (inclusive)
+   * @param options.end - End timestamp (exclusive)
+   * @param options.sessionId - Filter by session ID
+   * @param options.limit - Maximum number of results
    * @returns Matching events
    */
   query(options: {
@@ -106,6 +111,9 @@ export class EventStore {
   /**
    * Count events matching the given criteria.
    * @param options - Query options
+   * @param options.type - Filter by event type
+   * @param options.start - Start timestamp (inclusive)
+   * @param options.end - End timestamp (exclusive)
    * @returns Count of matching events
    */
   count(options: {

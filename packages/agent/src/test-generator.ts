@@ -49,7 +49,6 @@ export function generateTest(
 
 function generateRageClickTest(issue: IssueGroup): string {
   const selectors = issue.affectedElements.map((e) => e.selector);
-  const urls = [...new Set(issue.affectedElements.map((e) => e.url))];
 
   return `import { describe, it, expect } from 'vitest';
 

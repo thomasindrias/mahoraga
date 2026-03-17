@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdtempSync, rmSync, existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { mkdtempSync, rmSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { runStatus, runInspect } from '../index.js';
@@ -103,7 +103,7 @@ async function getInitHelpers() {
   // Read the init source and extract the function
   // Since buildGitHubWorkflow is not exported, we test it indirectly
   return {
-    buildGitHubWorkflow: (baseBranch: string) => {
+    buildGitHubWorkflow: (_baseBranch: string) => {
       return `name: Mahoraga Analysis
 on:
   schedule:

@@ -6,6 +6,7 @@ import type { MahoragaConfig } from '@mahoraga/core';
  * @param config - Mahoraga configuration
  * @param subcommand - What to inspect: 'events' or 'issues'
  * @param options - Query options
+ * @param options.limit - Maximum number of results to display
  */
 export async function runInspect(
   config: MahoragaConfig,
