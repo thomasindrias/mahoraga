@@ -1,4 +1,4 @@
-# @mahoraga/cli
+# mahoraga-cli
 
 CLI entry point for Mahoraga - self-evolving frontend intelligence.
 
@@ -6,7 +6,7 @@ CLI entry point for Mahoraga - self-evolving frontend intelligence.
 
 ```bash
 # Global installation
-npm install -g @mahoraga/cli
+npm install -g mahoraga-cli
 
 # Or use directly with npx
 npx mahoraga
@@ -54,7 +54,7 @@ mahoraga map "button.submit-form"
 Create `mahoraga.config.ts` in your project root:
 
 ```typescript
-import { defineConfig } from '@mahoraga/cli';
+import { defineConfig } from 'mahoraga-cli';
 
 export default defineConfig({
   sources: {

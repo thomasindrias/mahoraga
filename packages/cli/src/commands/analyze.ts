@@ -4,12 +4,12 @@ import {
   CheckpointStore,
   IssueStore,
   RunStore,
-} from '@mahoraga/core';
-import type { MahoragaConfig, TimeRange, RunError } from '@mahoraga/core';
-import { PipelineRunner, AmplitudeAdapter } from '@mahoraga/sources';
-import type { SourceAdapter } from '@mahoraga/sources';
-import { AnalysisEngine, RageClickRule, ErrorSpikeRule } from '@mahoraga/analyzer';
-import { AgentDispatcher, ClaudeCodeExecutor, createWorktree, cleanupWorktree } from '@mahoraga/agent';
+} from 'mahoraga-core';
+import type { MahoragaConfig, TimeRange, RunError } from 'mahoraga-core';
+import { PipelineRunner, AmplitudeAdapter } from 'mahoraga-sources';
+import type { SourceAdapter } from 'mahoraga-sources';
+import { AnalysisEngine, RageClickRule, ErrorSpikeRule } from 'mahoraga-analyzer';
+import { AgentDispatcher, ClaudeCodeExecutor, createWorktree, cleanupWorktree } from 'mahoraga-agent';
 import { randomUUID } from 'node:crypto';
 
 /**

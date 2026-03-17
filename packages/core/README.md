@@ -1,11 +1,11 @@
-# @mahoraga/core
+# mahoraga-core
 
 Shared schemas, storage, types, and utilities for Mahoraga.
 
 ## Installation
 
 ```bash
-npm install @mahoraga/core
+npm install mahoraga-core
 ```
 
 ## Features
@@ -13,11 +13,11 @@ npm install @mahoraga/core
 - **Zod schemas** for event validation and type safety
 - **SQLite storage** via better-sqlite3 (WAL mode, hash-based deduplication)
 - **Utilities**: hash generation, deduplication, retry logic, rate limiter
-- **Testing subpath**: `@mahoraga/core/testing` with factories for test data
+- **Testing subpath**: `mahoraga-core/testing` with factories for test data
 
 ## Testing Utilities
 
-The `@mahoraga/core/testing` subpath exports test factories:
+The `mahoraga-core/testing` subpath exports test factories:
 
 ```typescript
 import {
@@ -25,7 +25,7 @@ import {
   createSession,
   createTimeWindow,
   createRageClickSequence,
-} from '@mahoraga/core/testing';
+} from 'mahoraga-core/testing';
 ```
 
 ## Requirements

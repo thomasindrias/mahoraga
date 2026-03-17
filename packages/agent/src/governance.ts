@@ -1,4 +1,4 @@
-import type { AgentConfig, IssueGroup } from '@mahoraga/core';
+import type { AgentConfig, IssueGroup } from 'mahoraga-core';
 import { minimatch } from 'minimatch';
 
 /**

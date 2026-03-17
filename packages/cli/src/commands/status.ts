@@ -1,5 +1,5 @@
-import { createDatabase, RunStore } from '@mahoraga/core';
-import type { MahoragaConfig } from '@mahoraga/core';
+import { createDatabase, RunStore } from 'mahoraga-core';
+import type { MahoragaConfig } from 'mahoraga-core';
 
 /**
  * Show recent run history and outcomes.

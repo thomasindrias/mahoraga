@@ -1,5 +1,5 @@
-import type { Issue, MahoragaEvent, ErrorPayload, Evidence, EventSummary } from '@mahoraga/core';
-import { createFingerprint } from '@mahoraga/core';
+import type { Issue, MahoragaEvent, ErrorPayload, Evidence, EventSummary } from 'mahoraga-core';
+import { createFingerprint } from 'mahoraga-core';
 import type { DetectionRule, AnalysisContext } from '../rule.js';
 
 const MIN_SPIKE_COUNT = 5;

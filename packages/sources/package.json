@@ -1,5 +1,5 @@
 {
-  "name": "@mahoraga/sources",
+  "name": "mahoraga-sources",
   "version": "0.1.0",
   "description": "Pluggable source adapters for Mahoraga",
   "license": "MIT",
@@ -37,7 +37,7 @@
     "check-exports": "attw --pack . --profile esm-only"
   },
   "dependencies": {
-    "@mahoraga/core": "workspace:*"
+    "mahoraga-core": "workspace:*"
   },
   "devDependencies": {
     "msw": "^2.4.0",

@@ -1,5 +1,5 @@
 {
-  "name": "@mahoraga/agent",
+  "name": "mahoraga-agent",
   "version": "0.1.0",
   "description": "AI agent dispatcher with adaptation loop for Mahoraga",
   "license": "MIT",
@@ -37,8 +37,8 @@
     "check-exports": "attw --pack . --profile esm-only"
   },
   "dependencies": {
-    "@mahoraga/core": "workspace:*",
-    "@mahoraga/mapper": "workspace:*",
+    "mahoraga-core": "workspace:*",
+    "mahoraga-mapper": "workspace:*",
     "minimatch": "^10.0.0"
   },
   "devDependencies": {

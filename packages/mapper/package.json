@@ -1,5 +1,5 @@
 {
-  "name": "@mahoraga/mapper",
+  "name": "mahoraga-mapper",
   "version": "0.1.0",
   "description": "AST-based code-to-event mapping for Mahoraga",
   "license": "MIT",
@@ -38,7 +38,7 @@
     "check-exports": "attw --pack . --profile esm-only"
   },
   "dependencies": {
-    "@mahoraga/core": "workspace:*",
+    "mahoraga-core": "workspace:*",
     "typescript": "^5.5.0",
     "glob": "^11.0.0"
   },

@@ -7,7 +7,7 @@ const pkg = JSON.parse(readFileSync(resolve(pkgDir, 'package.json'), 'utf-8'));
 
 describe('package exports', () => {
   it('should have required npm metadata', () => {
-    expect(pkg.name).toBe('@mahoraga/mapper');
+    expect(pkg.name).toBe('mahoraga-mapper');
     expect(pkg.license).toBe('MIT');
     expect(pkg.version).toBeDefined();
     expect(pkg.files).toContain('dist');
@@ -22,7 +22,7 @@ describe('package exports', () => {
 
   it('workspace dependencies should use workspace protocol', () => {
     const internalDeps = Object.entries(pkg.dependencies as Record<string, string>)
-      .filter(([name]) => name.startsWith('@mahoraga/'));
+      .filter(([name]) => name.startsWith('mahoraga-'));
     expect(internalDeps.length).toBeGreaterThan(0);
     for (const [name, version] of internalDeps) {
       expect(version, `${name} should use workspace:*`).toBe('workspace:*');

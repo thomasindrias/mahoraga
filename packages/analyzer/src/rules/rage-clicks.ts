@@ -1,5 +1,5 @@
-import type { Issue, MahoragaEvent, ClickPayload, Evidence, EventSummary } from '@mahoraga/core';
-import { createFingerprint } from '@mahoraga/core';
+import type { Issue, MahoragaEvent, ClickPayload, Evidence, EventSummary } from 'mahoraga-core';
+import { createFingerprint } from 'mahoraga-core';
 import type { DetectionRule, AnalysisContext } from '../rule.js';
 
 const RAGE_CLICK_THRESHOLD = 3;

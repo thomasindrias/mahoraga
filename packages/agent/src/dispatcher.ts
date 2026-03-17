@@ -1,6 +1,6 @@
-import type { IssueGroup, AgentConfig, DispatchResult } from '@mahoraga/core';
+import type { IssueGroup, AgentConfig, DispatchResult } from 'mahoraga-core';
 import type { AgentExecutor } from './executor.js';
-import type { SourceLocation } from '@mahoraga/core';
+import type { SourceLocation } from 'mahoraga-core';
 import { buildPrompt } from './prompt-builder.js';
 import { runAdaptationLoop } from './adaptation-loop.js';
 import { createPR } from './pr-creator.js';

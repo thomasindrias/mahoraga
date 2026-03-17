@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { createDatabase, EventStore } from '@mahoraga/core';
-import type { DatabaseManager } from '@mahoraga/core';
+import { createDatabase, EventStore } from 'mahoraga-core';
+import type { DatabaseManager } from 'mahoraga-core';
 import {
   createEvent,
   createRageClickSequence,
   createErrorEvent,
   resetEventCounter,
-} from '@mahoraga/core/testing';
+} from 'mahoraga-core/testing';
 import { AnalysisEngine } from '../engine.js';
 import { RageClickRule } from '../rules/rage-clicks.js';
 import { ErrorSpikeRule } from '../rules/error-spikes.js';

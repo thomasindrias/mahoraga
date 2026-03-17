@@ -1,4 +1,4 @@
-import type { IssueGroup } from '@mahoraga/core';
+import type { IssueGroup } from 'mahoraga-core';
 import type { AgentExecutor, AgentExecutionResult, AgentExecuteOptions } from './executor.js';
 import { generateTest, type GeneratedTest } from './test-generator.js';
 

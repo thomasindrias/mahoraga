@@ -4,8 +4,8 @@ import {
   EventStore,
   CheckpointStore,
   createIdempotencyKey,
-} from '@mahoraga/core';
-import type { MahoragaEvent, Cursor, TimeRange } from '@mahoraga/core';
+} from 'mahoraga-core';
+import type { MahoragaEvent, Cursor, TimeRange } from 'mahoraga-core';
 import type { SourceAdapter, AdapterConfig, PullBatch, ValidationResult } from '../adapter.js';
 import { PipelineRunner } from '../runner.js';
 import { AmplitudeAdapter, transformAmplitudeEvent } from '../amplitude/adapter.js';

@@ -1,5 +1,5 @@
 {
-  "name": "@mahoraga/analyzer",
+  "name": "mahoraga-analyzer",
   "version": "0.1.0",
   "description": "Pluggable detection rules engine for Mahoraga",
   "license": "MIT",
@@ -37,7 +37,7 @@
     "check-exports": "attw --pack . --profile esm-only"
   },
   "dependencies": {
-    "@mahoraga/core": "workspace:*"
+    "mahoraga-core": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.5.0",

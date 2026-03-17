@@ -3,8 +3,8 @@ import { mkdtempSync, rmSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { runStatus, runInspect } from '../index.js';
-import { createDatabase, defineConfig } from '@mahoraga/core';
-import type { MahoragaConfig } from '@mahoraga/core';
+import { createDatabase, defineConfig } from 'mahoraga-core';
+import type { MahoragaConfig } from 'mahoraga-core';
 
 let tempDir: string;
 let config: MahoragaConfig;
@@ -36,7 +36,7 @@ describe('runStatus', () => {
 
   it('should show run history after creating a run', async () => {
     const db = createDatabase(config.storage.dbPath);
-    const { RunStore } = await import('@mahoraga/core');
+    const { RunStore } = await import('mahoraga-core');
     const runStore = new RunStore(db.db);
     runStore.create('test-run-1');
     runStore.update('test-run-1', { eventsPulled: 50, issuesDetected: 2 });

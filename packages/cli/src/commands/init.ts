@@ -81,7 +81,7 @@ export async function runInit(cwd: string): Promise<void> {
 }
 
 function buildConfigFile(source: string, baseBranch: string): string {
-  return `import { defineConfig } from '@mahoraga/core';
+  return `import { defineConfig } from 'mahoraga-core';
 
 export default defineConfig({
   sources: [

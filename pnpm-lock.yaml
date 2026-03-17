@@ -41,10 +41,10 @@ importers:
 
   packages/agent:
     dependencies:
-      '@mahoraga/core':
+      mahoraga-core:
         specifier: workspace:*
         version: link:../core
-      '@mahoraga/mapper':
+      mahoraga-mapper:
         specifier: workspace:*
         version: link:../mapper
       minimatch:
@@ -63,7 +63,7 @@ importers:
 
   packages/analyzer:
     dependencies:
-      '@mahoraga/core':
+      mahoraga-core:
         specifier: workspace:*
         version: link:../core
     devDependencies:
@@ -82,19 +82,19 @@ importers:
       '@clack/prompts':
         specifier: ^0.8.0
         version: 0.8.2
-      '@mahoraga/agent':
+      mahoraga-agent:
         specifier: workspace:*
         version: link:../agent
-      '@mahoraga/analyzer':
+      mahoraga-analyzer:
         specifier: workspace:*
         version: link:../analyzer
-      '@mahoraga/core':
+      mahoraga-core:
         specifier: workspace:*
         version: link:../core
-      '@mahoraga/mapper':
+      mahoraga-mapper:
         specifier: workspace:*
         version: link:../mapper
-      '@mahoraga/sources':
+      mahoraga-sources:
         specifier: workspace:*
         version: link:../sources
     devDependencies:
@@ -132,12 +132,12 @@ importers:
 
   packages/mapper:
     dependencies:
-      '@mahoraga/core':
-        specifier: workspace:*
-        version: link:../core
       glob:
         specifier: ^11.0.0
         version: 11.1.0
+      mahoraga-core:
+        specifier: workspace:*
+        version: link:../core
       typescript:
         specifier: ^5.5.0
         version: 5.9.3
@@ -151,7 +151,7 @@ importers:
 
   packages/sources:
     dependencies:
-      '@mahoraga/core':
+      mahoraga-core:
         specifier: workspace:*
         version: link:../core
     devDependencies:

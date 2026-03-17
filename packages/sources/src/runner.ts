@@ -3,8 +3,8 @@ import {
   EventStore,
   CheckpointStore,
   withRetry,
-} from '@mahoraga/core';
-import type { TimeRange } from '@mahoraga/core';
+} from 'mahoraga-core';
+import type { TimeRange } from 'mahoraga-core';
 import type { SourceAdapter, AdapterConfig, PullResult } from './adapter.js';
 
 /**

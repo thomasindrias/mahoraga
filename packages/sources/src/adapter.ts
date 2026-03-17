@@ -1,4 +1,4 @@
-import type { MahoragaEvent, Cursor, TimeRange } from '@mahoraga/core';
+import type { MahoragaEvent, Cursor, TimeRange } from 'mahoraga-core';
 
 /** Adapter-specific configuration passed to pull() and validate() */
 export interface AdapterConfig {

@@ -1,5 +1,5 @@
 {
-  "name": "@mahoraga/core",
+  "name": "mahoraga-core",
   "version": "0.1.0",
   "description": "Shared schemas, storage, types, and utilities for Mahoraga",
   "license": "MIT",

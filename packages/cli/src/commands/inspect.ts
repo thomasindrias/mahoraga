@@ -1,5 +1,5 @@
-import { createDatabase, EventStore, IssueStore } from '@mahoraga/core';
-import type { MahoragaConfig } from '@mahoraga/core';
+import { createDatabase, EventStore, IssueStore } from 'mahoraga-core';
+import type { MahoragaConfig } from 'mahoraga-core';
 
 /**
  * Inspect command — query local SQLite data.

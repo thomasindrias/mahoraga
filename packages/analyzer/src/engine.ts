@@ -1,4 +1,4 @@
-import type { Issue } from '@mahoraga/core';
+import type { Issue } from 'mahoraga-core';
 import type { DetectionRule, AnalysisContext } from './rule.js';
 
 /**

@@ -1,5 +1,5 @@
 {
-  "name": "@mahoraga/cli",
+  "name": "mahoraga-cli",
   "version": "0.1.0",
   "description": "CLI entry point for Mahoraga",
   "license": "MIT",
@@ -41,11 +41,11 @@
     "check-exports": "attw --pack . --profile esm-only"
   },
   "dependencies": {
-    "@mahoraga/core": "workspace:*",
-    "@mahoraga/mapper": "workspace:*",
-    "@mahoraga/sources": "workspace:*",
-    "@mahoraga/analyzer": "workspace:*",
-    "@mahoraga/agent": "workspace:*",
+    "mahoraga-core": "workspace:*",
+    "mahoraga-mapper": "workspace:*",
+    "mahoraga-sources": "workspace:*",
+    "mahoraga-analyzer": "workspace:*",
+    "mahoraga-agent": "workspace:*",
     "@clack/prompts": "^0.8.0"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-import type { IssueGroup } from '@mahoraga/core';
+import type { IssueGroup } from 'mahoraga-core';
 
 /**
  * Result of generating a localized test.

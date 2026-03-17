@@ -1,4 +1,4 @@
-import { FileSystemCodeMapper } from '@mahoraga/mapper';
+import { FileSystemCodeMapper } from 'mahoraga-mapper';
 import { join } from 'node:path';
 
 /**

@@ -1,4 +1,4 @@
-import type { IssueGroup, SourceLocation } from '@mahoraga/core';
+import type { IssueGroup, SourceLocation } from 'mahoraga-core';
 
 /**
  * Context for building agent prompts.

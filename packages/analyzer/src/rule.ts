@@ -1,5 +1,5 @@
-import type { EventType, Issue, TimeRange } from '@mahoraga/core';
-import type { EventStore } from '@mahoraga/core';
+import type { EventType, Issue, TimeRange } from 'mahoraga-core';
+import type { EventStore } from 'mahoraga-core';
 
 /**
  * Context passed to each detection rule during analysis.

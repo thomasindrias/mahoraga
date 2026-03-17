@@ -42,18 +42,18 @@ cli -> agent -> analyzer -> sources -> core
         core
 ```
 
-`@mahoraga/core` is the leaf dependency. All packages depend on it.
+`mahoraga-core` is the leaf dependency. All packages depend on it.
 
 ### Packages
 
 | Package | Path | Description |
 |---------|------|-------------|
-| `@mahoraga/core` | `packages/core` | Zod schemas, SQLite storage, types, utilities (hash, dedup, retry, rate limiter), testing factories. Exports `@mahoraga/core/testing` subpath for test helpers. |
-| `@mahoraga/mapper` | `packages/mapper` | AST-based selector-to-source-file mapping. Parses TSX/JSX via TypeScript Compiler API, resolves CSS selectors to file:line:column. Competitive moat. |
-| `@mahoraga/sources` | `packages/sources` | Pluggable source adapters. `SourceAdapter` interface with async iterable batch pulling. V1: Amplitude. Uses MSW for contract tests. |
-| `@mahoraga/analyzer` | `packages/analyzer` | Detection rules engine. `DetectionRule` interface. V1 rules: rage-click detector, error-spike detector. Rules query SQLite directly. |
-| `@mahoraga/agent` | `packages/agent` | Agent dispatcher with adaptation loop. Constructs prompts, manages git worktrees, invokes Claude Code CLI, validates fixes (build + test + diff size), creates PRs via `gh`. Competitive moat. |
-| `@mahoraga/cli` | `packages/cli` | CLI entry point (`mahoraga`). Commands: `init`, `analyze`, `analyze --dry-run`, `inspect`, `status`, `gc`, `map`. |
+| `mahoraga-core` | `packages/core` | Zod schemas, SQLite storage, types, utilities (hash, dedup, retry, rate limiter), testing factories. Exports `mahoraga-core/testing` subpath for test helpers. |
+| `mahoraga-mapper` | `packages/mapper` | AST-based selector-to-source-file mapping. Parses TSX/JSX via TypeScript Compiler API, resolves CSS selectors to file:line:column. Competitive moat. |
+| `mahoraga-sources` | `packages/sources` | Pluggable source adapters. `SourceAdapter` interface with async iterable batch pulling. V1: Amplitude. Uses MSW for contract tests. |
+| `mahoraga-analyzer` | `packages/analyzer` | Detection rules engine. `DetectionRule` interface. V1 rules: rage-click detector, error-spike detector. Rules query SQLite directly. |
+| `mahoraga-agent` | `packages/agent` | Agent dispatcher with adaptation loop. Constructs prompts, manages git worktrees, invokes Claude Code CLI, validates fixes (build + test + diff size), creates PRs via `gh`. Competitive moat. |
+| `mahoraga-cli` | `packages/cli` | CLI entry point (`mahoraga`). Commands: `init`, `analyze`, `analyze --dry-run`, `inspect`, `status`, `gc`, `map`. |
 
 ## Development Workflow
 
@@ -79,9 +79,9 @@ pnpm turbo lint                         # Lint all packages
 pnpm turbo typecheck                    # Type-check all packages
 pnpm turbo clean                        # Clean all dist/ outputs
 
-pnpm --filter @mahoraga/<pkg> test      # Test a specific package
-pnpm --filter @mahoraga/<pkg> build     # Build a specific package
-pnpm --filter @mahoraga/<pkg> lint      # Lint a specific package
+pnpm --filter mahoraga-<pkg> test       # Test a specific package
+pnpm --filter mahoraga-<pkg> build      # Build a specific package
+pnpm --filter mahoraga-<pkg> lint       # Lint a specific package
 ```
 
 ## Code Conventions
@@ -134,13 +134,13 @@ Credentials are never stored in SQLite or logged.
 
 ### Layers
 - **Unit tests** (all packages) -- pure function logic, mocked dependencies, no I/O
-- **Contract tests** (`@mahoraga/sources`) -- MSW fake HTTP servers, recorded fixtures in `__fixtures__/`
+- **Contract tests** (`mahoraga-sources`) -- MSW fake HTTP servers, recorded fixtures in `__fixtures__/`
 - **Integration tests** -- full pipeline from fixture data to issue reports, real SQLite (in-memory)
 - **Agent tests** -- prompt assembly unit tests, git operations in temp repos, `MockAgentExecutor` with pre-recorded diffs
 - **E2E tests** -- gated behind `MAHORAGA_INTEGRATION_TESTS=true`, not run on every PR
 
 ### Test Factories
-`@mahoraga/core/testing` exports: `createEvent()`, `createSession()`, `createTimeWindow()`, `createRageClickSequence()`.
+`mahoraga-core/testing` exports: `createEvent()`, `createSession()`, `createTimeWindow()`, `createRageClickSequence()`.
 
 ### Coverage
 Target 80% line coverage minimum per package.

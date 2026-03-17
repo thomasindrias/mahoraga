@@ -1,11 +1,11 @@
-# @mahoraga/agent
+# mahoraga-agent
 
 AI agent dispatcher with adaptation loop.
 
 ## Installation
 
 ```bash
-npm install @mahoraga/agent
+npm install mahoraga-agent
 ```
 
 ## Features
@@ -19,7 +19,7 @@ npm install @mahoraga/agent
 ## Usage
 
 ```typescript
-import { AgentDispatcher } from '@mahoraga/agent';
+import { AgentDispatcher } from 'mahoraga-agent';
 
 const dispatcher = new AgentDispatcher({
   projectRoot: '/path/to/project',

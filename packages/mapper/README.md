@@ -1,11 +1,11 @@
-# @mahoraga/mapper
+# mahoraga-mapper
 
 AST-based CSS selector to source file mapping.
 
 ## Installation
 
 ```bash
-npm install @mahoraga/mapper
+npm install mahoraga-mapper
 ```
 
 ## Features
@@ -18,7 +18,7 @@ npm install @mahoraga/mapper
 ## Usage
 
 ```typescript
-import { mapSelectorToSource } from '@mahoraga/mapper';
+import { mapSelectorToSource } from 'mahoraga-mapper';
 
 const location = await mapSelectorToSource({
   selector: 'button.submit-form',

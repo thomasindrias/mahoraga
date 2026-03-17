@@ -1,5 +1,5 @@
-import { createIdempotencyKey } from '@mahoraga/core';
-import type { MahoragaEvent, Cursor, TimeRange, EventPayload } from '@mahoraga/core';
+import { createIdempotencyKey } from 'mahoraga-core';
+import type { MahoragaEvent, Cursor, TimeRange, EventPayload } from 'mahoraga-core';
 import type {
   SourceAdapter,
   AdapterConfig,

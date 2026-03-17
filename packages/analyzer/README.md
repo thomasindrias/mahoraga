@@ -1,11 +1,11 @@
-# @mahoraga/analyzer
+# mahoraga-analyzer
 
 Detection rules engine for UI issues.
 
 ## Installation
 
 ```bash
-npm install @mahoraga/analyzer
+npm install mahoraga-analyzer
 ```
 
 ## Features
@@ -19,7 +19,7 @@ npm install @mahoraga/analyzer
 ## Usage
 
 ```typescript
-import { RageClickDetector } from '@mahoraga/analyzer';
+import { RageClickDetector } from 'mahoraga-analyzer';
 
 const detector = new RageClickDetector({
   clickThreshold: 5,

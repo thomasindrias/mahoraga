@@ -1,4 +1,4 @@
-import type { IssueGroup } from '@mahoraga/core';
+import type { IssueGroup } from 'mahoraga-core';
 import type { AdaptationResult } from './adaptation-loop.js';
 
 /**

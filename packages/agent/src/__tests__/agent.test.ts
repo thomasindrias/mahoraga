@@ -12,7 +12,7 @@ import {
   checkDiffPaths,
   checkDiffSize,
 } from '../governance.js';
-import type { IssueGroup, AgentConfig, SourceLocation } from '@mahoraga/core';
+import type { IssueGroup, AgentConfig, SourceLocation } from 'mahoraga-core';
 
 const mockIssue: IssueGroup = {
   id: 'issue-1',

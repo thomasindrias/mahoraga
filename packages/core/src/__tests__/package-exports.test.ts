@@ -7,7 +7,7 @@ const pkg = JSON.parse(readFileSync(resolve(pkgDir, 'package.json'), 'utf-8'));
 
 describe('package exports', () => {
   it('should have required npm metadata', () => {
-    expect(pkg.name).toBe('@mahoraga/core');
+    expect(pkg.name).toBe('mahoraga-core');
     expect(pkg.license).toBe('MIT');
     expect(pkg.version).toBeDefined();
     expect(pkg.files).toContain('dist');

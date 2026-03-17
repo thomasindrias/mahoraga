@@ -1,11 +1,11 @@
-# @mahoraga/sources
+# mahoraga-sources
 
 Pluggable source adapters for analytics platforms.
 
 ## Installation
 
 ```bash
-npm install @mahoraga/sources
+npm install mahoraga-sources
 ```
 
 ## Features
@@ -18,7 +18,7 @@ npm install @mahoraga/sources
 ## Usage
 
 ```typescript
-import { AmplitudeAdapter } from '@mahoraga/sources';
+import { AmplitudeAdapter } from 'mahoraga-sources';
 
 const adapter = new AmplitudeAdapter({
   apiKey: process.env.AMPLITUDE_API_KEY,
