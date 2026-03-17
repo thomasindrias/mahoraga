@@ -16,42 +16,52 @@ npm install mahoraga-analyzer
 import { AnalysisEngine, RageClickRule, ErrorSpikeRule } from 'mahoraga-analyzer';
 import { createDatabase, EventStore } from 'mahoraga-core';
 
-const db = createDatabase('.mahoraga/mahoraga.db');
-const engine = new AnalysisEngine([
-  new RageClickRule(db),
-  new ErrorSpikeRule(db),
-]);
+const dbManager = createDatabase('.mahoraga/mahoraga.db');
+const eventStore = new EventStore(dbManager.db);
 
+const engine = new AnalysisEngine();
+engine.registerRule(new RageClickRule());
+engine.registerRule(new ErrorSpikeRule());
+
+const now = Date.now();
 const issues = await engine.analyze({
-  windowStart: Date.now() - 3 * 86400000,
-  windowEnd: Date.now(),
+  eventStore,
+  timeWindow: { start: now - 3 * 86400000, end: now },
+  previousWindow: { start: now - 6 * 86400000, end: now - 3 * 86400000 },
 });
 
 console.log(issues);
-// [{ type: 'rage-click', selector: '.btn-submit', confidence: 0.92, severity: 'high', ... }]
+// [{ ruleId: 'rage-clicks', title: 'Rage clicks detected on ".btn-submit"', severity: 'high', ... }]
 ```
 
 ## Built-in Rules
 
 | Rule | Detects |
 |------|---------|
-| `RageClickRule` | Excessive clicks on the same element in a short timespan |
-| `ErrorSpikeRule` | Abnormal increase in JavaScript errors |
+| `RageClickRule` | 3+ clicks on the same element within 1 second |
+| `ErrorSpikeRule` | Abnormal increase in JavaScript errors vs previous window |
 
 ## Writing a Custom Rule
 
 Implement the `DetectionRule` interface:
 
 ```typescript
-import type { DetectionRule } from 'mahoraga-analyzer';
-import type { AnalysisContext } from 'mahoraga-analyzer';
+import type { DetectionRule, AnalysisContext } from 'mahoraga-analyzer';
 import type { Issue } from 'mahoraga-core';
 
 export class MyRule implements DetectionRule {
-  name = 'my-rule';
+  readonly id = 'my-rule';
+  readonly name = 'My Custom Rule';
+  readonly description = 'Detects a custom pattern';
+  readonly requiredEventTypes = ['click'] as const;
 
   async analyze(context: AnalysisContext): Promise<Issue[]> {
-    // Query events, detect patterns, return issues
+    const events = context.eventStore.query({
+      type: 'click',
+      start: context.timeWindow.start,
+      end: context.timeWindow.end,
+    });
+    // Detect patterns, return issues
     return [];
   }
 }

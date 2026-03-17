@@ -17,19 +17,24 @@ Takes a detected UI issue, generates a fix using an AI coding agent, validates t
 ## Usage
 
 ```typescript
-import { AgentDispatcher } from 'mahoraga-agent';
+import { AgentDispatcher, ClaudeCodeExecutor } from 'mahoraga-agent';
+import { FileSystemCodeMapper } from 'mahoraga-mapper';
+import { defineConfig } from 'mahoraga-core';
 
-const dispatcher = new AgentDispatcher({
-  projectRoot: '/path/to/project',
-  baseBranch: 'main',
-  allowedPaths: ['src/**/*.tsx'],
-  deniedPaths: ['src/admin/**'],
-  confidenceThreshold: 0.7,
-  maxRetries: 3,
-  postChecks: { build: true, test: true, maxDiffLines: 500 },
+const config = defineConfig({
+  sources: [{ adapter: 'amplitude' }],
+  agent: {
+    allowedPaths: ['src/**/*.tsx'],
+    deniedPaths: ['src/admin/**'],
+  },
 });
 
-const result = await dispatcher.dispatch(issueGroup);
+const executor = new ClaudeCodeExecutor();
+const mapper = new FileSystemCodeMapper('./src');
+await mapper.buildIndex();
+
+const dispatcher = new AgentDispatcher(executor, mapper, config.agent);
+const result = await dispatcher.dispatch([issueGroup], '/path/to/worktree');
 // { status: 'pr_created', prUrl: 'https://github.com/user/repo/pull/123', ... }
 ```
 

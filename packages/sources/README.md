@@ -16,14 +16,21 @@ npm install mahoraga-sources
 import { AmplitudeAdapter, PipelineRunner } from 'mahoraga-sources';
 import { createDatabase, EventStore, CheckpointStore } from 'mahoraga-core';
 
-const db = createDatabase('.mahoraga/mahoraga.db');
-const runner = new PipelineRunner(new EventStore(db), new CheckpointStore(db));
+const dbManager = createDatabase('.mahoraga/mahoraga.db');
+const runner = new PipelineRunner(
+  new EventStore(dbManager.db),
+  new CheckpointStore(dbManager.db),
+);
 
 const adapter = new AmplitudeAdapter();
-const result = await runner.run(adapter, {
-  apiKey: process.env.MAHORAGA_AMPLITUDE_API_KEY!,
-  secretKey: process.env.MAHORAGA_AMPLITUDE_SECRET_KEY!,
-}, { start: Date.now() - 86400000, end: Date.now() });
+const result = await runner.run(
+  adapter,
+  {
+    apiKey: process.env.MAHORAGA_AMPLITUDE_API_KEY!,
+    secretKey: process.env.MAHORAGA_AMPLITUDE_SECRET_KEY!,
+  },
+  { start: Date.now() - 86400000, end: Date.now() },
+);
 
 console.log(result);
 // { status: 'ok', eventCount: 1234 }
@@ -42,7 +49,8 @@ console.log(result);
 Implement the `SourceAdapter` interface:
 
 ```typescript
-import type { SourceAdapter, AdapterConfig, EventBatch } from 'mahoraga-sources';
+import type { SourceAdapter, AdapterConfig } from 'mahoraga-sources';
+import type { TimeRange } from 'mahoraga-core';
 
 export class MyAdapter implements SourceAdapter {
   name = 'my-source';

@@ -28,9 +28,12 @@ const config = defineConfig({
   sources: [{ adapter: 'amplitude', apiKey: '...' }],
 });
 
-// SQLite storage
-const db = createDatabase('.mahoraga/mahoraga.db');
-const events = new EventStore(db);
+// SQLite storage (createDatabase returns a DatabaseManager)
+const dbManager = createDatabase('.mahoraga/mahoraga.db');
+const events = new EventStore(dbManager.db);
+
+// Don't forget to close when done
+dbManager.close();
 ```
 
 ## Test Factories
@@ -47,8 +50,9 @@ import {
 } from 'mahoraga-core/testing';
 
 const event = createEvent({ type: 'click' });
-const session = createSession({ eventCount: 5 });
-const rageClicks = createRageClickSequence({ count: 6 });
+const session = createSession([{ type: 'click' }, { type: 'navigation' }]);
+const rageClicks = createRageClickSequence('.btn-submit', 6);
+const error = createErrorEvent('TypeError: Cannot read property');
 ```
 
 ## Requirements
