@@ -13,9 +13,15 @@
     "test": "turbo test",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
-    "clean": "turbo clean"
+    "clean": "turbo clean",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "changeset publish",
+    "check-exports": "turbo check-exports"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.2",
+    "@changesets/cli": "^2.30.0",
     "@types/node": "^22.0.0",
     "eslint": "^9.0.0",
     "eslint-plugin-jsdoc": "^50.0.0",
