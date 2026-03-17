@@ -40,7 +40,7 @@
   "dependencies": {
     "mahoraga-core": "workspace:*",
     "typescript": "^5.5.0",
-    "glob": "^11.0.0"
+    "glob": "^13.0.6"
   },
   "devDependencies": {
     "vitest": "^2.0.0",
