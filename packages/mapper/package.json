@@ -1,0 +1,30 @@
+{
+  "name": "@mahoraga/mapper",
+  "version": "0.1.0",
+  "description": "AST-based code-to-event mapping for Mahoraga",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@mahoraga/core": "workspace:*",
+    "typescript": "^5.5.0",
+    "glob": "^11.0.0"
+  },
+  "devDependencies": {
+    "vitest": "^2.0.0",
+    "tsup": "^8.0.0"
+  }
+}

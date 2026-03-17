@@ -1,0 +1,31 @@
+{
+  "name": "@mahoraga/cli",
+  "version": "0.1.0",
+  "description": "CLI entry point for Mahoraga",
+  "type": "module",
+  "bin": {
+    "mahoraga": "./dist/main.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@mahoraga/core": "workspace:*",
+    "@mahoraga/mapper": "workspace:*",
+    "@mahoraga/sources": "workspace:*",
+    "@mahoraga/analyzer": "workspace:*",
+    "@mahoraga/agent": "workspace:*",
+    "@clack/prompts": "^0.8.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0",
+    "tsup": "^8.0.0"
+  }
+}

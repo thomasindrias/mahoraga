@@ -1,0 +1,83 @@
+import { z } from 'zod';
+
+/** Source adapter configuration schema */
+export const SourceConfigSchema = z.object({
+  adapter: z.string(),
+  apiKey: z.string().optional(),
+  secretKey: z.string().optional(),
+  projectId: z.string().optional(),
+});
+
+/** Analysis configuration schema */
+export const AnalysisConfigSchema = z.object({
+  windowDays: z.number().int().positive().default(3),
+  rules: z.array(z.string()).default(['rage-clicks', 'error-spikes']),
+  customRules: z.array(z.unknown()).default([]),
+});
+
+/** Post-agent validation checks */
+export const PostChecksSchema = z.object({
+  build: z.boolean().default(true),
+  test: z.boolean().default(true),
+  maxDiffLines: z.number().int().positive().default(500),
+});
+
+/** Agent configuration schema with governance controls */
+export const AgentConfigSchema = z.object({
+  provider: z.enum(['claude-code', 'gemini', 'openai']).default('claude-code'),
+  claudeMdPath: z.string().optional(),
+  agentMdPath: z.string().optional(),
+  skills: z.array(z.string()).optional(),
+  mcpServers: z.array(z.string()).optional(),
+  workflow: z.literal('plan-then-implement').default('plan-then-implement'),
+  createPR: z.boolean().default(true),
+  baseBranch: z.string().default('main'),
+  draftPR: z.boolean().default(true),
+  maxCostPerIssue: z.number().positive().default(2),
+  maxCostPerRun: z.number().positive().default(20),
+  maxDispatchesPerRun: z.number().int().positive().default(5),
+  timeoutMs: z.number().int().positive().default(300_000),
+  maxRetries: z.number().int().nonnegative().default(3),
+  postChecks: PostChecksSchema.default({}),
+  /** Paths the agent is allowed to modify */
+  allowedPaths: z.array(z.string()).default([]),
+  /** Paths the agent must not modify */
+  deniedPaths: z.array(z.string()).default([]),
+  /** Minimum confidence to create PR (below this → create issue instead) */
+  confidenceThreshold: z.number().min(0).max(1).default(0.7),
+});
+
+/** Storage configuration schema */
+export const StorageConfigSchema = z.object({
+  dbPath: z.string().default('.mahoraga/mahoraga.db'),
+  retentionDays: z.number().int().positive().default(30),
+});
+
+/** Logging configuration schema */
+export const LoggingConfigSchema = z.object({
+  level: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+  format: z.enum(['pretty', 'json']).default('pretty'),
+});
+
+/**
+ * Full Mahoraga configuration schema.
+ * Used by `defineConfig()` to provide type-safe configuration.
+ */
+export const MahoragaConfigSchema = z.object({
+  sources: z.array(SourceConfigSchema),
+  analysis: AnalysisConfigSchema.default({}),
+  agent: AgentConfigSchema.default({}),
+  storage: StorageConfigSchema.default({}),
+  logging: LoggingConfigSchema.default({}),
+});
+
+/**
+ * Helper for type-safe configuration.
+ * @param config - Raw configuration object
+ * @returns Validated and defaulted configuration
+ */
+export function defineConfig(
+  config: z.input<typeof MahoragaConfigSchema>,
+): z.infer<typeof MahoragaConfigSchema> {
+  return MahoragaConfigSchema.parse(config);
+}

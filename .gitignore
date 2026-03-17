@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.mahoraga/
+.mahoraga.env
+*.db
+*.db-wal
+*.db-shm
+.turbo/
+.DS_Store
+coverage/
