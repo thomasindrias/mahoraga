@@ -1,57 +1,50 @@
 # mahoraga-cli
 
-CLI entry point for Mahoraga - self-evolving frontend intelligence.
+[![npm](https://img.shields.io/npm/v/mahoraga-cli.svg)](https://www.npmjs.com/package/mahoraga-cli)
 
-## Installation
+CLI for [Mahoraga](https://github.com/thomasindrias/mahoraga) — self-evolving frontend intelligence.
+
+## Install
 
 ```bash
-# Global installation
+# npm
 npm install -g mahoraga-cli
 
-# Or use directly with npx
-npx mahoraga-cli
+# pnpm
+pnpm add -g mahoraga-cli
+
+# Or run directly
+npx mahoraga-cli --help
 ```
 
 ## Quick Start
 
 ```bash
-# Initialize configuration
+# Generate mahoraga.config.ts interactively
 mahoraga init
 
-# Run analysis (dry-run to preview issues)
+# Preview detected issues (no agents dispatched)
 mahoraga analyze --dry-run
 
-# Run full analysis with agent dispatch
+# Run full pipeline: pull → analyze → dispatch → PR
 mahoraga analyze
-
-# Inspect specific issue
-mahoraga inspect <issue-id>
-
-# Check pipeline status
-mahoraga status
-
-# Clean up old data
-mahoraga gc
-
-# Map selector to source file
-mahoraga map "button.submit-form"
 ```
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `init` | Initialize Mahoraga configuration and database |
-| `analyze` | Run the full pipeline: pull events, detect issues, dispatch agents |
-| `analyze --dry-run` | Preview detected issues without dispatching agents |
-| `inspect <id>` | Show detailed information about a specific issue |
-| `status` | Display pipeline status and statistics |
-| `gc` | Clean up old events based on retention policy |
-| `map <selector>` | Map a CSS selector to source file location |
+| `init` | Generate configuration file and initialize database |
+| `analyze` | Pull events, detect issues, dispatch agents |
+| `analyze --dry-run` | Detect issues without dispatching agents |
+| `inspect [id]` | View stored events, sessions, or a specific issue |
+| `status` | Show pipeline status and dispatch history |
+| `gc` | Clean up events older than `retentionDays` |
+| `map <selector>` | Map a CSS selector to its source file location |
 
 ## Configuration
 
-Create `mahoraga.config.ts` in your project root:
+Create `mahoraga.config.ts` in your project root (or run `mahoraga init`):
 
 ```typescript
 import { defineConfig } from 'mahoraga-core';
@@ -76,20 +69,17 @@ export default defineConfig({
 });
 ```
 
-## Environment Variables
+## Credentials
 
-Credentials can be provided via environment variables:
+Store in `.mahoraga.env` (automatically gitignored) or set as environment variables:
 
-- `MAHORAGA_AMPLITUDE_API_KEY`
-- `MAHORAGA_AMPLITUDE_SECRET_KEY`
-- `MAHORAGA_POSTHOG_API_KEY` (future)
-- `MAHORAGA_SENTRY_DSN` (future)
+| Variable | Source |
+|----------|--------|
+| `MAHORAGA_AMPLITUDE_API_KEY` | Amplitude |
+| `MAHORAGA_AMPLITUDE_SECRET_KEY` | Amplitude |
+| `MAHORAGA_POSTHOG_API_KEY` | PostHog (planned) |
+| `MAHORAGA_SENTRY_DSN` | Sentry (planned) |
 
 ## License
 
-MIT
-
-## Links
-
-- [Main repository](https://github.com/thomasindrias/mahoraga)
-- [Documentation](https://github.com/thomasindrias/mahoraga#readme)
+[MIT](https://github.com/thomasindrias/mahoraga/blob/main/LICENSE)

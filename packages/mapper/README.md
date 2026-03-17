@@ -1,43 +1,45 @@
 # mahoraga-mapper
 
-AST-based CSS selector to source file mapping.
+[![npm](https://img.shields.io/npm/v/mahoraga-mapper.svg)](https://www.npmjs.com/package/mahoraga-mapper)
 
-## Installation
+AST-based CSS selector to source file mapping for [Mahoraga](https://github.com/thomasindrias/mahoraga).
+
+## Install
 
 ```bash
 npm install mahoraga-mapper
 ```
 
-## Features
+## What It Does
 
-- **AST parsing** via TypeScript Compiler API
-- **CSS selector resolution** to file:line:column locations
-- **Framework-agnostic** TSX/JSX support
-- **Precise mapping** from user interactions to source code
+Maps CSS selectors (from analytics events like rage clicks) to the exact source file, line, and column where the element is defined. Uses the TypeScript Compiler API to parse TSX/JSX ASTs.
 
 ## Usage
 
 ```typescript
-import { mapSelectorToSource } from 'mahoraga-mapper';
+import { FileSystemCodeMapper } from 'mahoraga-mapper';
 
-const location = await mapSelectorToSource({
-  selector: 'button.submit-form',
-  projectRoot: '/path/to/project',
-});
+const mapper = new FileSystemCodeMapper('./src');
+await mapper.buildIndex('./src', ['**/*.tsx']);
 
-console.log(location);
-// { file: '/path/to/project/src/components/Form.tsx', line: 42, column: 8 }
+const locations = mapper.resolve('.btn-submit');
+// [{ filePath: 'src/components/Form.tsx', line: 42, column: 8 }]
 ```
 
-## Notes
+## How It Works
 
-Uses the TypeScript Compiler API at runtime for AST analysis.
+1. **Scan** — Parses TSX/JSX files via the TypeScript Compiler API
+2. **Extract** — Finds `className`, `id`, and `data-*` attributes in JSX elements
+3. **Index** — Builds a selector-to-location map with file:line:column precision
+4. **Resolve** — Looks up any CSS selector against the index
+
+## Exports
+
+- `FileSystemCodeMapper` — Main class implementing the `CodeMapper` interface
+- `scanFile()` — Low-level AST scanner for individual files
+- `scanRoutes()` — Route definition scanner for URL-to-component mapping
+- `buildIndex()` / `buildAndSave()` — Index construction utilities
 
 ## License
 
-MIT
-
-## Links
-
-- [Main repository](https://github.com/thomasindrias/mahoraga)
-- [Documentation](https://github.com/thomasindrias/mahoraga#readme)
+[MIT](https://github.com/thomasindrias/mahoraga/blob/main/LICENSE)

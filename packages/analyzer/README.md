@@ -1,51 +1,62 @@
 # mahoraga-analyzer
 
-Detection rules engine for UI issues.
+[![npm](https://img.shields.io/npm/v/mahoraga-analyzer.svg)](https://www.npmjs.com/package/mahoraga-analyzer)
 
-## Installation
+Detection rules engine for UI issues, used by [Mahoraga](https://github.com/thomasindrias/mahoraga).
+
+## Install
 
 ```bash
 npm install mahoraga-analyzer
 ```
 
-## Features
-
-- **DetectionRule interface** for pluggable issue detection
-- **SQLite-powered queries** for efficient pattern analysis
-- **V1 detection rules**:
-  - Rage click detector (excessive clicks in short timespan)
-  - Error spike detector (abnormal error rate increases)
-
 ## Usage
 
 ```typescript
-import { RageClickDetector } from 'mahoraga-analyzer';
+import { AnalysisEngine, RageClickRule, ErrorSpikeRule } from 'mahoraga-analyzer';
+import { createDatabase, EventStore } from 'mahoraga-core';
 
-const detector = new RageClickDetector({
-  clickThreshold: 5,
-  timeWindowMs: 2000,
+const db = createDatabase('.mahoraga/mahoraga.db');
+const engine = new AnalysisEngine([
+  new RageClickRule(db),
+  new ErrorSpikeRule(db),
+]);
+
+const issues = await engine.analyze({
+  windowStart: Date.now() - 3 * 86400000,
+  windowEnd: Date.now(),
 });
 
-const issues = await detector.analyze(storage);
 console.log(issues);
-// [{ type: 'rage-click', selector: 'button.broken', confidence: 0.92, ... }]
+// [{ type: 'rage-click', selector: '.btn-submit', confidence: 0.92, severity: 'high', ... }]
 ```
 
-## Detection Rules
+## Built-in Rules
 
-Each rule implements the `DetectionRule` interface:
+| Rule | Detects |
+|------|---------|
+| `RageClickRule` | Excessive clicks on the same element in a short timespan |
+| `ErrorSpikeRule` | Abnormal increase in JavaScript errors |
+
+## Writing a Custom Rule
+
+Implement the `DetectionRule` interface:
 
 ```typescript
-interface DetectionRule {
-  analyze(storage: MahoragaStorage): Promise<Issue[]>;
+import type { DetectionRule } from 'mahoraga-analyzer';
+import type { AnalysisContext } from 'mahoraga-analyzer';
+import type { Issue } from 'mahoraga-core';
+
+export class MyRule implements DetectionRule {
+  name = 'my-rule';
+
+  async analyze(context: AnalysisContext): Promise<Issue[]> {
+    // Query events, detect patterns, return issues
+    return [];
+  }
 }
 ```
 
 ## License
 
-MIT
-
-## Links
-
-- [Main repository](https://github.com/thomasindrias/mahoraga)
-- [Documentation](https://github.com/thomasindrias/mahoraga#readme)
+[MIT](https://github.com/thomasindrias/mahoraga/blob/main/LICENSE)

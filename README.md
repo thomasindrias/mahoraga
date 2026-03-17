@@ -54,12 +54,11 @@ Human Review -> Merge
 ### Prerequisites
 
 - Node.js >= 20
-- [pnpm](https://pnpm.io) >= 9
 - An [Amplitude](https://amplitude.com) account (V1 source)
 - [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) (for agent dispatch)
 - [GitHub CLI](https://cli.github.com) (`gh`) for PR creation
 
-### Installation
+### Install
 
 ```bash
 # npm
@@ -68,13 +67,13 @@ npm install mahoraga-cli mahoraga-core
 # pnpm
 pnpm add mahoraga-cli mahoraga-core
 
-# Or run directly without installing
+# Or try it without installing
 npx mahoraga-cli --help
 ```
 
-### Configuration
+### Configure
 
-Create a `mahoraga.config.ts` in your project root:
+Create `mahoraga.config.ts` in your project root:
 
 ```typescript
 import { defineConfig } from "mahoraga-core";
@@ -87,61 +86,46 @@ export default defineConfig({
       secretKey: process.env.MAHORAGA_AMPLITUDE_SECRET_KEY!,
     },
   ],
-
   analysis: {
-    windowDays: 3,
     rules: ["rage-clicks", "error-spikes"],
   },
-
   agent: {
     provider: "claude-code",
-    baseBranch: "main",
-    maxRetries: 3,
-    maxCostPerIssue: 2,
-    maxCostPerRun: 20,
-    confidenceThreshold: 0.7,
     allowedPaths: ["src/**"],
     deniedPaths: ["src/generated/**"],
-    postChecks: {
-      build: true,
-      test: true,
-      maxDiffLines: 500,
-    },
-  },
-
-  storage: {
-    dbPath: ".mahoraga/mahoraga.db",
-    retentionDays: 30,
   },
 });
 ```
 
-Store credentials in `.mahoraga.env` (gitignored):
+Or generate one interactively:
 
 ```bash
+npx mahoraga-cli init
+```
+
+Store credentials in `.mahoraga.env` (automatically gitignored):
+
+```env
 MAHORAGA_AMPLITUDE_API_KEY=your-api-key
 MAHORAGA_AMPLITUDE_SECRET_KEY=your-secret-key
 ```
 
-### Usage
+### Run
 
 ```bash
-# Initialize Mahoraga in your project
-npx mahoraga-cli init
-
-# Run analysis (pulls data, detects issues, dispatches agents)
-npx mahoraga-cli analyze
-
-# Dry run — detect issues without dispatching agents
+# Preview detected issues without dispatching agents
 npx mahoraga-cli analyze --dry-run
+
+# Run full pipeline: pull → analyze → dispatch → PR
+npx mahoraga-cli analyze
 
 # Inspect stored events and sessions
 npx mahoraga-cli inspect
 
-# Check status of dispatched agents
+# Check agent dispatch status
 npx mahoraga-cli status
 
-# Map a CSS selector to source file location
+# Map a CSS selector to its source file
 npx mahoraga-cli map ".btn-submit"
 
 # Clean up old data
@@ -150,31 +134,84 @@ npx mahoraga-cli gc
 
 ## Packages
 
-| Package | Description |
-|---|---|
-| [`mahoraga-core`](packages/core) | Zod schemas, SQLite storage, types, utilities |
-| [`mahoraga-sources`](packages/sources) | Pluggable source adapters (V1: Amplitude) |
-| [`mahoraga-analyzer`](packages/analyzer) | Detection rules engine |
-| [`mahoraga-mapper`](packages/mapper) | AST-based selector-to-source-file mapping |
-| [`mahoraga-agent`](packages/agent) | Agent dispatcher with adaptation loop |
-| [`mahoraga-cli`](packages/cli) | CLI entry point |
+| Package | npm | Description |
+|---------|-----|-------------|
+| [`mahoraga-core`](packages/core) | [![npm](https://img.shields.io/npm/v/mahoraga-core.svg?label=)](https://www.npmjs.com/package/mahoraga-core) | Zod schemas, SQLite storage, types, utilities |
+| [`mahoraga-sources`](packages/sources) | [![npm](https://img.shields.io/npm/v/mahoraga-sources.svg?label=)](https://www.npmjs.com/package/mahoraga-sources) | Pluggable source adapters (V1: Amplitude) |
+| [`mahoraga-analyzer`](packages/analyzer) | [![npm](https://img.shields.io/npm/v/mahoraga-analyzer.svg?label=)](https://www.npmjs.com/package/mahoraga-analyzer) | Detection rules engine |
+| [`mahoraga-mapper`](packages/mapper) | [![npm](https://img.shields.io/npm/v/mahoraga-mapper.svg?label=)](https://www.npmjs.com/package/mahoraga-mapper) | AST-based selector-to-source mapping |
+| [`mahoraga-agent`](packages/agent) | [![npm](https://img.shields.io/npm/v/mahoraga-agent.svg?label=)](https://www.npmjs.com/package/mahoraga-agent) | Agent dispatcher with adaptation loop |
+| [`mahoraga-cli`](packages/cli) | [![npm](https://img.shields.io/npm/v/mahoraga-cli.svg?label=)](https://www.npmjs.com/package/mahoraga-cli) | CLI entry point |
 
 ### Dependency Graph
 
 ```
-cli -> agent -> core, mapper
-  |-> analyzer -> core
-  |-> sources -> core
-  |-> mapper -> core
-agent -> core, mapper
+cli (composition root)
+ ├── agent ─── core, mapper
+ ├── analyzer ── core
+ ├── sources ─── core
+ ├── mapper ──── core
+ └── core
 ```
 
-## Development
+## Configuration Reference
+
+All options with their defaults:
+
+```typescript
+defineConfig({
+  // Required: at least one source
+  sources: [
+    { adapter: "amplitude", apiKey: "...", secretKey: "..." },
+  ],
+
+  // Analysis (all optional)
+  analysis: {
+    windowDays: 3,                    // Days of data to analyze
+    rules: ["rage-clicks", "error-spikes"],
+    customRules: [],                  // Custom DetectionRule implementations
+  },
+
+  // Agent (all optional)
+  agent: {
+    provider: "claude-code",          // "claude-code" | "gemini" | "openai"
+    baseBranch: "main",
+    draftPR: true,                    // Create PRs as drafts
+    maxRetries: 3,                    // Adaptation loop retries
+    maxCostPerIssue: 2,               // USD budget per issue
+    maxCostPerRun: 20,                // USD budget per run
+    maxDispatchesPerRun: 5,
+    confidenceThreshold: 0.7,         // Below this → issue instead of PR
+    allowedPaths: [],                 // Glob patterns the agent can modify
+    deniedPaths: [],                  // Glob patterns the agent must not modify
+    postChecks: {
+      build: true,
+      test: true,
+      maxDiffLines: 500,
+    },
+  },
+
+  // Storage (all optional)
+  storage: {
+    dbPath: ".mahoraga/mahoraga.db",
+    retentionDays: 30,
+  },
+
+  // Logging (all optional)
+  logging: {
+    level: "info",                    // "debug" | "info" | "warn" | "error"
+    format: "pretty",                 // "pretty" | "json"
+  },
+});
+```
+
+## Contributing
 
 ```bash
 git clone https://github.com/thomasindrias/mahoraga.git
 cd mahoraga
 pnpm install
+pnpm turbo build
 ```
 
 ```bash
@@ -182,7 +219,6 @@ pnpm turbo build         # Build all packages
 pnpm turbo test          # Run all tests
 pnpm turbo lint          # Lint all packages
 pnpm turbo typecheck     # Type-check all packages
-pnpm turbo clean         # Clean all dist/ outputs
 
 # Work on a specific package
 pnpm --filter mahoraga-core test
