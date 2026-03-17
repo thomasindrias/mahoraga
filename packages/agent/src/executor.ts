@@ -122,8 +122,8 @@ export class MockAgentExecutor implements AgentExecutor {
 
   /** @inheritdoc */
   async execute(
-    _prompt?: string,
-    _workDir?: string,
+    _prompt: string,
+    _workDir: string,
     _options?: AgentExecuteOptions,
   ): Promise<AgentExecutionResult> {
     const result = this.results[this.callCount % this.results.length]!;

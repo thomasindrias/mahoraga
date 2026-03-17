@@ -175,18 +175,18 @@ jobs:
   analyze:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'pnpm'
       - run: pnpm install
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: .mahoraga/
           key: mahoraga-state-\${{ github.ref }}
-      - run: npx mahoraga analyze
+      - run: npx mahoraga-cli analyze
         env:
           MAHORAGA_AMPLITUDE_API_KEY: \${{ secrets.AMPLITUDE_API_KEY }}
           MAHORAGA_AMPLITUDE_SECRET_KEY: \${{ secrets.AMPLITUDE_SECRET_KEY }}

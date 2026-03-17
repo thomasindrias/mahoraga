@@ -50,8 +50,9 @@ export class PipelineRunner {
           const result = MahoragaEventSchema.safeParse(event);
           if (result.success) {
             validEvents.push(result.data);
+          } else {
+            console.warn(`Skipping invalid event: ${result.error.message}`);
           }
-          // Skip invalid events silently
         }
 
         if (validEvents.length > 0) {

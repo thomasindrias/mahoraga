@@ -1,20 +1,13 @@
 import ts from 'typescript';
+import type { SourceLocation } from 'mahoraga-core';
+
+export type { SourceLocation } from 'mahoraga-core';
 
 /**
  * Result of scanning a file for selectors.
  */
 export interface ScanResult {
   selectors: Map<string, SourceLocation>;
-}
-
-/**
- * Location of a selector in source code.
- */
-export interface SourceLocation {
-  filePath: string;
-  line: number;
-  column: number;
-  componentName?: string;
 }
 
 /**
