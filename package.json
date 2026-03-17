@@ -2,6 +2,12 @@
   "name": "mahoraga",
   "private": true,
   "description": "Self-evolving frontend intelligence — ingests analytics, detects UI issues, dispatches AI agents to fix them",
+  "author": "Thomas Indrias <thomasindrias@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thomasindrias/mahoraga.git"
+  },
   "scripts": {
     "build": "turbo build",
     "test": "turbo test",

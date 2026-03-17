@@ -8,3 +8,7 @@ dist/
 .turbo/
 .DS_Store
 coverage/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
