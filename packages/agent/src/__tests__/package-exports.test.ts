@@ -7,7 +7,7 @@ const pkg = JSON.parse(readFileSync(resolve(pkgDir, 'package.json'), 'utf-8'));
 
 describe('package exports', () => {
   it('should have required npm metadata', () => {
-    expect(pkg.name).toBe('@mahoraga/core');
+    expect(pkg.name).toBe('@mahoraga/agent');
     expect(pkg.license).toBe('MIT');
     expect(pkg.version).toBeDefined();
     expect(pkg.files).toContain('dist');
@@ -20,11 +20,13 @@ describe('package exports', () => {
     expect(existsSync(resolve(pkgDir, mainExport.types))).toBe(true);
   });
 
-  it('testing subpath export files should exist after build', () => {
-    const testingExport = pkg.exports['./testing'];
-    expect(testingExport).toBeDefined();
-    expect(existsSync(resolve(pkgDir, testingExport.import))).toBe(true);
-    expect(existsSync(resolve(pkgDir, testingExport.types))).toBe(true);
+  it('workspace dependencies should use workspace protocol', () => {
+    const internalDeps = Object.entries(pkg.dependencies as Record<string, string>)
+      .filter(([name]) => name.startsWith('@mahoraga/'));
+    expect(internalDeps.length).toBeGreaterThan(0);
+    for (const [name, version] of internalDeps) {
+      expect(version, `${name} should use workspace:*`).toBe('workspace:*');
+    }
   });
 
   it('LICENSE file should exist', () => {

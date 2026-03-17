@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -11,6 +12,12 @@ describe('package exports', () => {
     expect(pkg.version).toBeDefined();
     expect(pkg.files).toContain('dist');
     expect(pkg.publishConfig?.access).toBe('public');
+  });
+
+  it('main export files should exist after build', () => {
+    const mainExport = pkg.exports['.'];
+    expect(existsSync(resolve(pkgDir, mainExport.import))).toBe(true);
+    expect(existsSync(resolve(pkgDir, mainExport.types))).toBe(true);
   });
 
   it('bin entry should point to existing file', () => {

@@ -87,5 +87,5 @@ MIT
 
 ## Links
 
-- [Main repository](https://github.com/thomas-m10s/mahoraga)
-- [Documentation](https://github.com/thomas-m10s/mahoraga#readme)
+- [Main repository](https://github.com/thomasindrias/mahoraga)
+- [Documentation](https://github.com/thomasindrias/mahoraga#readme)
