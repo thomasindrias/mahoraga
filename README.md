@@ -62,15 +62,12 @@ Human Review -> Merge
 ### Installation
 
 ```bash
-git clone https://github.com/thomasindrias/mahoraga.git
-cd mahoraga
-pnpm install
-pnpm turbo build
+npm install mahoraga-cli mahoraga-core
 ```
 
 ### Configuration
 
-Create a `mahoraga.config.ts` in your target project:
+Create a `mahoraga.config.ts` in your project root:
 
 ```typescript
 import { defineConfig } from "mahoraga-core";
@@ -166,6 +163,12 @@ agent -> core, mapper
 ```
 
 ## Development
+
+```bash
+git clone https://github.com/thomasindrias/mahoraga.git
+cd mahoraga
+pnpm install
+```
 
 ```bash
 pnpm turbo build         # Build all packages
