@@ -1,5 +1,6 @@
 import { defineConfig } from 'tsup';
 
+// main.ts must be first — its `clean: true` wipes dist/ before index.ts writes into it
 export default defineConfig([
   {
     entry: ['src/main.ts'],

@@ -72,33 +72,40 @@ pnpm turbo build
 Create a `mahoraga.config.ts` in your target project:
 
 ```typescript
-import { defineConfig } from "@mahoraga/cli";
+import { defineConfig } from "mahoraga-core";
 
 export default defineConfig({
-  sources: {
-    amplitude: {
-      apiKey: process.env.AMPLITUDE_API_KEY!,
-      secretKey: process.env.AMPLITUDE_SECRET_KEY!,
+  sources: [
+    {
+      adapter: "amplitude",
+      apiKey: process.env.MAHORAGA_AMPLITUDE_API_KEY!,
+      secretKey: process.env.MAHORAGA_AMPLITUDE_SECRET_KEY!,
     },
-  },
+  ],
+
   analysis: {
-    rules: ["rage-click", "error-spike"],
-    confidenceThreshold: 0.7,
+    windowDays: 3,
+    rules: ["rage-clicks", "error-spikes"],
   },
+
   agent: {
-    model: "claude",
+    provider: "claude-code",
+    baseBranch: "main",
     maxRetries: 3,
-    maxDiffLines: 500,
+    maxCostPerIssue: 2,
+    maxCostPerRun: 20,
+    confidenceThreshold: 0.7,
     allowedPaths: ["src/**"],
     deniedPaths: ["src/generated/**"],
+    postChecks: {
+      build: true,
+      test: true,
+      maxDiffLines: 500,
+    },
   },
-  governance: {
-    costPerIssue: 2,
-    costPerRun: 20,
-    maxDispatchesPerRun: 5,
-    cooldownDays: 7,
-  },
+
   storage: {
+    dbPath: ".mahoraga/mahoraga.db",
     retentionDays: 30,
   },
 });
@@ -115,37 +122,37 @@ MAHORAGA_AMPLITUDE_SECRET_KEY=your-secret-key
 
 ```bash
 # Initialize Mahoraga in your project
-npx mahoraga init
+npx mahoraga-cli init
 
 # Run analysis (pulls data, detects issues, dispatches agents)
-npx mahoraga analyze
+npx mahoraga-cli analyze
 
 # Dry run — detect issues without dispatching agents
-npx mahoraga analyze --dry-run
+npx mahoraga-cli analyze --dry-run
 
 # Inspect stored events and sessions
-npx mahoraga inspect
+npx mahoraga-cli inspect
 
 # Check status of dispatched agents
-npx mahoraga status
+npx mahoraga-cli status
 
 # Map a CSS selector to source file location
-npx mahoraga map ".btn-submit"
+npx mahoraga-cli map ".btn-submit"
 
 # Clean up old data
-npx mahoraga gc
+npx mahoraga-cli gc
 ```
 
 ## Packages
 
 | Package | Description |
 |---|---|
-| [`@mahoraga/core`](packages/core) | Zod schemas, SQLite storage, types, utilities |
-| [`@mahoraga/sources`](packages/sources) | Pluggable source adapters (V1: Amplitude) |
-| [`@mahoraga/analyzer`](packages/analyzer) | Detection rules engine |
-| [`@mahoraga/mapper`](packages/mapper) | AST-based selector-to-source-file mapping |
-| [`@mahoraga/agent`](packages/agent) | Agent dispatcher with adaptation loop |
-| [`@mahoraga/cli`](packages/cli) | CLI entry point |
+| [`mahoraga-core`](packages/core) | Zod schemas, SQLite storage, types, utilities |
+| [`mahoraga-sources`](packages/sources) | Pluggable source adapters (V1: Amplitude) |
+| [`mahoraga-analyzer`](packages/analyzer) | Detection rules engine |
+| [`mahoraga-mapper`](packages/mapper) | AST-based selector-to-source-file mapping |
+| [`mahoraga-agent`](packages/agent) | Agent dispatcher with adaptation loop |
+| [`mahoraga-cli`](packages/cli) | CLI entry point |
 
 ### Dependency Graph
 
@@ -167,8 +174,8 @@ pnpm turbo typecheck     # Type-check all packages
 pnpm turbo clean         # Clean all dist/ outputs
 
 # Work on a specific package
-pnpm --filter @mahoraga/core test
-pnpm --filter @mahoraga/analyzer build
+pnpm --filter mahoraga-core test
+pnpm --filter mahoraga-analyzer build
 ```
 
 ## License

@@ -9,7 +9,7 @@ CLI entry point for Mahoraga - self-evolving frontend intelligence.
 npm install -g mahoraga-cli
 
 # Or use directly with npx
-npx mahoraga
+npx mahoraga-cli
 ```
 
 ## Quick Start
@@ -54,21 +54,25 @@ mahoraga map "button.submit-form"
 Create `mahoraga.config.ts` in your project root:
 
 ```typescript
-import { defineConfig } from 'mahoraga-cli';
+import { defineConfig } from 'mahoraga-core';
 
 export default defineConfig({
-  sources: {
-    amplitude: {
-      apiKey: process.env.AMPLITUDE_API_KEY,
-      secretKey: process.env.AMPLITUDE_SECRET_KEY,
+  sources: [
+    {
+      adapter: 'amplitude',
+      apiKey: process.env.MAHORAGA_AMPLITUDE_API_KEY!,
+      secretKey: process.env.MAHORAGA_AMPLITUDE_SECRET_KEY!,
     },
-  },
+  ],
   agent: {
+    provider: 'claude-code',
     allowedPaths: ['src/**/*.tsx', 'src/**/*.ts'],
     deniedPaths: ['src/admin/**', '**/*.test.ts'],
     confidenceThreshold: 0.7,
   },
-  retentionDays: 30,
+  storage: {
+    retentionDays: 30,
+  },
 });
 ```
 

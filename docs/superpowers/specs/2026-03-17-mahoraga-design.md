@@ -41,7 +41,7 @@ Human Review → Merge
 ```
 mahoraga/
 ├── packages/
-│   ├── core/                     # @mahoraga/core
+│   ├── core/                     # mahoraga-core
 │   │   ├── src/
 │   │   │   ├── schemas/          # Zod schemas (events, issues, config)
 │   │   │   ├── types/            # TypeScript interfaces
@@ -53,7 +53,7 @@ mahoraga/
 │   │   ├── tsup.config.ts
 │   │   ├── vitest.config.ts
 │   │   └── package.json
-│   ├── mapper/                   # @mahoraga/mapper
+│   ├── mapper/                   # mahoraga-mapper
 │   │   ├── src/
 │   │   │   ├── code-mapper.ts    # CodeMapper interface + implementation
 │   │   │   ├── ast-scanner.ts    # TSX/JSX AST parser for selectors
@@ -65,7 +65,7 @@ mahoraga/
 │   │   ├── tsup.config.ts
 │   │   ├── vitest.config.ts
 │   │   └── package.json
-│   ├── sources/                  # @mahoraga/sources
+│   ├── sources/                  # mahoraga-sources
 │   │   ├── src/
 │   │   │   ├── adapter.ts        # SourceAdapter interface
 │   │   │   ├── amplitude/        # Amplitude adapter
@@ -76,7 +76,7 @@ mahoraga/
 │   │   ├── tsup.config.ts
 │   │   ├── vitest.config.ts
 │   │   └── package.json
-│   ├── analyzer/                 # @mahoraga/analyzer
+│   ├── analyzer/                 # mahoraga-analyzer
 │   │   ├── src/
 │   │   │   ├── engine.ts         # Analysis pipeline orchestrator
 │   │   │   ├── rule.ts           # DetectionRule interface
@@ -89,7 +89,7 @@ mahoraga/
 │   │   ├── tsup.config.ts
 │   │   ├── vitest.config.ts
 │   │   └── package.json
-│   ├── agent/                    # @mahoraga/agent
+│   ├── agent/                    # mahoraga-agent
 │   │   ├── src/
 │   │   │   ├── dispatcher.ts     # Agent orchestration
 │   │   │   ├── prompt-builder.ts # Structured prompt construction
@@ -100,7 +100,7 @@ mahoraga/
 │   │   ├── tsup.config.ts
 │   │   ├── vitest.config.ts
 │   │   └── package.json
-│   └── cli/                      # @mahoraga/cli (bin: mahoraga)
+│   └── cli/                      # mahoraga-cli (bin: mahoraga)
 │       ├── src/
 │       │   ├── commands/
 │       │   │   ├── analyze.ts    # Full pipeline
@@ -130,11 +130,11 @@ cli → agent → analyzer → sources → core
        core
 ```
 
-`@mahoraga/core` is the leaf dependency. All packages depend on it for shared types, schemas, storage, and utilities. `@mahoraga/agent` also depends on `@mahoraga/mapper` to resolve selectors to source locations before dispatching fixes.
+`mahoraga-core` is the leaf dependency. All packages depend on it for shared types, schemas, storage, and utilities. `mahoraga-agent` also depends on `mahoraga-mapper` to resolve selectors to source locations before dispatching fixes.
 
 ---
 
-## 3. Normalized Event Schema (`@mahoraga/core`)
+## 3. Normalized Event Schema (`mahoraga-core`)
 
 All source adapters normalize their data into this common schema. The analyzer only works against this format.
 
@@ -264,7 +264,7 @@ Every event entering the pipeline passes through a Zod schema validator at the i
 
 ---
 
-## 4. Storage Layer (`@mahoraga/core/storage`)
+## 4. Storage Layer (`mahoraga-core/storage`)
 
 ### Technology: SQLite via `better-sqlite3`
 
@@ -350,7 +350,7 @@ Embedded migrations that run on first connection. Version tracked in a `_migrati
 
 ---
 
-## 5. Source Adapters (`@mahoraga/sources`)
+## 5. Source Adapters (`mahoraga-sources`)
 
 ### Interface
 
@@ -410,7 +410,7 @@ type PullResult =
 
 ### Pipeline Runner Responsibilities
 
-The runner (in `@mahoraga/core`) wraps adapter calls with:
+The runner (in `mahoraga-core`) wraps adapter calls with:
 - **Zod validation** on each event at the ingestion boundary
 - **Retry logic** with exponential backoff + jitter (3 retries, 1s/4s/16s)
 - **Rate limiter** utility shared across adapters
@@ -445,7 +445,7 @@ Never stored in SQLite or config objects at rest.
 
 ---
 
-## 6. Analyzer & Detection Rules (`@mahoraga/analyzer`)
+## 6. Analyzer & Detection Rules (`mahoraga-analyzer`)
 
 ### Detection Rule Interface
 
@@ -562,7 +562,7 @@ These all implement `DetectionRule` — no changes to the pipeline needed.
 
 ---
 
-## 7. Agent Dispatcher (`@mahoraga/agent`)
+## 7. Agent Dispatcher (`mahoraga-agent`)
 
 ### Architecture
 
@@ -701,7 +701,7 @@ Enterprise blast-radius control module that gates every dispatch:
 
 ---
 
-## 7.5. Code-to-Event Mapper (`@mahoraga/mapper`)
+## 7.5. Code-to-Event Mapper (`mahoraga-mapper`)
 
 The mapper is Mahoraga's competitive moat — it bridges the gap between **runtime selectors** (what analytics sees) and **source code locations** (what developers need to fix).
 
@@ -778,7 +778,7 @@ mahoraga map --stats      # Show index statistics (files scanned, selectors foun
 
 ---
 
-## 8. CLI (`@mahoraga/cli`)
+## 8. CLI (`mahoraga-cli`)
 
 ### Commands
 
@@ -797,7 +797,7 @@ mahoraga gc                # Manual data retention cleanup
 
 ```typescript
 // mahoraga.config.ts
-import { defineConfig } from '@mahoraga/core';
+import { defineConfig } from 'mahoraga-core';
 
 export default defineConfig({
   sources: [
@@ -872,7 +872,7 @@ jobs:
         with:
           path: .mahoraga/
           key: mahoraga-state-${{ github.ref }}
-      - run: npx mahoraga analyze
+      - run: npx mahoraga-cli analyze
         env:
           MAHORAGA_AMPLITUDE_API_KEY: ${{ secrets.AMPLITUDE_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -923,7 +923,7 @@ Viewable via `mahoraga status`.
 - Draft PRs by default — humans review before merge
 
 ### Data Sanitization
-- Sanitization boundary in `@mahoraga/core` strips fields not in the normalized schema
+- Sanitization boundary in `mahoraga-core` strips fields not in the normalized schema
 - Structured logger redacts sensitive field paths
 - Anonymous session IDs only — no user identification possible
 
@@ -949,7 +949,7 @@ Viewable via `mahoraga status`.
 - Mocked dependencies via dependency injection
 - Fast, no I/O
 
-#### Contract Tests (`@mahoraga/sources`)
+#### Contract Tests (`mahoraga-sources`)
 - MSW (Mock Service Worker) stands up fake HTTP servers matching real API contracts
 - Tests verify pagination, error handling, rate limiting, auth failures
 - Recorded API response fixtures in `__fixtures__/` directories
@@ -959,7 +959,7 @@ Viewable via `mahoraga status`.
 - Uses real SQLite (in-memory for speed)
 - No external API calls
 
-#### Agent Tests (`@mahoraga/agent`)
+#### Agent Tests (`mahoraga-agent`)
 - **Prompt assembly**: Unit test that prompts contain correct context, paths, instructions
 - **Git operations**: Test branch/PR creation using temp git repos in `beforeEach`
 - **Full pipeline mock**: `MockAgentExecutor` returns pre-recorded diffs
@@ -970,7 +970,7 @@ Viewable via `mahoraga status`.
 - Full pipeline against test repo
 - Not run on every PR
 
-### Test Utilities (`@mahoraga/core/testing`)
+### Test Utilities (`mahoraga-core/testing`)
 
 ```typescript
 /** Create a normalized event with sensible defaults */
@@ -1006,12 +1006,12 @@ export function createRageClickSequence(
 
 ### In Scope
 - [x] Monorepo scaffolding (Turborepo + pnpm + Vitest + tsup)
-- [x] `@mahoraga/core`: Event schema (Zod), SQLite storage, utilities (hash, dedup, retry, rate limiter)
-- [x] `@mahoraga/sources`: Adapter interface + Amplitude adapter
-- [x] `@mahoraga/analyzer`: Rule interface + rage-click detector + error-spike detector
-- [x] `@mahoraga/mapper`: AST scanner + route scanner + index builder + `mahoraga map` CLI command
-- [x] `@mahoraga/agent`: Dispatcher + prompt builder + PR creator (via Claude Code CLI + gh) + adaptation loop (generate test → run → retry)
-- [x] `@mahoraga/cli`: `init`, `analyze`, `analyze --dry-run`, `inspect`, `status`, `gc`, `map`
+- [x] `mahoraga-core`: Event schema (Zod), SQLite storage, utilities (hash, dedup, retry, rate limiter)
+- [x] `mahoraga-sources`: Adapter interface + Amplitude adapter
+- [x] `mahoraga-analyzer`: Rule interface + rage-click detector + error-spike detector
+- [x] `mahoraga-mapper`: AST scanner + route scanner + index builder + `mahoraga map` CLI command
+- [x] `mahoraga-agent`: Dispatcher + prompt builder + PR creator (via Claude Code CLI + gh) + adaptation loop (generate test → run → retry)
+- [x] `mahoraga-cli`: `init`, `analyze`, `analyze --dry-run`, `inspect`, `status`, `gc`, `map`
 - [x] GitHub Actions template generation
 - [x] Full TDD test suite with MSW mocks and fixtures
 - [x] JSDoc on all public APIs
