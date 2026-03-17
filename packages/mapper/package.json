@@ -35,7 +35,7 @@
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",
-    "check-exports": "attw --pack ."
+    "check-exports": "attw --pack . --profile esm-only"
   },
   "dependencies": {
     "@mahoraga/core": "workspace:*",

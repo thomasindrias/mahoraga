@@ -39,7 +39,7 @@
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",
-    "check-exports": "attw --pack ."
+    "check-exports": "attw --pack . --profile esm-only"
   },
   "dependencies": {
     "better-sqlite3": "^11.0.0",
