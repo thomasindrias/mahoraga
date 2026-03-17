@@ -2,6 +2,24 @@
   "name": "@mahoraga/mapper",
   "version": "0.1.0",
   "description": "AST-based code-to-event mapping for Mahoraga",
+  "license": "MIT",
+  "author": "Thomas Indrias <thomasindrias@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thomasindrias/mahoraga.git",
+    "directory": "packages/mapper"
+  },
+  "homepage": "https://github.com/thomasindrias/mahoraga/tree/main/packages/mapper",
+  "bugs": {
+    "url": "https://github.com/thomasindrias/mahoraga/issues"
+  },
+  "keywords": [
+    "mahoraga",
+    "ast",
+    "css-selector",
+    "source-map",
+    "tsx"
+  ],
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -26,5 +44,16 @@
   "devDependencies": {
     "vitest": "^2.0.0",
     "tsup": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
   }
 }

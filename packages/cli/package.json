@@ -2,6 +2,24 @@
   "name": "@mahoraga/cli",
   "version": "0.1.0",
   "description": "CLI entry point for Mahoraga",
+  "license": "MIT",
+  "author": "Thomas Indrias <thomasindrias@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thomasindrias/mahoraga.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/thomasindrias/mahoraga/tree/main/packages/cli",
+  "bugs": {
+    "url": "https://github.com/thomasindrias/mahoraga/issues"
+  },
+  "keywords": [
+    "mahoraga",
+    "cli",
+    "frontend",
+    "analytics",
+    "ai-agent"
+  ],
   "type": "module",
   "bin": {
     "mahoraga": "./dist/main.js"
@@ -27,5 +45,16 @@
     "typescript": "^5.5.0",
     "vitest": "^2.0.0",
     "tsup": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
   }
 }
