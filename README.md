@@ -62,7 +62,14 @@ Human Review -> Merge
 ### Installation
 
 ```bash
+# npm
 npm install mahoraga-cli mahoraga-core
+
+# pnpm
+pnpm add mahoraga-cli mahoraga-core
+
+# Or run directly without installing
+npx mahoraga-cli --help
 ```
 
 ### Configuration
