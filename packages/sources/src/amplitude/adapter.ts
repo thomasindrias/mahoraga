@@ -71,6 +71,9 @@ export function transformAmplitudeEvent(raw: unknown): MahoragaEvent | null {
 
 /**
  * Map an Amplitude event_type and properties to a MahoragaEvent payload.
+ * @param eventType - Amplitude event_type string
+ * @param props - Event properties object
+ * @returns Normalized event payload
  */
 function mapPayload(
   eventType: string,
@@ -147,6 +150,8 @@ function isValidFormAction(v: unknown): v is 'focus' | 'blur' | 'submit' | 'aban
 
 /**
  * Format a Unix ms timestamp to Amplitude's YYYYMMDDTHHmm format.
+ * @param timestampMs - Unix timestamp in milliseconds
+ * @returns Formatted date string in YYYYMMDDTHHmm format
  */
 function formatAmplitudeDate(timestampMs: number): string {
   const d = new Date(timestampMs);
@@ -169,6 +174,7 @@ export class AmplitudeAdapter implements SourceAdapter {
   /**
    * Validate that the configuration contains required API credentials.
    * @param config - Must contain apiKey and secretKey
+   * @returns Validation result with any errors
    */
   async validate(config: AdapterConfig): Promise<ValidationResult> {
     const errors: string[] = [];
@@ -191,7 +197,8 @@ export class AmplitudeAdapter implements SourceAdapter {
    * Pull events from the Amplitude Export API.
    * @param config - Must contain apiKey and secretKey
    * @param timeRange - Unix ms start/end
-   * @param cursor - Optional resume cursor (unused for Amplitude, included for interface compliance)
+   * @param _cursor - Optional resume cursor (unused for Amplitude, included for interface compliance)
+   * @yields {PullBatch} Batches of normalized events
    */
   async *pull(
     config: AdapterConfig,

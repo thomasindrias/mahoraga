@@ -140,6 +140,8 @@ export class RageClickRule implements DetectionRule {
 
 /**
  * Determine severity based on the ratio of sessions affected.
+ * @param sessionRatio - Ratio of affected sessions
+ * @returns Severity level
  */
 function getSeverity(sessionRatio: number): Issue['severity'] {
   if (sessionRatio >= 0.25) return 'critical';

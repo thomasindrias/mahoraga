@@ -13,7 +13,6 @@ const DEFAULT_IGNORE = ['**/node_modules/**', '**/dist/**', '**/build/**', '**/.
 
 /**
  * Builds a CodeMapIndex by scanning source files and saves it to disk.
- *
  * @param rootDir - The root directory to scan.
  * @param outputPath - The path to write the JSON index file to.
  * @param patterns - Optional glob patterns to use instead of defaults.
@@ -38,7 +37,6 @@ export async function buildAndSave(
 
 /**
  * Loads a cached CodeMapIndex from disk.
- *
  * @param outputPath - The path to the cached index JSON file.
  * @returns The loaded CodeMapIndex, or null if not found or invalid.
  */
@@ -62,7 +60,6 @@ export function loadFromCache(outputPath: string): CodeMapIndex | null {
 
 /**
  * Builds a CodeMapIndex by scanning source files in rootDir.
- *
  * @param rootDir - The root directory to scan.
  * @param patterns - Optional glob patterns.
  * @returns The built CodeMapIndex.

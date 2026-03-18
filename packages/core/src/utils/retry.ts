@@ -17,7 +17,7 @@ export interface RetryOptions {
  * @param fn - Async function to execute
  * @param options - Retry configuration
  * @returns Result of the function
- * @throws Last error if all retries are exhausted
+ * @throws {Error} Last error if all retries are exhausted
  */
 export async function withRetry<T>(
   fn: () => Promise<T>,

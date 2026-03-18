@@ -95,6 +95,8 @@ export class ErrorSpikeRule implements DetectionRule {
 
 /**
  * Group error events by message prefix and count occurrences.
+ * @param events - Error events to group
+ * @returns Map of message prefix to count and events
  */
 function groupByMessage(
   events: MahoragaEvent[],
@@ -118,6 +120,9 @@ function groupByMessage(
 
 /**
  * Determine severity based on spike ratio and absolute count.
+ * @param ratio - Spike ratio (current/previous)
+ * @param count - Absolute error count
+ * @returns Severity level
  */
 function getSeverity(ratio: number, count: number): Issue['severity'] {
   if (ratio >= 10 || count >= 100) return 'critical';

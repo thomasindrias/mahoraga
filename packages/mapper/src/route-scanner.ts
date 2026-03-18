@@ -13,7 +13,6 @@ export type RouteMap = Map<string, SourceLocation>;
  * - Next.js `pages/` directory: `pages/about.tsx` -> `/about`
  * - Next.js `app/` directory: `app/dashboard/page.tsx` -> `/dashboard`
  * - React Router `<Route>` patterns (basic detection)
- *
  * @param rootDir - The root directory of the project.
  * @param files - List of file paths (relative or absolute) to scan.
  * @returns A RouteMap mapping URL patterns to SourceLocations.
@@ -72,7 +71,6 @@ export function scanRoutes(rootDir: string, files: string[]): RouteMap {
 
 /**
  * Converts a pages/ directory path segment to a URL path.
- *
  * @param routePath - The path segment after `pages/` without extension.
  * @returns The URL path, or null if it should be excluded (e.g., _app, _document).
  */

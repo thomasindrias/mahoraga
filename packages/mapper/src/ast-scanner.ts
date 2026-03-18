@@ -21,7 +21,6 @@ export interface ScanResult {
  * - `aria-label="Close"` -> `[aria-label="Close"]`
  *
  * Only handles string literal attribute values (not dynamic expressions).
- *
  * @param filePath - The file path used for source location reporting.
  * @param content - The file content to parse.
  * @returns A ScanResult with a map of selector string to SourceLocation.
@@ -37,7 +36,11 @@ export function scanFile(filePath: string, content: string): ScanResult {
     ts.ScriptKind.TSX,
   );
 
-  /** Find the nearest enclosing function/class component name. */
+  /**
+   * Find the nearest enclosing function/class component name.
+   * @param node - The AST node to search from.
+   * @returns The component name, or undefined if not found.
+   */
   function findComponentName(node: ts.Node): string | undefined {
     let current: ts.Node | undefined = node.parent;
     while (current) {

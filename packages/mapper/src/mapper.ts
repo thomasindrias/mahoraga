@@ -37,7 +37,6 @@ export class FileSystemCodeMapper implements CodeMapper {
 
   /**
    * Creates a new FileSystemCodeMapper.
-   *
    * @param rootDir - The root directory of the project to scan.
    */
   constructor(private rootDir: string) {
@@ -52,7 +51,6 @@ export class FileSystemCodeMapper implements CodeMapper {
    * Resolves a CSS selector to source locations.
    *
    * If a URL is provided, route matches for that URL are included.
-   *
    * @param selector - The CSS selector to resolve (e.g., `#foo`, `.bar`, `[data-testid="baz"]`).
    * @param url - Optional URL to match against route definitions.
    * @returns An array of matching SourceLocations.
@@ -79,7 +77,6 @@ export class FileSystemCodeMapper implements CodeMapper {
 
   /**
    * Builds the selector index by scanning files.
-   *
    * @param rootDir - The root directory to scan. Defaults to the constructor rootDir.
    * @param patterns - Optional glob patterns for file discovery.
    */
@@ -90,7 +87,6 @@ export class FileSystemCodeMapper implements CodeMapper {
 
   /**
    * Returns the current code map index.
-   *
    * @returns The CodeMapIndex.
    */
   getIndex(): CodeMapIndex {
