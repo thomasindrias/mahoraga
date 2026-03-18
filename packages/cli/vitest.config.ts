@@ -10,12 +10,11 @@ export default defineConfig({
       reportsDirectory: './coverage',
       include: ['src/**/*.ts'],
       exclude: ['src/__tests__/**', 'src/index.ts'],
-      // TODO: Increase thresholds to 80% as test coverage improves (target per CLAUDE.md)
       thresholds: {
-        lines: 10,
-        functions: 10,
-        branches: 10,
-        statements: 10,
+        lines: 14,
+        functions: 17,
+        branches: 16,
+        statements: 14,
       },
     },
   },
