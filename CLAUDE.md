@@ -154,6 +154,16 @@ Credentials are never stored in SQLite or logged.
 ### Coverage
 Target 80% line coverage minimum per package.
 
+## Skills (Claude Code Plugin)
+
+Mahoraga ships with a Claude Code plugin (`.claude-plugin/`) providing 4 skills for AI coding agents:
+- `mahoraga-setup` — Setting up and configuring Mahoraga in a project
+- `mahoraga-custom-rules` — Writing custom detection rules
+- `mahoraga-source-adapters` — Writing source adapters for new analytics platforms
+- `mahoraga-agent-config` — Configuring the agent dispatcher and governance controls
+
+Install by cloning the repo or adding as a Claude Code plugin.
+
 ## Tooling Recommendations
 
 **[rtk](https://github.com/rtk-ai/rtk)** -- Recommended for Claude Code users. Filters and compresses command outputs before they reach LLM context. Single Rust binary, zero dependencies, <10ms overhead. Reduces token costs by 60-90% on dev operations.
