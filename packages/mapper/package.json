@@ -32,19 +32,20 @@
   "scripts": {
     "build": "tsup",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",
     "check-exports": "attw --pack . --profile esm-only"
   },
   "dependencies": {
+    "glob": "^13.0.6",
     "mahoraga-core": "workspace:*",
-    "typescript": "^5.5.0",
-    "glob": "^13.0.6"
+    "typescript": "^5.5.0"
   },
   "devDependencies": {
-    "vitest": "^2.0.0",
-    "tsup": "^8.0.0"
+    "tsup": "^8.0.0",
+    "vitest": "^4.1.0"
   },
   "engines": {
     "node": ">=20"

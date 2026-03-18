@@ -31,6 +31,8 @@
   "scripts": {
     "build": "tsup",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:integration": "MAHORAGA_INTEGRATION_TESTS=true vitest run",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",
@@ -40,9 +42,9 @@
     "mahoraga-core": "workspace:*"
   },
   "devDependencies": {
+    "tsup": "^8.0.0",
     "typescript": "^5.5.0",
-    "vitest": "^2.0.0",
-    "tsup": "^8.0.0"
+    "vitest": "^4.1.0"
   },
   "engines": {
     "node": ">=20"

@@ -28,7 +28,7 @@ export default tseslint.config(
       'jsdoc/require-returns-description': 'warn',
       '@typescript-eslint/no-unused-vars': [
         'error',
-        { argsIgnorePattern: '^_' },
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
     },
   },

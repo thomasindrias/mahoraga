@@ -215,10 +215,12 @@ pnpm turbo build
 ```
 
 ```bash
-pnpm turbo build         # Build all packages
-pnpm turbo test          # Run all tests
-pnpm turbo lint          # Lint all packages
-pnpm turbo typecheck     # Type-check all packages
+pnpm turbo build              # Build all packages
+pnpm turbo test               # Run all tests
+pnpm turbo test:coverage      # Run tests with 80% coverage thresholds
+pnpm turbo test:integration   # Run all tests including integration tests
+pnpm turbo lint               # Lint all packages
+pnpm turbo typecheck          # Type-check all packages
 
 # Work on a specific package
 pnpm --filter mahoraga-core test

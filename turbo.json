@@ -8,6 +8,14 @@
     "test": {
       "dependsOn": ["^build"]
     },
+    "test:coverage": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
+    },
+    "test:integration": {
+      "dependsOn": ["^build"],
+      "env": ["MAHORAGA_INTEGRATION_TESTS"]
+    },
     "lint": {
       "dependsOn": ["^build"]
     },

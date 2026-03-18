@@ -1,0 +1,3 @@
+{"event_type":"Button Click","session_id":12345,"event_time":"2024-01-15 10:30:00","event_properties":{"selector":"#submit-btn","text":"Submit","x":150,"y":300,"current_url":"https://app.example.com/form"}}
+{"event_type":"JS Error","session_id":12345,"event_time":"2024-01-15 10:31:00","event_properties":{"message":"TypeError: Cannot read properties of null","stack":"at render (app.js:42)","current_url":"https://app.example.com/form"}}
+{"event_type":"Page View","session_id":12345,"event_time":"2024-01-15 10:32:00","event_properties":{"from":"/home","to":"/form","current_url":"https://app.example.com/form"}}
