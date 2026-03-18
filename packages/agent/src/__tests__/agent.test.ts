@@ -437,7 +437,7 @@ describe('Governance', () => {
   });
 
   it('defaults to 0.5 confidence for unknown severity', () => {
-    const weirdIssue = { ...mockIssue, severity: 'unknown' as any };
+    const weirdIssue = { ...mockIssue, severity: 'unknown' as unknown as IssueGroup['severity'] };
     const highThresholdConfig = { ...defaultConfig, confidenceThreshold: 0.6 };
     const result = checkGovernance(weirdIssue, highThresholdConfig);
     expect(result.action).toBe('create_issue');

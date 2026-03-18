@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createDatabase, EventStore } from 'mahoraga-core';
 import type { DatabaseManager } from 'mahoraga-core';
-import { createEvent, createNavigationEvent, resetEventCounter } from 'mahoraga-core/testing';
+import { createEvent, resetEventCounter } from 'mahoraga-core/testing';
 import { SlowNavigationRule } from '../rules/slow-navigation.js';
 import type { AnalysisContext } from '../rule.js';
 
