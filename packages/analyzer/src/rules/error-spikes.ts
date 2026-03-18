@@ -2,8 +2,8 @@ import type { Issue, MahoragaEvent, ErrorPayload, Evidence, EventSummary } from 
 import { createFingerprint } from 'mahoraga-core';
 import type { DetectionRule, AnalysisContext } from '../rule.js';
 
-const MIN_SPIKE_COUNT = 5;
-const MIN_SPIKE_RATIO = 2;
+const DEFAULT_MIN_ABSOLUTE_COUNT = 5;
+const DEFAULT_SPIKE_MULTIPLIER = 2;
 const MESSAGE_PREFIX_LENGTH = 100;
 
 /**
@@ -23,6 +23,10 @@ export class ErrorSpikeRule implements DetectionRule {
    * @returns Issues for each error message with a spike
    */
   async analyze(context: AnalysisContext): Promise<Issue[]> {
+    const thresholds = context.thresholds?.['error-spikes'];
+    const minAbsoluteCount = thresholds?.minAbsoluteCount ?? DEFAULT_MIN_ABSOLUTE_COUNT;
+    const spikeMultiplier = thresholds?.spikeMultiplier ?? DEFAULT_SPIKE_MULTIPLIER;
+
     const currentEvents = context.eventStore.query({
       type: 'error',
       start: context.timeWindow.start,
@@ -46,8 +50,8 @@ export class ErrorSpikeRule implements DetectionRule {
       const previousCount = previousCounts.get(messagePrefix)?.count ?? 0;
 
       // Check spike conditions
-      if (currentCount < MIN_SPIKE_COUNT) continue;
-      if (previousCount > 0 && currentCount / previousCount <= MIN_SPIKE_RATIO) continue;
+      if (currentCount < minAbsoluteCount) continue;
+      if (previousCount > 0 && currentCount / previousCount <= spikeMultiplier) continue;
       // If previousCount is 0 and currentCount >= MIN_SPIKE_COUNT, it's a new error spike
 
       const ratio = previousCount > 0 ? currentCount / previousCount : Infinity;

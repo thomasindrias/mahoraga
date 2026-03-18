@@ -6,13 +6,53 @@ export const SourceConfigSchema = z.object({
   apiKey: z.string().optional(),
   secretKey: z.string().optional(),
   projectId: z.string().optional(),
+  host: z.string().optional(),
 });
+
+/** Per-rule threshold overrides */
+export const RuleThresholdsSchema = z.object({
+  'rage-clicks': z.object({
+    clickCount: z.number().int().positive().default(3),
+    windowMs: z.number().int().positive().default(1000),
+  }).prefault({}),
+  'error-spikes': z.object({
+    spikeMultiplier: z.number().positive().default(2),
+    minAbsoluteCount: z.number().int().positive().default(5),
+  }).prefault({}),
+  'dead-clicks': z.object({
+    minClickCount: z.number().int().positive().default(5),
+    minSessions: z.number().int().positive().default(2),
+    waitMs: z.number().int().positive().default(2000),
+  }).prefault({}),
+  'form-abandonment': z.object({
+    minAbandonRate: z.number().min(0).max(1).default(0.4),
+    minSessions: z.number().int().positive().default(3),
+  }).prefault({}),
+  'slow-navigation': z.object({
+    thresholdMs: z.number().int().positive().default(3000),
+    minOccurrences: z.number().int().positive().default(3),
+    minSessions: z.number().int().positive().default(2),
+  }).prefault({}),
+  'layout-shifts': z.object({
+    minPoorEvents: z.number().int().positive().default(3),
+    minSessions: z.number().int().positive().default(2),
+  }).prefault({}),
+  'error-loops': z.object({
+    minOccurrences: z.number().int().positive().default(3),
+    minSessions: z.number().int().positive().default(2),
+  }).prefault({}),
+}).prefault({});
+
+/** Inferred type for rule thresholds */
+export type RuleThresholds = z.infer<typeof RuleThresholdsSchema>;
 
 /** Analysis configuration schema */
 export const AnalysisConfigSchema = z.object({
   windowDays: z.number().int().positive().default(3),
   rules: z.array(z.string()).default(['rage-clicks', 'error-spikes']),
   customRules: z.array(z.unknown()).default([]),
+  thresholds: RuleThresholdsSchema,
+  routePatterns: z.array(z.string()).default([]),
 });
 
 /** Post-agent validation checks */

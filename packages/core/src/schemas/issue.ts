@@ -33,6 +33,7 @@ export const IssueStatusSchema = z.enum([
   'pr_created',
   'no_fix',
   'cooldown',
+  'suppressed',
 ]);
 
 /**

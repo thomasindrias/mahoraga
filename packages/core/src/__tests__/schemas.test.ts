@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { MahoragaEventSchema } from '../schemas/event.js';
 import { IssueSchema } from '../schemas/issue.js';
-import { defineConfig } from '../schemas/config.js';
+import { defineConfig, RuleThresholdsSchema } from '../schemas/config.js';
 
 describe('MahoragaEventSchema', () => {
   it('should validate a valid click event', () => {
@@ -119,6 +119,47 @@ describe('IssueSchema', () => {
   });
 });
 
+describe('RuleThresholdsSchema', () => {
+  it('produces all defaults matching hardcoded values when parsed with empty object', () => {
+    const thresholds = RuleThresholdsSchema.parse({});
+    expect(thresholds['rage-clicks'].clickCount).toBe(3);
+    expect(thresholds['rage-clicks'].windowMs).toBe(1000);
+    expect(thresholds['error-spikes'].spikeMultiplier).toBe(2);
+    expect(thresholds['error-spikes'].minAbsoluteCount).toBe(5);
+    expect(thresholds['dead-clicks'].minClickCount).toBe(5);
+    expect(thresholds['dead-clicks'].minSessions).toBe(2);
+    expect(thresholds['dead-clicks'].waitMs).toBe(2000);
+    expect(thresholds['form-abandonment'].minAbandonRate).toBe(0.4);
+    expect(thresholds['form-abandonment'].minSessions).toBe(3);
+    expect(thresholds['slow-navigation'].thresholdMs).toBe(3000);
+    expect(thresholds['slow-navigation'].minOccurrences).toBe(3);
+    expect(thresholds['slow-navigation'].minSessions).toBe(2);
+    expect(thresholds['layout-shifts'].minPoorEvents).toBe(3);
+    expect(thresholds['layout-shifts'].minSessions).toBe(2);
+    expect(thresholds['error-loops'].minOccurrences).toBe(3);
+    expect(thresholds['error-loops'].minSessions).toBe(2);
+  });
+
+  it('accepts partial overrides', () => {
+    const thresholds = RuleThresholdsSchema.parse({
+      'rage-clicks': { clickCount: 5 },
+    });
+    expect(thresholds['rage-clicks'].clickCount).toBe(5);
+    expect(thresholds['rage-clicks'].windowMs).toBe(1000); // default preserved
+    expect(thresholds['error-spikes'].spikeMultiplier).toBe(2); // other rules default
+  });
+
+  it('rejects invalid values', () => {
+    expect(() => RuleThresholdsSchema.parse({
+      'rage-clicks': { clickCount: -1 },
+    })).toThrow();
+
+    expect(() => RuleThresholdsSchema.parse({
+      'form-abandonment': { minAbandonRate: 1.5 },
+    })).toThrow();
+  });
+});
+
 describe('MahoragaConfigSchema', () => {
   it('should apply defaults for minimal config', () => {
     const config = defineConfig({
@@ -126,6 +167,8 @@ describe('MahoragaConfigSchema', () => {
     });
 
     expect(config.analysis.windowDays).toBe(3);
+    expect(config.analysis.routePatterns).toEqual([]);
+    expect(config.analysis.thresholds['rage-clicks'].clickCount).toBe(3);
     expect(config.agent.provider).toBe('claude-code');
     expect(config.agent.maxRetries).toBe(3);
     expect(config.agent.confidenceThreshold).toBe(0.7);

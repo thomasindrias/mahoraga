@@ -1,4 +1,4 @@
-import type { EventType, Issue, TimeRange } from 'mahoraga-core';
+import type { EventType, Issue, TimeRange, RuleThresholds } from 'mahoraga-core';
 import type { EventStore } from 'mahoraga-core';
 
 /**
@@ -11,6 +11,10 @@ export interface AnalysisContext {
   timeWindow: TimeRange;
   /** Previous time window for comparison (e.g., spike detection) */
   previousWindow: TimeRange;
+  /** Per-rule threshold overrides (all fields have defaults) */
+  thresholds?: RuleThresholds;
+  /** Route patterns for URL normalization (e.g., '/products/:id') */
+  routePatterns?: string[];
 }
 
 /**

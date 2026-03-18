@@ -1,10 +1,10 @@
 import type { Issue, MahoragaEvent, NavigationPayload, Evidence, EventSummary } from 'mahoraga-core';
-import { createFingerprint } from 'mahoraga-core';
+import { createFingerprint, normalizeUrl } from 'mahoraga-core';
 import type { DetectionRule, AnalysisContext } from '../rule.js';
 
-const SLOW_THRESHOLD_MS = 3000;
-const MIN_OCCURRENCES = 3;
-const MIN_SESSIONS = 2;
+const DEFAULT_THRESHOLD_MS = 3000;
+const DEFAULT_MIN_OCCURRENCES = 3;
+const DEFAULT_MIN_SESSIONS = 2;
 
 /**
  * Detects route transitions that consistently take too long.
@@ -23,6 +23,12 @@ export class SlowNavigationRule implements DetectionRule {
    * @returns Issues for each route pair with slow navigations
    */
   async analyze(context: AnalysisContext): Promise<Issue[]> {
+    const thresholds = context.thresholds?.['slow-navigation'];
+    const thresholdMs = thresholds?.thresholdMs ?? DEFAULT_THRESHOLD_MS;
+    const minOccurrences = thresholds?.minOccurrences ?? DEFAULT_MIN_OCCURRENCES;
+    const minSessions = thresholds?.minSessions ?? DEFAULT_MIN_SESSIONS;
+    const routePatterns = context.routePatterns ?? [];
+
     const events = context.eventStore.query({
       type: 'navigation',
       start: context.timeWindow.start,
@@ -31,10 +37,10 @@ export class SlowNavigationRule implements DetectionRule {
 
     if (events.length === 0) return [];
 
-    // Filter events with duration > 3000ms
+    // Filter events with duration > thresholdMs
     const slowEvents = events.filter((event) => {
       const payload = event.payload as NavigationPayload;
-      return payload.duration !== undefined && payload.duration > SLOW_THRESHOLD_MS;
+      return payload.duration !== undefined && payload.duration > thresholdMs;
     });
 
     if (slowEvents.length === 0) return [];
@@ -47,7 +53,9 @@ export class SlowNavigationRule implements DetectionRule {
 
     for (const event of slowEvents) {
       const payload = event.payload as NavigationPayload;
-      const routePair = `${payload.from}->${payload.to}`;
+      const from = normalizeUrl(payload.from, routePatterns);
+      const to = normalizeUrl(payload.to, routePatterns);
+      const routePair = `${from}->${to}`;
 
       const existing = routeData.get(routePair);
       if (existing) {
@@ -68,7 +76,7 @@ export class SlowNavigationRule implements DetectionRule {
     const issues: Issue[] = [];
 
     for (const [routePair, data] of routeData) {
-      if (data.events.length < MIN_OCCURRENCES || data.sessions.size < MIN_SESSIONS) {
+      if (data.events.length < minOccurrences || data.sessions.size < minSessions) {
         continue;
       }
 

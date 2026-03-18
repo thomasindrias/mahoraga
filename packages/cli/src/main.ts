@@ -95,6 +95,21 @@ export async function main(): Promise<void> {
       break;
     }
 
+    case 'dismiss': {
+      const config = await loadConfig(cwd);
+      if (!config) return;
+      const { runDismiss } = await import('./commands/dismiss.js');
+      const dismissArgs = args.slice(1);
+      const isList = dismissArgs.includes('--list');
+      const undoIndex = dismissArgs.indexOf('--undo');
+      const reasonIndex = dismissArgs.indexOf('--reason');
+      const undo = undoIndex !== -1 ? dismissArgs[undoIndex + 1] : undefined;
+      const reason = reasonIndex !== -1 ? dismissArgs[reasonIndex + 1] : undefined;
+      const fingerprint = dismissArgs.find((a) => !a.startsWith('--') && a !== undo && a !== reason);
+      await runDismiss(config, fingerprint, { list: isList, undo, reason });
+      break;
+    }
+
     case 'create-rule': {
       const { interactiveCreateRule } = await import('./commands/create-rule.js');
       await interactiveCreateRule(cwd);
@@ -113,6 +128,9 @@ Commands:
   inspect issues      Show detected issue groups
   status              Show run history
   gc                  Manual data retention cleanup
+  dismiss <fp>        Suppress an issue fingerprint
+  dismiss --list      Show all active suppressions
+  dismiss --undo <fp> Remove a suppression
   create-rule         Scaffold a custom detection rule
 `);
   }

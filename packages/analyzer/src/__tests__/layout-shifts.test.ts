@@ -17,8 +17,8 @@ const timeWindow = { start: NOW - HOUR, end: NOW };
 /** Previous window: the hour before that */
 const previousWindow = { start: NOW - 2 * HOUR, end: NOW - HOUR };
 
-function makeContext(): AnalysisContext {
-  return { eventStore, timeWindow, previousWindow };
+function makeContext(overrides?: { routePatterns?: string[] }): AnalysisContext {
+  return { eventStore, timeWindow, previousWindow, routePatterns: overrides?.routePatterns };
 }
 
 beforeEach(() => {
@@ -84,7 +84,7 @@ describe('LayoutShiftRule', () => {
     expect(issues).toHaveLength(1);
     expect(issues[0]!.ruleId).toBe('layout-shifts');
     expect(issues[0]!.title).toContain('Layout shifts detected');
-    expect(issues[0]!.affectedElements[0]!.url).toBe(url);
+    expect(issues[0]!.affectedElements[0]!.url).toBe('/shifting-page');
     expect(issues[0]!.evidence[0]!.type).toBe('poor_cls');
   });
 
@@ -384,5 +384,47 @@ describe('LayoutShiftRule', () => {
 
     const issues = await rule.analyze(makeContext());
     expect(issues).toHaveLength(0);
+  });
+
+  it('groups dynamic URLs with routePatterns', async () => {
+    const baseTime = NOW - HOUR / 2;
+
+    // Poor CLS on /products/1 and /products/2 — should group with pattern
+    const events = [
+      createEvent({
+        type: 'performance',
+        sessionId: 'session-1',
+        timestamp: baseTime,
+        url: 'https://example.com/products/1',
+        payload: { type: 'performance', metric: 'CLS', value: 0.3, rating: 'poor' as const },
+      }),
+      createEvent({
+        type: 'performance',
+        sessionId: 'session-1',
+        timestamp: baseTime + 1000,
+        url: 'https://example.com/products/2',
+        payload: { type: 'performance', metric: 'CLS', value: 0.4, rating: 'poor' as const },
+      }),
+      createEvent({
+        type: 'performance',
+        sessionId: 'session-2',
+        timestamp: baseTime + 2000,
+        url: 'https://example.com/products/3',
+        payload: { type: 'performance', metric: 'CLS', value: 0.5, rating: 'poor' as const },
+      }),
+    ];
+
+    eventStore.insertBatch(events);
+
+    // Without patterns — 3 different URLs, each with only 1 event (below threshold)
+    const issuesNoPattern = await rule.analyze(makeContext());
+    expect(issuesNoPattern).toHaveLength(0);
+
+    // With patterns — grouped into 1 URL, 3 events across 2 sessions
+    const issuesWithPattern = await rule.analyze(makeContext({
+      routePatterns: ['/products/:id'],
+    }));
+    expect(issuesWithPattern).toHaveLength(1);
+    expect(issuesWithPattern[0]!.title).toContain('/products/:id');
   });
 });

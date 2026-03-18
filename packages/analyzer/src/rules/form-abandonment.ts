@@ -2,8 +2,8 @@ import type { Issue, MahoragaEvent, FormPayload, Evidence, EventSummary } from '
 import { createFingerprint } from 'mahoraga-core';
 import type { DetectionRule, AnalysisContext } from '../rule.js';
 
-const MIN_ABANDON_SESSIONS = 3;
-const MIN_ABANDON_RATE = 0.4; // 40%
+const DEFAULT_MIN_SESSIONS = 3;
+const DEFAULT_MIN_ABANDON_RATE = 0.4; // 40%
 
 /**
  * Detects forms with high abandonment rates indicating UX friction.
@@ -21,6 +21,10 @@ export class FormAbandonmentRule implements DetectionRule {
    * @returns Issues for each form with high abandonment
    */
   async analyze(context: AnalysisContext): Promise<Issue[]> {
+    const thresholds = context.thresholds?.['form-abandonment'];
+    const minSessions = thresholds?.minSessions ?? DEFAULT_MIN_SESSIONS;
+    const minAbandonRate = thresholds?.minAbandonRate ?? DEFAULT_MIN_ABANDON_RATE;
+
     const events = context.eventStore.query({
       type: 'form',
       start: context.timeWindow.start,
@@ -100,11 +104,11 @@ export class FormAbandonmentRule implements DetectionRule {
       const totalSessions = abandonCount + submitCount;
 
       // Check thresholds
-      if (abandonCount < MIN_ABANDON_SESSIONS) continue;
+      if (abandonCount < minSessions) continue;
       if (totalSessions === 0) continue;
 
       const abandonRate = abandonCount / totalSessions;
-      if (abandonRate < MIN_ABANDON_RATE) continue;
+      if (abandonRate < minAbandonRate) continue;
 
       const severity = getSeverity(abandonRate);
       const fingerprint = createFingerprint('form-abandonment', formSelector);

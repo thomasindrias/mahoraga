@@ -5,3 +5,4 @@ export * from './adaptation-loop.js';
 export * from './pr-creator.js';
 export * from './dispatcher.js';
 export * from './governance.js';
+export * from './cost-tracker.js';

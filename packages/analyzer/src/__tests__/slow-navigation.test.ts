@@ -16,8 +16,8 @@ const timeWindow = { start: NOW - HOUR, end: NOW };
 /** Previous window: the hour before that */
 const previousWindow = { start: NOW - 2 * HOUR, end: NOW - HOUR };
 
-function makeContext(): AnalysisContext {
-  return { eventStore, timeWindow, previousWindow };
+function makeContext(overrides?: { routePatterns?: string[] }): AnalysisContext {
+  return { eventStore, timeWindow, previousWindow, routePatterns: overrides?.routePatterns };
 }
 
 beforeEach(() => {
@@ -435,5 +435,44 @@ describe('SlowNavigationRule', () => {
     for (const issue of issues) {
       expect(issue.frequency).toBe(2);
     }
+  });
+
+  it('groups dynamic routes with URL normalization', async () => {
+    const baseTime = NOW - HOUR / 2;
+
+    // /products/1->/details/1 and /products/2->/details/2 should group
+    const events = [
+      createEvent({
+        type: 'navigation',
+        sessionId: 'session-1',
+        timestamp: baseTime,
+        payload: { type: 'navigation', from: '/products/1', to: '/details/1', duration: 5000 },
+      }),
+      createEvent({
+        type: 'navigation',
+        sessionId: 'session-1',
+        timestamp: baseTime + 10000,
+        payload: { type: 'navigation', from: '/products/2', to: '/details/2', duration: 4500 },
+      }),
+      createEvent({
+        type: 'navigation',
+        sessionId: 'session-2',
+        timestamp: baseTime + 20000,
+        payload: { type: 'navigation', from: '/products/3', to: '/details/3', duration: 6000 },
+      }),
+    ];
+
+    eventStore.insertBatch(events);
+
+    // Without routePatterns — no grouping, 3 different route pairs
+    const issuesNoPattern = await rule.analyze(makeContext());
+    expect(issuesNoPattern).toHaveLength(0); // Each route pair has only 1 event
+
+    // With routePatterns — grouped into 1 route pair
+    const issuesWithPattern = await rule.analyze(makeContext({
+      routePatterns: ['/products/:id', '/details/:id'],
+    }));
+    expect(issuesWithPattern).toHaveLength(1);
+    expect(issuesWithPattern[0]!.title).toContain('/products/:id->/details/:id');
   });
 });
