@@ -1,5 +1,21 @@
 # mahoraga-core
 
+## 0.2.0
+
+### Minor Changes
+
+- b053a99: feat: configurable rule thresholds
+
+  All 7 detection rules now read thresholds from `context.thresholds` instead of hardcoded constants. Configure via `analysis.thresholds` in `mahoraga.config.ts`. All defaults match previous hardcoded values — zero behavior change without configuration.
+
+- b053a99: feat: false-positive suppression
+
+  New `SuppressionStore` and `mahoraga dismiss` command for permanently suppressing false-positive issues. Suppressed fingerprints are filtered after analysis and marked with `'suppressed'` status for audit trail.
+
+- b053a99: feat: URL normalization with route patterns
+
+  New `normalizeUrl()` utility groups dynamic URLs (e.g., `/products/123` and `/products/456`) using configurable route patterns. Integrated into slow-navigation and layout-shift rules. Configure via `analysis.routePatterns` in `mahoraga.config.ts`.
+
 ## 0.1.3
 
 ### Patch Changes

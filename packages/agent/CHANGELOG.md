@@ -1,5 +1,21 @@
 # mahoraga-agent
 
+## 0.2.0
+
+### Minor Changes
+
+- b053a99: feat: cost budget enforcement
+
+  New `CostTracker` class enforces `maxCostPerRun` and `maxDispatchesPerRun` limits. Replaces the previous `.slice(0, N)` approach with a budget-aware dispatch loop that stops early when limits are reached.
+
+### Patch Changes
+
+- Updated dependencies [b053a99]
+- Updated dependencies [b053a99]
+- Updated dependencies [b053a99]
+  - mahoraga-core@0.2.0
+  - mahoraga-mapper@0.1.4
+
 ## 0.1.3
 
 ### Patch Changes
