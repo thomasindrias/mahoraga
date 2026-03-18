@@ -1,4 +1,11 @@
-import type { MahoragaEvent, ClickPayload, ErrorPayload } from '../types/index.js';
+import type {
+  MahoragaEvent,
+  ClickPayload,
+  ErrorPayload,
+  NavigationPayload,
+  FormPayload,
+  PerformancePayload,
+} from '../types/index.js';
 import { createIdempotencyKey } from '../utils/hash.js';
 
 let eventCounter = 0;
@@ -110,6 +117,78 @@ export function createErrorEvent(
 
   return createEvent({
     type: 'error',
+    payload,
+  });
+}
+
+/**
+ * Create a navigation event for testing page navigation.
+ * @param from - The URL navigated from
+ * @param to - The URL navigated to
+ * @param duration - Optional navigation duration in milliseconds
+ * @returns A navigation event
+ */
+export function createNavigationEvent(
+  from: string,
+  to: string,
+  duration?: number,
+): MahoragaEvent {
+  const payload: NavigationPayload = {
+    type: 'navigation',
+    from,
+    to,
+    ...(duration !== undefined && { duration }),
+  };
+
+  return createEvent({
+    type: 'navigation',
+    payload,
+  });
+}
+
+/**
+ * Create a form event for testing form interactions.
+ * @param formSelector - CSS selector of the form element
+ * @param action - The form action (focus, blur, submit, abandon)
+ * @returns A form event
+ */
+export function createFormEvent(
+  formSelector: string,
+  action: 'focus' | 'blur' | 'submit' | 'abandon',
+): MahoragaEvent {
+  const payload: FormPayload = {
+    type: 'form',
+    formSelector,
+    action,
+  };
+
+  return createEvent({
+    type: 'form',
+    payload,
+  });
+}
+
+/**
+ * Create a performance event for testing performance metrics.
+ * @param metric - The performance metric name (e.g., 'CLS', 'LCP', 'FID')
+ * @param value - The metric value
+ * @param rating - The performance rating (good, needs-improvement, poor)
+ * @returns A performance event
+ */
+export function createPerformanceEvent(
+  metric: string,
+  value: number,
+  rating: 'good' | 'needs-improvement' | 'poor',
+): MahoragaEvent {
+  const payload: PerformancePayload = {
+    type: 'performance',
+    metric,
+    value,
+    rating,
+  };
+
+  return createEvent({
+    type: 'performance',
     payload,
   });
 }

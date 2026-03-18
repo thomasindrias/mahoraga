@@ -77,7 +77,12 @@ export async function runAdaptationLoop(
     }
 
     // Run the generated test
-    const testError = await testRunner(generatedTest);
+    let testError: string | null;
+    try {
+      testError = await testRunner(generatedTest);
+    } catch (error) {
+      testError = error instanceof Error ? error.message : String(error);
+    }
 
     if (testError === null) {
       // Test passed — fix is verified

@@ -4,6 +4,9 @@ import {
   createSession,
   createRageClickSequence,
   createErrorEvent,
+  createNavigationEvent,
+  createFormEvent,
+  createPerformanceEvent,
   resetEventCounter,
 } from '../testing/index.js';
 import { MahoragaEventSchema } from '../schemas/event.js';
@@ -75,5 +78,43 @@ describe('createErrorEvent', () => {
       expect(event.payload.message).toBe('ReferenceError: x is not defined');
       expect(event.payload.frequency).toBe(5);
     }
+  });
+});
+
+describe('createNavigationEvent', () => {
+  it('creates a navigation event with from/to/duration', () => {
+    const event = createNavigationEvent('/home', '/about', 5000);
+    expect(event.type).toBe('navigation');
+    expect(event.payload).toMatchObject({
+      type: 'navigation',
+      from: '/home',
+      to: '/about',
+      duration: 5000,
+    });
+  });
+});
+
+describe('createFormEvent', () => {
+  it('creates a form event with selector and action', () => {
+    const event = createFormEvent('#signup-form', 'abandon');
+    expect(event.type).toBe('form');
+    expect(event.payload).toMatchObject({
+      type: 'form',
+      formSelector: '#signup-form',
+      action: 'abandon',
+    });
+  });
+});
+
+describe('createPerformanceEvent', () => {
+  it('creates a performance event with metric/value/rating', () => {
+    const event = createPerformanceEvent('CLS', 0.35, 'poor');
+    expect(event.type).toBe('performance');
+    expect(event.payload).toMatchObject({
+      type: 'performance',
+      metric: 'CLS',
+      value: 0.35,
+      rating: 'poor',
+    });
   });
 });

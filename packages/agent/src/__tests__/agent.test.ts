@@ -239,6 +239,40 @@ describe('runAdaptationLoop', () => {
     expect(result.attempts).toBe(2);
     expect(result.attemptErrors).toHaveLength(1);
   });
+
+  it('fails immediately when maxRetries is 0 and test fails', async () => {
+    const executor = new MockAgentExecutor([{ success: true, costUsd: 0.1 }]);
+    const result = await runAdaptationLoop(executor, 'prompt', mockIssue, '/tmp', {
+      maxRetries: 0,
+      testRunner: async () => 'test failed',
+    });
+    expect(result.success).toBe(false);
+    expect(result.attempts).toBe(1);
+  });
+
+  it('records all attempt errors when agent always fails', async () => {
+    const executor = new MockAgentExecutor([
+      { success: false, error: 'agent crash' },
+      { success: false, error: 'agent crash' },
+      { success: false, error: 'agent crash' },
+    ]);
+    const result = await runAdaptationLoop(executor, 'prompt', mockIssue, '/tmp', {
+      maxRetries: 2,
+    });
+    expect(result.success).toBe(false);
+    expect(result.attemptErrors).toHaveLength(3);
+    expect(result.attemptErrors[0]).toContain('Agent failed');
+  });
+
+  it('handles testRunner that throws an exception', async () => {
+    const executor = new MockAgentExecutor([{ success: true, costUsd: 0.1 }]);
+    const result = await runAdaptationLoop(executor, 'prompt', mockIssue, '/tmp', {
+      maxRetries: 0,
+      testRunner: async () => { throw new Error('runner exploded'); },
+    });
+    expect(result.success).toBe(false);
+    expect(result.attemptErrors[0]).toContain('runner exploded');
+  });
 });
 
 describe('PR creation helpers', () => {
@@ -347,5 +381,43 @@ describe('Governance', () => {
 
     const big = checkDiffSize(600, 500);
     expect(big.allowed).toBe(false);
+  });
+
+  it('denies when runCostSoFar exactly equals maxCostPerRun', () => {
+    const result = checkGovernance(mockIssue, defaultConfig, defaultConfig.maxCostPerRun);
+    expect(result.allowed).toBe(false);
+  });
+
+  it('allows when runCostSoFar is one cent below maxCostPerRun', () => {
+    const result = checkGovernance(mockIssue, defaultConfig, defaultConfig.maxCostPerRun - 0.01);
+    expect(result.allowed).toBe(true);
+  });
+
+  it('allows checkDiffSize when diffLineCount exactly equals maxDiffLines', () => {
+    const result = checkDiffSize(500, 500);
+    expect(result.allowed).toBe(true);
+  });
+
+  it('allows checkDiffSize with 0 lines', () => {
+    const result = checkDiffSize(0, 500);
+    expect(result.allowed).toBe(true);
+  });
+
+  it('allows checkDiffPaths with empty diffFiles array', () => {
+    const result = checkDiffPaths([], defaultConfig);
+    expect(result.allowed).toBe(true);
+  });
+
+  it('denies when file matches both allowed and denied paths', () => {
+    const dualConfig = { ...defaultConfig, allowedPaths: ['src/**'], deniedPaths: ['src/secret/**'] };
+    const result = checkDiffPaths(['src/secret/keys.ts'], dualConfig);
+    expect(result.allowed).toBe(false);
+  });
+
+  it('defaults to 0.5 confidence for unknown severity', () => {
+    const weirdIssue = { ...mockIssue, severity: 'unknown' as any };
+    const highThresholdConfig = { ...defaultConfig, confidenceThreshold: 0.6 };
+    const result = checkGovernance(weirdIssue, highThresholdConfig);
+    expect(result.action).toBe('create_issue');
   });
 });
