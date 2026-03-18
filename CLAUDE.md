@@ -51,9 +51,9 @@ agent -> core, mapper
 | `mahoraga-core` | `packages/core` | Zod schemas, SQLite storage, types, utilities (hash, dedup, retry, rate limiter), testing factories. Exports `mahoraga-core/testing` subpath for test helpers. |
 | `mahoraga-mapper` | `packages/mapper` | AST-based selector-to-source-file mapping. Parses TSX/JSX via TypeScript Compiler API, resolves CSS selectors to file:line:column. Competitive moat. |
 | `mahoraga-sources` | `packages/sources` | Pluggable source adapters. `SourceAdapter` interface with async iterable batch pulling. V1: Amplitude. Uses MSW for contract tests. |
-| `mahoraga-analyzer` | `packages/analyzer` | Detection rules engine. `DetectionRule` interface. V1 rules: rage-click detector, error-spike detector. Rules query SQLite directly. |
+| `mahoraga-analyzer` | `packages/analyzer` | Detection rules engine. `DetectionRule` interface. V1 rules: rage-click, error-spike. V2 rules: dead-click, form-abandonment, slow-navigation, layout-shift, error-loop. Rules query SQLite directly. |
 | `mahoraga-agent` | `packages/agent` | Agent dispatcher with adaptation loop. Constructs prompts, manages git worktrees, invokes Claude Code CLI, validates fixes (build + test + diff size), creates PRs via `gh`. Competitive moat. |
-| `mahoraga-cli` | `packages/cli` | CLI entry point (`mahoraga`). Commands: `init`, `analyze`, `analyze --dry-run`, `inspect`, `status`, `gc`, `map`. |
+| `mahoraga-cli` | `packages/cli` | CLI entry point (`mahoraga`). Commands: `init`, `analyze`, `analyze --dry-run`, `inspect`, `status`, `gc`, `map`, `create-rule`. |
 
 ## Development Workflow
 
@@ -140,7 +140,7 @@ Credentials are never stored in SQLite or logged.
 - **E2E tests** -- gated behind `MAHORAGA_INTEGRATION_TESTS=true`, not run on every PR
 
 ### Test Factories
-`mahoraga-core/testing` exports: `createEvent()`, `createSession()`, `createRageClickSequence()`, `createErrorEvent()`, `resetEventCounter()`.
+`mahoraga-core/testing` exports: `createEvent()`, `createSession()`, `createRageClickSequence()`, `createErrorEvent()`, `createNavigationEvent()`, `createFormEvent()`, `createPerformanceEvent()`, `resetEventCounter()`.
 
 ### Coverage
 Target 80% line coverage minimum per package.

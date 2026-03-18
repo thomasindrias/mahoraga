@@ -42,7 +42,7 @@ Human Review -> Merge
 ## Features
 
 - **Source adapters** — Pull behavioral data from Amplitude, PostHog, Sentry (V1: Amplitude)
-- **Detection rules** — Pluggable analysis engine (V1: rage clicks, error spikes)
+- **Detection rules** — Pluggable analysis engine (rage clicks, error spikes, dead clicks, form abandonment, slow navigation, layout shifts, error loops)
 - **Code mapper** — AST-based resolution from CSS selectors to exact source file locations
 - **Agent dispatcher** — Generates fixes, writes tests, validates via build/test/diff, and opens draft PRs
 - **Adaptation loop** — If a generated test fails, the agent retries with error context (up to 3 attempts)
@@ -87,7 +87,7 @@ export default defineConfig({
     },
   ],
   analysis: {
-    rules: ["rage-clicks", "error-spikes"],
+    rules: ["rage-clicks", "error-spikes", "dead-clicks", "form-abandonment", "slow-navigation", "layout-shifts", "error-loops"],
   },
   agent: {
     provider: "claude-code",
@@ -130,7 +130,20 @@ npx mahoraga-cli map ".btn-submit"
 
 # Clean up old data
 npx mahoraga-cli gc
+
+# Scaffold a custom detection rule
+npx mahoraga-cli create-rule
 ```
+
+## Custom Rules
+
+Create your own detection rules with the scaffold command:
+
+```bash
+npx mahoraga-cli create-rule
+```
+
+This generates a rule class and test file with boilerplate. Follow the prompts to name your rule, select event types, and get started.
 
 ## Packages
 
@@ -168,7 +181,7 @@ defineConfig({
   // Analysis (all optional)
   analysis: {
     windowDays: 3,                    // Days of data to analyze
-    rules: ["rage-clicks", "error-spikes"],
+    rules: ["rage-clicks", "error-spikes", "dead-clicks", "form-abandonment", "slow-navigation", "layout-shifts", "error-loops"],
     customRules: [],                  // Custom DetectionRule implementations
   },
 
