@@ -95,6 +95,12 @@ export async function main(): Promise<void> {
       break;
     }
 
+    case 'create-rule': {
+      const { interactiveCreateRule } = await import('./commands/create-rule.js');
+      await interactiveCreateRule(cwd);
+      break;
+    }
+
     default:
       console.log(`Mahoraga — Self-Evolving Frontend Intelligence
 
@@ -107,6 +113,7 @@ Commands:
   inspect issues      Show detected issue groups
   status              Show run history
   gc                  Manual data retention cleanup
+  create-rule         Scaffold a custom detection rule
 `);
   }
 }
