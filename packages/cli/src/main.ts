@@ -7,6 +7,26 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 
 /**
+ * Parse a .env file content into key-value pairs.
+ * Skips empty lines and lines starting with #.
+ * @param content - Raw file content
+ * @returns Parsed key-value pairs
+ */
+export function parseEnvFile(content: string): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const line of content.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eqIndex = trimmed.indexOf('=');
+    if (eqIndex === -1) continue;
+    const key = trimmed.slice(0, eqIndex).trim();
+    const value = trimmed.slice(eqIndex + 1).trim();
+    result[key] = value;
+  }
+  return result;
+}
+
+/**
  * CLI entry point. Parses arguments and dispatches to command handlers.
  */
 export async function main(): Promise<void> {
@@ -18,14 +38,9 @@ export async function main(): Promise<void> {
   const envPath = join(cwd, '.mahoraga.env');
   if (existsSync(envPath)) {
     const envContent = readFileSync(envPath, 'utf-8');
-    for (const line of envContent.split('\n')) {
-      const trimmed = line.trim();
-      if (trimmed && !trimmed.startsWith('#')) {
-        const [key, ...valueParts] = trimmed.split('=');
-        if (key) {
-          process.env[key] = valueParts.join('=');
-        }
-      }
+    const envVars = parseEnvFile(envContent);
+    for (const [key, value] of Object.entries(envVars)) {
+      process.env[key] = value;
     }
   }
 

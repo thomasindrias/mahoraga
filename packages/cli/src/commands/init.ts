@@ -94,7 +94,7 @@ export default defineConfig({
 
   analysis: {
     windowDays: 3,
-    rules: ['rage-clicks', 'error-spikes'],
+    rules: ['rage-clicks', 'error-spikes', 'dead-clicks', 'form-abandonment', 'slow-navigation', 'layout-shifts', 'error-loops'],
   },
 
   agent: {

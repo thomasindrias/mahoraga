@@ -8,7 +8,7 @@ import {
 import type { MahoragaConfig, TimeRange, RunError } from 'mahoraga-core';
 import { PipelineRunner, AmplitudeAdapter } from 'mahoraga-sources';
 import type { SourceAdapter } from 'mahoraga-sources';
-import { AnalysisEngine, RageClickRule, ErrorSpikeRule } from 'mahoraga-analyzer';
+import { AnalysisEngine, RageClickRule, ErrorSpikeRule, DeadClickRule, FormAbandonmentRule, SlowNavigationRule, LayoutShiftRule, ErrorLoopRule } from 'mahoraga-analyzer';
 import { AgentDispatcher, ClaudeCodeExecutor, createWorktree, cleanupWorktree } from 'mahoraga-agent';
 import { randomUUID } from 'node:crypto';
 
@@ -104,6 +104,21 @@ export async function runAnalyze(
           break;
         case 'error-spikes':
           engine.registerRule(new ErrorSpikeRule());
+          break;
+        case 'dead-clicks':
+          engine.registerRule(new DeadClickRule());
+          break;
+        case 'form-abandonment':
+          engine.registerRule(new FormAbandonmentRule());
+          break;
+        case 'slow-navigation':
+          engine.registerRule(new SlowNavigationRule());
+          break;
+        case 'layout-shifts':
+          engine.registerRule(new LayoutShiftRule());
+          break;
+        case 'error-loops':
+          engine.registerRule(new ErrorLoopRule());
           break;
       }
     }

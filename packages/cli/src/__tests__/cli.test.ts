@@ -3,6 +3,7 @@ import { mkdtempSync, rmSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { runStatus, runInspect } from '../index.js';
+import { parseEnvFile } from '../main.js';
 import { createDatabase, defineConfig } from 'mahoraga-core';
 import type { MahoragaConfig } from 'mahoraga-core';
 
@@ -20,6 +21,28 @@ beforeEach(() => {
 
 afterEach(() => {
   rmSync(tempDir, { recursive: true, force: true });
+});
+
+describe('parseEnvFile', () => {
+  it('parses key=value pairs', () => {
+    const result = parseEnvFile('API_KEY=abc123\nSECRET=xyz');
+    expect(result).toEqual({ API_KEY: 'abc123', SECRET: 'xyz' });
+  });
+
+  it('handles values containing equals signs', () => {
+    const result = parseEnvFile('KEY=abc=def=ghi');
+    expect(result).toEqual({ KEY: 'abc=def=ghi' });
+  });
+
+  it('skips empty lines and comments', () => {
+    const result = parseEnvFile('# comment\n\nKEY=val\n  \n# another');
+    expect(result).toEqual({ KEY: 'val' });
+  });
+
+  it('handles key with empty value', () => {
+    const result = parseEnvFile('EMPTY_KEY=');
+    expect(result).toEqual({ EMPTY_KEY: '' });
+  });
 });
 
 describe('runStatus', () => {
