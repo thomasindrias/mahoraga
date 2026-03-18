@@ -1,5 +1,16 @@
 # mahoraga-analyzer
 
+## 0.2.0
+
+### Minor Changes
+
+- cc63dcb: Add 5 new detection rules: dead clicks, form abandonment, slow navigation, layout shifts, error loops
+
+### Patch Changes
+
+- Updated dependencies [cc63dcb]
+  - mahoraga-core@0.1.3
+
 ## 0.1.2
 
 ### Patch Changes

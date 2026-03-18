@@ -1,6 +1,6 @@
 {
   "name": "mahoraga-core",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Shared schemas, storage, types, and utilities for Mahoraga",
   "license": "MIT",
   "author": "Thomas Indrias <thomasindrias@gmail.com>",

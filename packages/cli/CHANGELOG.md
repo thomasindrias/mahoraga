@@ -1,5 +1,23 @@
 # mahoraga-cli
 
+## 0.2.0
+
+### Minor Changes
+
+- ad65a24: Add create-rule scaffold command for custom detection rules
+
+### Patch Changes
+
+- cc63dcb: Harden test coverage and fix adaptation loop exception handling
+- cc63dcb: Add 5 new detection rules: dead clicks, form abandonment, slow navigation, layout shifts, error loops
+- Updated dependencies [cc63dcb]
+- Updated dependencies [cc63dcb]
+  - mahoraga-agent@0.1.3
+  - mahoraga-analyzer@0.2.0
+  - mahoraga-core@0.1.3
+  - mahoraga-mapper@0.1.3
+  - mahoraga-sources@0.1.3
+
 ## 0.1.2
 
 ### Patch Changes
