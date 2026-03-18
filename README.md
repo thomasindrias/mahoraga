@@ -258,6 +258,19 @@ defineConfig({
 });
 ```
 
+## AI Agent Support
+
+Mahoraga includes a Claude Code plugin with 4 skills that help AI coding agents understand and extend the system:
+
+| Skill | Description |
+|-------|-------------|
+| `mahoraga-setup` | Initialize, configure, and run Mahoraga |
+| `mahoraga-custom-rules` | Write custom detection rules for the analysis engine |
+| `mahoraga-source-adapters` | Build adapters for new analytics platforms |
+| `mahoraga-agent-config` | Configure agent dispatch, governance, and cost controls |
+
+The plugin auto-discovers from `.claude-plugin/` when cloning the repo. Skills work with Claude Code and any agent that supports the superpowers skills format.
+
 ## Contributing
 
 ```bash
