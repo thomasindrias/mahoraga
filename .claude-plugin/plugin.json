@@ -1,0 +1,8 @@
+{
+  "name": "mahoraga",
+  "version": "1.0.0",
+  "description": "Skills for using and extending Mahoraga - self-evolving frontend intelligence that ingests analytics data and dispatches AI agents to fix UI issues.",
+  "repository": "https://github.com/thomasindrias/mahoraga",
+  "license": "MIT",
+  "keywords": ["analytics", "ui-issues", "detection-rules", "agent-dispatch"]
+}
