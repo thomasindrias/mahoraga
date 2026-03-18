@@ -4,6 +4,7 @@ import {
   type AgentExecutionResult,
 } from '../executor.js';
 import { buildPrompt } from '../prompt-builder.js';
+import { AgentDispatcher } from '../dispatcher.js';
 import { generateTest } from '../test-generator.js';
 import { runAdaptationLoop } from '../adaptation-loop.js';
 import { buildPRTitle, buildPRBody } from '../pr-creator.js';
@@ -151,6 +152,27 @@ describe('generateTest', () => {
     };
     const test = generateTest(errorIssue, '/tmp/work');
     expect(test.content).toContain('error-spike fix');
+  });
+
+  it('generates a generic test for unknown ruleId', () => {
+    const customIssue = { ...mockIssue, ruleId: 'custom-user-rule' };
+    const test = generateTest(customIssue, '/tmp');
+    expect(test.content).toContain('expect');
+    expect(test.testPath).toContain('custom-user-rule');
+  });
+
+  it('handles issue with empty affectedElements', () => {
+    const emptyIssue = { ...mockIssue, affectedElements: [] };
+    const test = generateTest(emptyIssue, '/tmp');
+    expect(test.content).toBeDefined();
+  });
+
+  it('escapes special characters in issue title', () => {
+    const specialIssue = { ...mockIssue, title: "Can't click \"button\" with `backtick`" };
+    const test = generateTest(specialIssue, '/tmp');
+    // The escapeString function escapes single quotes with backslash
+    // When embedded in a template literal, it becomes: 'Can\'t'
+    expect(test.content).toContain("Can\\'t");
   });
 });
 
@@ -419,5 +441,16 @@ describe('Governance', () => {
     const highThresholdConfig = { ...defaultConfig, confidenceThreshold: 0.6 };
     const result = checkGovernance(weirdIssue, highThresholdConfig);
     expect(result.action).toBe('create_issue');
+  });
+});
+
+describe('AgentDispatcher', () => {
+  it('returns error status when dispatched with empty issues array', async () => {
+    const executor = new MockAgentExecutor([]);
+    const dispatcher = new AgentDispatcher(executor, null, defaultConfig);
+    const result = await dispatcher.dispatch([], '/tmp');
+    expect(result.status).toBe('error');
+    expect(result.summary).toBe('No issues provided');
+    expect(result.issueIds).toEqual([]);
   });
 });

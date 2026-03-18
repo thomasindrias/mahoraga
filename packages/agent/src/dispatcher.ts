@@ -42,6 +42,15 @@ export class AgentDispatcher {
     workDir: string,
     runCostSoFar = 0,
   ): Promise<DispatchResult> {
+    if (issues.length === 0) {
+      return {
+        issueIds: [],
+        status: 'error',
+        summary: 'No issues provided',
+        adaptationAttempts: 0,
+      };
+    }
+
     const issueIds = issues.map((i) => i.id);
 
     // Governance check on the first/primary issue
