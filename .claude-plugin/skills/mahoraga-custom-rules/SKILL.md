@@ -73,11 +73,14 @@ const issues = await rule.analyze({
 Register in `mahoraga.config.ts`:
 
 ```typescript
-export default {
+import { defineConfig } from 'mahoraga-core';
+
+export default defineConfig({
+  sources: [/* ... */],
   analysis: {
     customRules: [new MyCustomRule()]
   }
-};
+});
 ```
 
 ## Common Mistakes

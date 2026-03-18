@@ -76,15 +76,19 @@ Mahoraga's competitive moat:
 
 **Suppression**: `mahoraga dismiss <issue-id>` persists in SQLite, survives future runs.
 
-## Provider Options
+## Provider & Advanced Options
 
-- `provider`: `'claude-code'` (default) | `'gemini'` | `'openai'`
-- Additional: `claudeMdPath`, `agentMdPath`, `skills`, `mcpServers`, `workflow`
+- `provider`: `'claude-code'` (default). `'gemini'` and `'openai'` are defined in the schema but not yet implemented.
+- `claudeMdPath`: path to CLAUDE.md for the agent's context
+- `agentMdPath`: path to AGENTS.md for agent-specific instructions
+- `skills`: array of skill names to make available to the agent
+- `mcpServers`: array of MCP server names for the agent to use
+- `workflow`: `'plan-then-implement'` (only supported value)
 
 ## Common Mistakes
 
 - **`maxCostPerRun` too low**: Set ≥$10 for multiple issues
-- **Missing env vars**: Requires `ANTHROPIC_API_KEY` and `GITHUB_TOKEN`
+- **Missing env vars**: Requires `ANTHROPIC_API_KEY` and authenticated `gh` CLI
 - **No `allowedPaths` in large repos**: Agent may modify unexpected files
 - **`confidenceThreshold` too high**: Lower to 0.5 to include medium-severity issues
 - **Blocked by cooldown**: Check `mahoraga status`, use `dismiss` to clear suppressions

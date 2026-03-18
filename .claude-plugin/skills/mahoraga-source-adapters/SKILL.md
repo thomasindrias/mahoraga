@@ -67,13 +67,18 @@ Map vendor fields to `MahoragaEvent`. Always validate with Zod:
 function transformEvent(raw: unknown): MahoragaEvent | null {
   if (typeof raw !== 'object' || raw === null) return null;
   const event = raw as Record<string, unknown>;
-  const payload = mapPayload(String(event.event_type), event.properties);
-  const id = createIdempotencyKey('vendor', eventType, sessionId, timestamp, distinctiveField);
+  const eventType = String(event.event_type ?? '');
+  const sessionId = String(event.session_id ?? '');
+  const timestamp = Number(event.timestamp ?? 0);
+  if (!eventType || !sessionId || !timestamp) return null;
+
+  const payload = mapPayload(eventType, event.properties);
+  const id = createIdempotencyKey('vendor', eventType, sessionId, String(timestamp));
 
   return MahoragaEventSchema.parse({
     id, schemaVersion: 1, sessionId, timestamp, type: payload.type,
     url: String(event.url || 'unknown'), payload,
-    metadata: { source: 'vendor', rawEventType: String(event.event_type) },
+    metadata: { source: 'vendor', rawEventType: eventType },
   });
 }
 ```
@@ -94,6 +99,7 @@ Re-pulling the same time range deduplicates automatically via `INSERT OR IGNORE`
 - **Type mapping:** Keyword-based — event name includes "click"/"error"/"navigate"
 - **Batch size:** 1000 events
 - **Cursor:** Last event timestamp
+- **Self-hosted support:** Use optional `host` config field for self-hosted or regional instances (e.g., PostHog EU cloud)
 
 ## Testing
 
