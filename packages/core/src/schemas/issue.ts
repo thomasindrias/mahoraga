@@ -11,7 +11,7 @@ export const EventSummarySchema = z.object({
 
 /** A single data point supporting an issue detection */
 export const EvidenceSchema = z.object({
-  type: z.enum(['event_cluster', 'frequency_spike', 'pattern_match']),
+  type: z.enum(['event_cluster', 'frequency_spike', 'pattern_match', 'error_loop']),
   description: z.string(),
   eventSummaries: z.array(EventSummarySchema),
 });
