@@ -78,6 +78,7 @@ export class AgentDispatcher {
       issues,
       codeLocations,
       baseBranch: this.config.baseBranch,
+      conventions: this.config.conventions,
     });
 
     // Run the adaptation loop
@@ -233,6 +234,34 @@ export class AgentDispatcher {
         const msg =
           error instanceof Error ? error.message : String(error);
         return { status: 'build_failed', summary: `Build failed: ${msg}` };
+      }
+    }
+
+    // Run lint check
+    if (this.config.postChecks.lint) {
+      try {
+        await exec('npm', ['run', 'lint', '--if-present'], {
+          cwd: workDir,
+          timeout: 120_000,
+        });
+      } catch (error) {
+        const msg =
+          error instanceof Error ? error.message : String(error);
+        return { status: 'lint_failed', summary: `Lint failed: ${msg}` };
+      }
+    }
+
+    // Run typecheck
+    if (this.config.postChecks.typecheck) {
+      try {
+        await exec('npm', ['run', 'typecheck', '--if-present'], {
+          cwd: workDir,
+          timeout: 120_000,
+        });
+      } catch (error) {
+        const msg =
+          error instanceof Error ? error.message : String(error);
+        return { status: 'typecheck_failed', summary: `Typecheck failed: ${msg}` };
       }
     }
 

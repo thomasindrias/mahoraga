@@ -61,7 +61,7 @@ const defaultConfig: AgentConfig = {
   maxDispatchesPerRun: 5,
   timeoutMs: 300_000,
   maxRetries: 3,
-  postChecks: { build: true, test: true, maxDiffLines: 500 },
+  postChecks: { build: true, test: true, lint: false, typecheck: false, maxDiffLines: 500 },
   allowedPaths: [],
   deniedPaths: [],
   confidenceThreshold: 0.7,
@@ -131,6 +131,31 @@ describe('buildPrompt', () => {
     });
 
     expect(prompt).toContain('Always use TypeScript strict mode');
+  });
+
+  it('should always include default quality requirements', () => {
+    const prompt = buildPrompt({
+      issues: [mockIssue],
+      codeLocations: new Map(),
+      baseBranch: 'main',
+    });
+
+    expect(prompt).toContain('JSDoc required');
+    expect(prompt).toContain('Tests alongside the fix');
+    expect(prompt).toContain('No `any` types');
+  });
+
+  it('should merge default conventions with user-supplied conventions', () => {
+    const prompt = buildPrompt({
+      issues: [mockIssue],
+      codeLocations: new Map(),
+      baseBranch: 'main',
+      conventions: 'Use kebab-case filenames',
+    });
+
+    // Both default and user conventions must appear
+    expect(prompt).toContain('JSDoc required');
+    expect(prompt).toContain('Use kebab-case filenames');
   });
 });
 

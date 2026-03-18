@@ -146,6 +146,8 @@ export interface DispatchResult {
     | 'issue_created'
     | 'no_fix_found'
     | 'build_failed'
+    | 'lint_failed'
+    | 'typecheck_failed'
     | 'diff_too_large'
     | 'timeout'
     | 'cost_exceeded'

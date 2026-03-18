@@ -19,6 +19,8 @@ export const AnalysisConfigSchema = z.object({
 export const PostChecksSchema = z.object({
   build: z.boolean().default(true),
   test: z.boolean().default(true),
+  lint: z.boolean().default(false),
+  typecheck: z.boolean().default(false),
   maxDiffLines: z.number().int().positive().default(500),
 });
 
@@ -45,6 +47,8 @@ export const AgentConfigSchema = z.object({
   deniedPaths: z.array(z.string()).default([]),
   /** Minimum confidence to create PR (below this → create issue instead) */
   confidenceThreshold: z.number().min(0).max(1).default(0.7),
+  /** Project conventions injected into every agent prompt */
+  conventions: z.string().optional(),
 });
 
 /** Storage configuration schema */

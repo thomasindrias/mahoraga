@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { MahoragaEventSchema } from '../schemas/event.js';
 import { IssueSchema } from '../schemas/issue.js';
-import { MahoragaConfigSchema, defineConfig } from '../schemas/config.js';
+import { defineConfig } from '../schemas/config.js';
 
 describe('MahoragaEventSchema', () => {
   it('should validate a valid click event', () => {
@@ -152,5 +152,28 @@ describe('MahoragaConfigSchema', () => {
     expect(config.agent.deniedPaths).toEqual(['src/auth/']);
     expect(config.agent.confidenceThreshold).toBe(0.8);
     expect(config.agent.maxRetries).toBe(5);
+  });
+
+  it('should default lint and typecheck postChecks to false', () => {
+    const config = defineConfig({ sources: [{ adapter: 'amplitude' }] });
+    expect(config.agent.postChecks.lint).toBe(false);
+    expect(config.agent.postChecks.typecheck).toBe(false);
+  });
+
+  it('should accept lint and typecheck postChecks', () => {
+    const config = defineConfig({
+      sources: [{ adapter: 'amplitude' }],
+      agent: { postChecks: { lint: true, typecheck: true } },
+    });
+    expect(config.agent.postChecks.lint).toBe(true);
+    expect(config.agent.postChecks.typecheck).toBe(true);
+  });
+
+  it('should accept conventions field in agent config', () => {
+    const config = defineConfig({
+      sources: [{ adapter: 'amplitude' }],
+      agent: { conventions: 'Use kebab-case filenames' },
+    });
+    expect(config.agent.conventions).toBe('Use kebab-case filenames');
   });
 });

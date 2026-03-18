@@ -1,6 +1,18 @@
 import type { IssueGroup, SourceLocation } from '@mahoraga/core';
 
 /**
+ * Default coding conventions injected into every agent prompt.
+ * Enforces JSDoc, TDD practices, and TypeScript hygiene.
+ */
+const DEFAULT_CONVENTIONS = `\
+- **JSDoc required** — add \`/** ... */\` JSDoc to every new or modified public function, class, and interface. Include \`@param\` and \`@returns\` tags.
+- **Tests alongside the fix** — the generated test in \`__mahoraga_tests__/\` uses placeholder assertions; you MUST replace them with real assertions that verify the fix works. Do not leave any \`throw new Error('...')\` placeholders in place.
+- **No \`any\` types** — use \`unknown\` and narrow with type guards or Zod schemas.
+- **Minimal diff** — only modify files directly related to the reported issue.
+- **TypeScript strict mode** — the project uses \`strict: true\` and \`noUncheckedIndexedAccess: true\`; all new code must compile without errors.\
+`;
+
+/**
  * Context for building agent prompts.
  */
 export interface PromptContext {
@@ -76,19 +88,22 @@ export function buildPrompt(context: PromptContext): string {
     sections.push('');
   }
 
+  // Quality requirements (always present)
+  sections.push('## Quality Requirements\n');
+  const mergedConventions = conventions
+    ? `${DEFAULT_CONVENTIONS}\n${conventions}`
+    : DEFAULT_CONVENTIONS;
+  sections.push(mergedConventions);
+  sections.push('');
+
   // Instructions
   sections.push('## Instructions\n');
   sections.push('1. Analyze the issue and affected source files');
   sections.push('2. Create a focused fix that addresses the root cause');
   sections.push('3. Ensure the fix does not break existing functionality');
   sections.push(`4. Base your work on the \`${baseBranch}\` branch`);
-  sections.push('5. Keep the diff minimal — only change what is necessary\n');
-
-  if (conventions) {
-    sections.push('## Project Conventions\n');
-    sections.push(conventions);
-    sections.push('');
-  }
+  sections.push('5. Keep the diff minimal — only change what is necessary');
+  sections.push('6. Replace every placeholder assertion in the generated test with real assertions\n');
 
   return sections.join('\n');
 }
