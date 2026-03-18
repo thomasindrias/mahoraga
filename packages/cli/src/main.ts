@@ -103,7 +103,11 @@ export async function main(): Promise<void> {
       const isList = dismissArgs.includes('--list');
       const undoIndex = dismissArgs.indexOf('--undo');
       const reasonIndex = dismissArgs.indexOf('--reason');
-      const undo = undoIndex !== -1 ? dismissArgs[undoIndex + 1] : undefined;
+      const undo = undoIndex !== -1 ? dismissArgs[undoIndex + 1] ?? undefined : undefined;
+      if (undoIndex !== -1 && !undo) {
+        console.error('Usage: mahoraga dismiss --undo <fingerprint>');
+        process.exit(1);
+      }
       const reason = reasonIndex !== -1 ? dismissArgs[reasonIndex + 1] : undefined;
       const fingerprint = dismissArgs.find((a) => !a.startsWith('--') && a !== undo && a !== reason);
       await runDismiss(config, fingerprint, { list: isList, undo, reason });

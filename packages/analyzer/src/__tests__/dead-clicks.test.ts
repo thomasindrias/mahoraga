@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createDatabase, EventStore } from 'mahoraga-core';
-import type { DatabaseManager } from 'mahoraga-core';
+import type { DatabaseManager, RuleThresholds } from 'mahoraga-core';
 import {
   createEvent,
   resetEventCounter,
@@ -19,8 +19,13 @@ const timeWindow = { start: NOW - HOUR, end: NOW };
 /** Previous window: the hour before that */
 const previousWindow = { start: NOW - 2 * HOUR, end: NOW - HOUR };
 
-function makeContext(): AnalysisContext {
-  return { eventStore, timeWindow, previousWindow };
+function makeContext(overrides?: { thresholds?: Partial<RuleThresholds> }): AnalysisContext {
+  return {
+    eventStore,
+    timeWindow,
+    previousWindow,
+    thresholds: overrides?.thresholds ? { ...overrides.thresholds } as RuleThresholds : undefined,
+  };
 }
 
 beforeEach(() => {
@@ -238,5 +243,41 @@ describe('DeadClickRule', () => {
     // Should produce exactly 1 issue for #dedup-btn, not 2
     expect(issues).toHaveLength(1);
     expect(issues[0]!.frequency).toBe(2); // 2 sessions affected
+  });
+
+  it('uses custom minClickCount threshold from context', async () => {
+    const baseTime = NOW - HOUR / 2;
+
+    // Create 4 dead clicks across 2 sessions (below default 5, above custom 3)
+    for (let i = 0; i < 2; i++) {
+      const click = createEvent({
+        type: 'click',
+        sessionId: 'session-a',
+        timestamp: baseTime + i * 5000,
+        url: 'https://example.com/page',
+        payload: { type: 'click', selector: '#threshold-link', coordinates: { x: 10, y: 20 }, isRageClick: false },
+      });
+      eventStore.insertBatch([click]);
+    }
+    for (let i = 0; i < 2; i++) {
+      const click = createEvent({
+        type: 'click',
+        sessionId: 'session-b',
+        timestamp: baseTime + i * 5000,
+        url: 'https://example.com/page',
+        payload: { type: 'click', selector: '#threshold-link', coordinates: { x: 10, y: 20 }, isRageClick: false },
+      });
+      eventStore.insertBatch([click]);
+    }
+
+    // Default threshold (5) — 4 clicks < 5 => NOT detected
+    const issuesDefault = await rule.analyze(makeContext());
+    expect(issuesDefault).toHaveLength(0);
+
+    // Custom threshold (3) — 4 clicks >= 3 => detected
+    const issuesCustom = await rule.analyze(makeContext({
+      thresholds: { 'dead-clicks': { minClickCount: 3, minSessions: 2, waitMs: 2000 } },
+    }));
+    expect(issuesCustom).toHaveLength(1);
   });
 });

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createDatabase, EventStore } from 'mahoraga-core';
-import type { DatabaseManager } from 'mahoraga-core';
+import type { DatabaseManager, RuleThresholds } from 'mahoraga-core';
 import { createErrorEvent, resetEventCounter } from 'mahoraga-core/testing';
 import { ErrorLoopRule } from '../rules/error-loops.js';
 import type { AnalysisContext } from '../rule.js';
@@ -16,8 +16,13 @@ const timeWindow = { start: NOW - HOUR, end: NOW };
 /** Previous window: the hour before that */
 const previousWindow = { start: NOW - 2 * HOUR, end: NOW - HOUR };
 
-function makeContext(): AnalysisContext {
-  return { eventStore, timeWindow, previousWindow };
+function makeContext(overrides?: { thresholds?: Partial<RuleThresholds> }): AnalysisContext {
+  return {
+    eventStore,
+    timeWindow,
+    previousWindow,
+    thresholds: overrides?.thresholds ? { ...overrides.thresholds } as RuleThresholds : undefined,
+  };
 }
 
 beforeEach(() => {
@@ -213,5 +218,30 @@ describe('ErrorLoopRule', () => {
 
     const lowIssue = issues.find((i) => i.title.includes('LowLoopError'));
     expect(lowIssue?.severity).toBe('low');
+  });
+
+  it('uses custom minOccurrences threshold from context', async () => {
+    const baseTime = NOW - HOUR / 2;
+    const errorMessage = 'ThresholdTestError';
+
+    // 4 occurrences per session (above default 3, below custom 5)
+    for (let i = 0; i < 4; i++) {
+      const evt = createErrorEvent(errorMessage);
+      eventStore.insertBatch([{ ...evt, sessionId: 'session-1', timestamp: baseTime + i * 1000 }]);
+    }
+    for (let i = 0; i < 4; i++) {
+      const evt = createErrorEvent(errorMessage);
+      eventStore.insertBatch([{ ...evt, sessionId: 'session-2', timestamp: baseTime + i * 1000 }]);
+    }
+
+    // Default threshold (3) — 4 >= 3 => detected
+    const issuesDefault = await rule.analyze(makeContext());
+    expect(issuesDefault).toHaveLength(1);
+
+    // Custom threshold (5) — 4 < 5 => NOT detected
+    const issuesCustom = await rule.analyze(makeContext({
+      thresholds: { 'error-loops': { minOccurrences: 5, minSessions: 2 } },
+    }));
+    expect(issuesCustom).toHaveLength(0);
   });
 });

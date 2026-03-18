@@ -174,7 +174,7 @@ export async function runAnalyze(
     }
 
     // Phase 4: Dispatch agent
-    if (issues.length === 0) {
+    if (activeIssues.length === 0) {
       console.log('No issues to dispatch.');
       runStore.complete(runId, 'completed', errors);
       dbManager.close();

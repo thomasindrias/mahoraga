@@ -156,6 +156,21 @@ describe('transformPostHogEvent', () => {
     expect(result!.type).toBe('navigation');
   });
 
+  it('maps $autocapture with non-button/anchor tag to custom type', () => {
+    const result = transformPostHogEvent({
+      ...baseEvent,
+      event: '$autocapture',
+      properties: {
+        ...baseEvent.properties,
+        $elements: [{ tag_name: 'div', attr_id: 'card', $el_text: 'Card content' }],
+      },
+    });
+
+    expect(result).not.toBeNull();
+    expect(result!.type).toBe('custom');
+    expect(result!.payload).toMatchObject({ type: 'custom', name: '$autocapture' });
+  });
+
   it('maps $autocapture with anchor element to click type', () => {
     const result = transformPostHogEvent({
       ...baseEvent,

@@ -28,7 +28,7 @@ function makeContext(overrides?: { thresholds?: Partial<RuleThresholds>; routePa
     eventStore,
     timeWindow,
     previousWindow,
-    thresholds: overrides?.thresholds as RuleThresholds,
+    thresholds: overrides?.thresholds ? { ...overrides.thresholds } as RuleThresholds : undefined,
     routePatterns: overrides?.routePatterns,
   };
 }
