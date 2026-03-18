@@ -11,6 +11,7 @@ export default defineConfig({
       include: ['src/**/*.ts'],
       exclude: ['src/__tests__/**', 'src/index.ts'],
       thresholds: {
+        // TODO: Target 80%. Remaining gap is in main.ts and command handlers (CLI I/O, config loading).
         lines: 14,
         functions: 17,
         branches: 16,

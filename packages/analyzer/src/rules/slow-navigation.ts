@@ -47,7 +47,7 @@ export class SlowNavigationRule implements DetectionRule {
 
     for (const event of slowEvents) {
       const payload = event.payload as NavigationPayload;
-      const routePair = `${payload.from} -> ${payload.to}`;
+      const routePair = `${payload.from}->${payload.to}`;
 
       const existing = routeData.get(routePair);
       if (existing) {
@@ -82,7 +82,7 @@ export class SlowNavigationRule implements DetectionRule {
       const severity = getSeverity(median);
 
       // Create event summaries
-      const eventSummaries: EventSummary[] = data.events.map((evt) => {
+      const eventSummaries: EventSummary[] = data.events.slice(0, 10).map((evt) => {
         const payload = evt.payload as NavigationPayload;
         return {
           eventId: evt.id,

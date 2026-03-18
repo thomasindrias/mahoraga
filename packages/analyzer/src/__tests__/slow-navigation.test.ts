@@ -32,7 +32,7 @@ describe('SlowNavigationRule', () => {
   it('detects slow routes (3+ navigations > 3s on same route, 2+ sessions)', async () => {
     const baseTime = NOW - HOUR / 2;
 
-    // Session 1: 2 slow navigations /home -> /dashboard
+    // Session 1: 2 slow navigations /home->/dashboard
     const session1Events = [
       createEvent({
         type: 'navigation',
@@ -58,7 +58,7 @@ describe('SlowNavigationRule', () => {
       }),
     ];
 
-    // Session 2: 1 slow navigation /home -> /dashboard
+    // Session 2: 1 slow navigation /home->/dashboard
     const session2Events = [
       createEvent({
         type: 'navigation',
@@ -78,7 +78,7 @@ describe('SlowNavigationRule', () => {
     const issues = await rule.analyze(makeContext());
     expect(issues).toHaveLength(1);
     expect(issues[0]!.ruleId).toBe('slow-navigation');
-    expect(issues[0]!.title).toContain('/home -> /dashboard');
+    expect(issues[0]!.title).toContain('/home->/dashboard');
     expect(issues[0]!.evidence[0]!.type).toBe('slow_transitions');
     expect(issues[0]!.frequency).toBe(2); // 2 sessions affected
   });
@@ -348,7 +348,7 @@ describe('SlowNavigationRule', () => {
   it('groups by route pair (/a->/b and /a->/c tracked separately)', async () => {
     const baseTime = NOW - HOUR / 2;
 
-    // Route 1: /home -> /dashboard (3 slow navigations, 2 sessions)
+    // Route 1: /home->/dashboard (3 slow navigations, 2 sessions)
     const route1Events = [
       createEvent({
         type: 'navigation',
@@ -385,7 +385,7 @@ describe('SlowNavigationRule', () => {
       }),
     ];
 
-    // Route 2: /home -> /profile (3 slow navigations, 2 sessions)
+    // Route 2: /home->/profile (3 slow navigations, 2 sessions)
     const route2Events = [
       createEvent({
         type: 'navigation',
@@ -428,8 +428,8 @@ describe('SlowNavigationRule', () => {
     expect(issues).toHaveLength(2);
 
     const titles = issues.map((i) => i.title);
-    expect(titles).toContain('Slow navigation: /home -> /dashboard');
-    expect(titles).toContain('Slow navigation: /home -> /profile');
+    expect(titles).toContain('Slow navigation: /home->/dashboard');
+    expect(titles).toContain('Slow navigation: /home->/profile');
 
     // Each route should have 2 unique sessions
     for (const issue of issues) {

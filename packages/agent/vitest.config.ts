@@ -11,6 +11,7 @@ export default defineConfig({
       include: ['src/**/*.ts'],
       exclude: ['src/__tests__/**', 'src/index.ts'],
       thresholds: {
+        // TODO: Target 80%. Remaining gap is in executor.ts and worktree.ts (shell/git I/O).
         lines: 55,
         functions: 63,
         branches: 44,

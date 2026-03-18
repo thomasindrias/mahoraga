@@ -107,7 +107,7 @@ export class FormAbandonmentRule implements DetectionRule {
       if (abandonRate < MIN_ABANDON_RATE) continue;
 
       const severity = getSeverity(abandonRate);
-      const fingerprint = createFingerprint('form-abandonment', formSelector, data.url);
+      const fingerprint = createFingerprint('form-abandonment', formSelector);
 
       // Create event summaries from abandon events (limit to 10 for readability)
       const eventSummaries: EventSummary[] = data.events.slice(0, 10).map((evt) => {
