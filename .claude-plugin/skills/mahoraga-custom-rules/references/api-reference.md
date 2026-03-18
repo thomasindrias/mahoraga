@@ -45,6 +45,12 @@ export interface AnalysisContext {
 
   /** Previous time window (for comparison-based rules) */
   previousWindow: TimeRange;
+
+  /** Per-rule threshold overrides from config (all fields have defaults) */
+  thresholds?: RuleThresholds;
+
+  /** Route patterns for URL normalization (e.g., '/products/:id') */
+  routePatterns?: string[];
 }
 
 export interface TimeRange {
@@ -54,6 +60,23 @@ export interface TimeRange {
   /** End timestamp (Unix milliseconds) */
   end: number;
 }
+```
+
+### RuleThresholds
+
+All 7 built-in rules read thresholds from `context.thresholds` with `??` fallback to defaults. Custom rules should follow the same pattern. Configured via `analysis.thresholds` in `mahoraga.config.ts`:
+
+```typescript
+export type RuleThresholds = {
+  'rage-clicks': { clickCount: number; windowMs: number };        // defaults: 3, 1000
+  'error-spikes': { spikeMultiplier: number; minAbsoluteCount: number }; // defaults: 2, 5
+  'dead-clicks': { minClickCount: number; minSessions: number; waitMs: number }; // defaults: 5, 2, 2000
+  'form-abandonment': { minAbandonRate: number; minSessions: number };   // defaults: 0.4, 3
+  'slow-navigation': { thresholdMs: number; minOccurrences: number; minSessions: number }; // defaults: 3000, 3, 2
+  'layout-shifts': { minPoorEvents: number; minSessions: number };       // defaults: 3, 2
+  'error-loops': { minOccurrences: number; minSessions: number };        // defaults: 3, 2
+  [customRuleId: string]: Record<string, unknown>;  // custom rule thresholds
+};
 ```
 
 ## Event Store
@@ -73,7 +96,7 @@ query(options: {
   /** Start timestamp (inclusive) */
   start?: number;
 
-  /** End timestamp (inclusive) */
+  /** End timestamp (exclusive) */
   end?: number;
 
   /** Filter by session ID */

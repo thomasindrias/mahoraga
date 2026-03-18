@@ -35,12 +35,14 @@ The `analyze()` method receives an `AnalysisContext` with:
 - `eventStore`: query events via `query({ type, start, end, sessionId, limit })`
 - `timeWindow`: current analysis period (start/end timestamps)
 - `previousWindow`: previous period for comparison (e.g., error spikes)
+- `thresholds?`: per-rule threshold overrides from config (read via `context.thresholds?.['my-rule'] ?? DEFAULT`)
+- `routePatterns?`: URL normalization patterns (e.g., `'/products/:id'`)
 
 ## Implementation Recipe
 
 1. **Query events**: `context.eventStore.query({ type: 'click', start: context.timeWindow.start, end: context.timeWindow.end })`
 2. **Group by key**: Map events by `sessionId + selector`, `url`, or `errorMessage`
-3. **Apply thresholds**: Filter groups by count, frequency, or ratio
+3. **Apply thresholds**: Read from `context.thresholds?.['my-rule-id'] ?? DEFAULT_VALUE`, filter groups by count, frequency, or ratio
 4. **Create issues**: Use `createFingerprint(ruleId, selector, url)` for deduplication, map severity based on session ratio, include evidence with `eventSummaries`
 
 ## Severity Mapping

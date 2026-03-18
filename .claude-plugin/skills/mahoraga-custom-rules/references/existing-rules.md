@@ -54,7 +54,7 @@ Mahoraga ships with 7 built-in detection rules. Use these as reference when impl
 
 **Severity:** Based on affected session ratio (same as rage-clicks).
 
-**Evidence:** `pattern_match` with dead click examples.
+**Evidence:** `event_cluster` with dead click examples.
 
 ### form-abandonment (Outcome Analysis)
 
@@ -67,8 +67,8 @@ Mahoraga ships with 7 built-in detection rules. Use these as reference when impl
 **Severity:** Based on abandon rate:
 - >= 80%: critical
 - >= 60%: high
-- >= 50%: medium
-- >= 40%: low
+- >= 40%: medium
+- < 40%: low
 
 **Evidence:** `abandonment_rate` with submit/abandon counts.
 
@@ -98,9 +98,9 @@ Mahoraga ships with 7 built-in detection rules. Use these as reference when impl
 
 **Severity:** Based on average CLS value:
 - >= 0.5: critical
-- >= 0.35: high
-- >= 0.25: medium
-- >= 0.1: low
+- >= 0.25: high
+- >= 0.1: medium
+- < 0.1: low
 
 **Evidence:** `poor_cls` with CLS values and URLs.
 
@@ -122,8 +122,10 @@ Mahoraga ships with 7 built-in detection rules. Use these as reference when impl
 
 ## Common Patterns Across Rules
 
-1. **Multi-level grouping**: First by session-level key, then aggregate across sessions
-2. **Session threshold**: Most rules require 2+ affected sessions to avoid false positives
-3. **Ratio-based severity**: Consistent 25%/10%/5% thresholds for critical/high/medium
-4. **Evidence typing**: Match evidence type to detection strategy (spike, pattern, loop, etc.)
-5. **Fingerprint composition**: Include stable identifiers (ruleId + selector/url/message prefix) for deduplication
+1. **Configurable thresholds**: All rules read from `context.thresholds?.['rule-id']` with `??` fallback to `DEFAULT_*` constants. This lets users tune sensitivity without forking rules.
+2. **Multi-level grouping**: First by session-level key, then aggregate across sessions
+3. **Session threshold**: Most rules require 2+ affected sessions to avoid false positives
+4. **Ratio-based severity**: Consistent 25%/10%/5% thresholds for critical/high/medium
+5. **Evidence typing**: Match evidence type to detection strategy (spike, pattern, loop, etc.)
+6. **Fingerprint composition**: Include stable identifiers (ruleId + selector/url/message prefix) for deduplication
+7. **URL normalization**: slow-navigation and layout-shifts use `normalizeUrl(url, context.routePatterns)` to group dynamic URLs
