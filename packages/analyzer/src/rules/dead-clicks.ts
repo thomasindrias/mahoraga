@@ -2,9 +2,9 @@ import type { Issue, MahoragaEvent, ClickPayload, Evidence, EventSummary } from 
 import { createFingerprint } from 'mahoraga-core';
 import type { DetectionRule, AnalysisContext } from '../rule.js';
 
-const DEAD_CLICK_THRESHOLD = 5;
-const DEAD_CLICK_SESSION_THRESHOLD = 2;
-const NAVIGATION_TIMEOUT_MS = 2000;
+const DEFAULT_MIN_CLICK_COUNT = 5;
+const DEFAULT_MIN_SESSIONS = 2;
+const DEFAULT_WAIT_MS = 2000;
 
 /**
  * Detects dead clicks: clicks on elements that never trigger navigation within 2 seconds.
@@ -23,6 +23,11 @@ export class DeadClickRule implements DetectionRule {
    * @returns Issues for each selector with dead clicks
    */
   async analyze(context: AnalysisContext): Promise<Issue[]> {
+    const thresholds = context.thresholds?.['dead-clicks'];
+    const minClickCount = thresholds?.minClickCount ?? DEFAULT_MIN_CLICK_COUNT;
+    const minSessions = thresholds?.minSessions ?? DEFAULT_MIN_SESSIONS;
+    const waitMs = thresholds?.waitMs ?? DEFAULT_WAIT_MS;
+
     const clickEvents = context.eventStore.query({
       type: 'click',
       start: context.timeWindow.start,
@@ -37,7 +42,7 @@ export class DeadClickRule implements DetectionRule {
       end: context.timeWindow.end,
     });
 
-    // For each click, check if any navigation follows within 2s from the same session
+    // For each click, check if any navigation follows within waitMs from the same session
     const deadClicks: MahoragaEvent[] = [];
 
     for (const click of clickEvents) {
@@ -45,7 +50,7 @@ export class DeadClickRule implements DetectionRule {
         (nav) =>
           nav.sessionId === click.sessionId &&
           nav.timestamp > click.timestamp &&
-          nav.timestamp <= click.timestamp + NAVIGATION_TIMEOUT_MS,
+          nav.timestamp <= click.timestamp + waitMs,
       );
 
       if (!hasNavigation) {
@@ -78,11 +83,11 @@ export class DeadClickRule implements DetectionRule {
       }
     }
 
-    // Filter by threshold: >= 5 dead clicks across >= 2 sessions
+    // Filter by threshold
     const qualifyingSelectors = Array.from(selectorData.entries()).filter(
       ([_selector, data]) =>
-        data.events.length >= DEAD_CLICK_THRESHOLD &&
-        data.sessions.size >= DEAD_CLICK_SESSION_THRESHOLD,
+        data.events.length >= minClickCount &&
+        data.sessions.size >= minSessions,
     );
 
     if (qualifyingSelectors.length === 0) return [];

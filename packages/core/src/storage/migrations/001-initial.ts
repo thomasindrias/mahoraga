@@ -79,4 +79,23 @@ export function runMigrations(db: Database.Database): void {
       ).run('001-initial', Date.now());
     })();
   }
+
+  if (!appliedSet.has('002-suppressions')) {
+    db.transaction(() => {
+      db.exec(`
+        CREATE TABLE suppressions (
+          fingerprint TEXT PRIMARY KEY,
+          rule_id TEXT NOT NULL,
+          reason TEXT,
+          suppressed_at INTEGER NOT NULL
+        );
+
+        CREATE INDEX idx_suppressions_rule ON suppressions(rule_id);
+      `);
+
+      db.prepare(
+        'INSERT INTO _migrations (name, applied_at) VALUES (?, ?)',
+      ).run('002-suppressions', Date.now());
+    })();
+  }
 }

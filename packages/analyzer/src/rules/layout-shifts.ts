@@ -1,9 +1,9 @@
 import type { Issue, MahoragaEvent, PerformancePayload, Evidence, EventSummary } from 'mahoraga-core';
-import { createFingerprint } from 'mahoraga-core';
+import { createFingerprint, normalizeUrl } from 'mahoraga-core';
 import type { DetectionRule, AnalysisContext } from '../rule.js';
 
-const MIN_POOR_CLS_EVENTS = 3;
-const MIN_AFFECTED_SESSIONS = 2;
+const DEFAULT_MIN_POOR_EVENTS = 3;
+const DEFAULT_MIN_SESSIONS = 2;
 
 /**
  * Detects pages with consistently poor Cumulative Layout Shift scores.
@@ -22,6 +22,11 @@ export class LayoutShiftRule implements DetectionRule {
    * @returns Issues for each URL with poor CLS scores
    */
   async analyze(context: AnalysisContext): Promise<Issue[]> {
+    const thresholds = context.thresholds?.['layout-shifts'];
+    const minPoorEvents = thresholds?.minPoorEvents ?? DEFAULT_MIN_POOR_EVENTS;
+    const minSessions = thresholds?.minSessions ?? DEFAULT_MIN_SESSIONS;
+    const routePatterns = context.routePatterns ?? [];
+
     const events = context.eventStore.query({
       type: 'performance',
       start: context.timeWindow.start,
@@ -45,7 +50,7 @@ export class LayoutShiftRule implements DetectionRule {
     >();
 
     for (const event of poorClsEvents) {
-      const url = event.url;
+      const url = normalizeUrl(event.url, routePatterns);
       const existing = urlData.get(url);
       const payload = event.payload as PerformancePayload;
 
@@ -66,8 +71,8 @@ export class LayoutShiftRule implements DetectionRule {
 
     for (const [url, data] of urlData) {
       // Check thresholds
-      if (data.events.length < MIN_POOR_CLS_EVENTS) continue;
-      if (data.sessions.size < MIN_AFFECTED_SESSIONS) continue;
+      if (data.events.length < minPoorEvents) continue;
+      if (data.sessions.size < minSessions) continue;
 
       // Calculate average CLS value
       const avgCls = data.clsValues.reduce((sum, val) => sum + val, 0) / data.clsValues.length;

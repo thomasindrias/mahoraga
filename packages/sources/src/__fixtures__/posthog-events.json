@@ -1,0 +1,47 @@
+{
+  "results": [
+    {
+      "uuid": "01234567-abcd-ef01-2345-6789abcdef00",
+      "event": "$pageview",
+      "distinct_id": "user-42",
+      "properties": {
+        "$session_id": "sess-ph-001",
+        "$current_url": "https://app.example.com/dashboard",
+        "$referrer": "https://app.example.com/home"
+      },
+      "timestamp": "2024-01-15T10:30:00.000Z"
+    },
+    {
+      "uuid": "01234567-abcd-ef01-2345-6789abcdef01",
+      "event": "$autocapture",
+      "distinct_id": "user-42",
+      "properties": {
+        "$session_id": "sess-ph-001",
+        "$current_url": "https://app.example.com/dashboard",
+        "$elements": [
+          {
+            "tag_name": "button",
+            "attr_id": "save-btn",
+            "$el_text": "Save"
+          }
+        ],
+        "$mouse_x": 200,
+        "$mouse_y": 400
+      },
+      "timestamp": "2024-01-15T10:31:00.000Z"
+    },
+    {
+      "uuid": "01234567-abcd-ef01-2345-6789abcdef02",
+      "event": "$exception",
+      "distinct_id": "user-42",
+      "properties": {
+        "$session_id": "sess-ph-001",
+        "$current_url": "https://app.example.com/dashboard",
+        "$exception_message": "TypeError: Cannot read properties of undefined",
+        "$exception_stack_trace_string": "at Dashboard.render (dashboard.tsx:55)"
+      },
+      "timestamp": "2024-01-15T10:32:00.000Z"
+    }
+  ],
+  "next": null
+}

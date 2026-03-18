@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createDatabase, EventStore } from 'mahoraga-core';
-import type { DatabaseManager } from 'mahoraga-core';
+import type { DatabaseManager, RuleThresholds } from 'mahoraga-core';
 import {
   createEvent,
   createRageClickSequence,
@@ -23,8 +23,14 @@ const timeWindow = { start: NOW - HOUR, end: NOW };
 /** Previous window: the hour before that */
 const previousWindow = { start: NOW - 2 * HOUR, end: NOW - HOUR };
 
-function makeContext(): AnalysisContext {
-  return { eventStore, timeWindow, previousWindow };
+function makeContext(overrides?: { thresholds?: Partial<RuleThresholds>; routePatterns?: string[] }): AnalysisContext {
+  return {
+    eventStore,
+    timeWindow,
+    previousWindow,
+    thresholds: overrides?.thresholds ? { ...overrides.thresholds } as RuleThresholds : undefined,
+    routePatterns: overrides?.routePatterns,
+  };
 }
 
 beforeEach(() => {
@@ -173,6 +179,67 @@ describe('RageClickRule', () => {
     expect(issues).toHaveLength(1);
     expect(issues[0]!.frequency).toBe(2); // 2 sessions affected
   });
+
+  it('uses custom clickCount threshold from context', async () => {
+    const baseTime = NOW - HOUR / 2;
+    // 4 clicks in 800ms — enough for default (3) but not for custom (5)
+    const clicks = Array.from({ length: 4 }, (_, i) =>
+      createEvent({
+        type: 'click',
+        sessionId: 'threshold-session',
+        timestamp: baseTime + i * 160,
+        url: 'https://example.com/page',
+        payload: {
+          type: 'click',
+          selector: '#custom-threshold',
+          coordinates: { x: 10, y: 20 },
+          isRageClick: false,
+        },
+      }),
+    );
+    eventStore.insertBatch(clicks);
+
+    // Default threshold (3) — should detect
+    const issuesDefault = await rule.analyze(makeContext());
+    expect(issuesDefault).toHaveLength(1);
+
+    // Custom threshold (5) — should NOT detect
+    const issuesCustom = await rule.analyze(makeContext({
+      thresholds: { 'rage-clicks': { clickCount: 5, windowMs: 1000 } },
+    }));
+    expect(issuesCustom).toHaveLength(0);
+  });
+
+  it('uses custom windowMs threshold from context', async () => {
+    const baseTime = NOW - HOUR / 2;
+    // 4 clicks with 400ms gaps (total span ~1200ms)
+    const clicks = Array.from({ length: 4 }, (_, i) =>
+      createEvent({
+        type: 'click',
+        sessionId: 'window-session',
+        timestamp: baseTime + i * 400,
+        url: 'https://example.com/page',
+        payload: {
+          type: 'click',
+          selector: '#window-test',
+          coordinates: { x: 10, y: 20 },
+          isRageClick: false,
+        },
+      }),
+    );
+    eventStore.insertBatch(clicks);
+
+    // Default window (1000ms) — 4 clicks across 1200ms won't all fit
+    // But 3 clicks within first 800ms will fit
+    const issuesDefault = await rule.analyze(makeContext());
+    expect(issuesDefault).toHaveLength(1);
+
+    // Custom narrow window (500ms) — only 2 clicks fit in 500ms
+    const issuesNarrow = await rule.analyze(makeContext({
+      thresholds: { 'rage-clicks': { clickCount: 3, windowMs: 500 } },
+    }));
+    expect(issuesNarrow).toHaveLength(0);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -258,6 +325,51 @@ describe('ErrorSpikeRule', () => {
     const issues = await rule.analyze(makeContext());
     expect(issues).toHaveLength(1);
     expect(issues[0]!.severity).toBe('critical'); // 10x ratio >= 10
+  });
+
+  it('uses custom spikeMultiplier from context', async () => {
+    const currentBase = NOW - HOUR / 2;
+    const previousBase = NOW - HOUR - HOUR / 2;
+
+    // 2 errors in previous, 6 in current => ratio 3x
+    for (let i = 0; i < 2; i++) {
+      const evt = createErrorEvent('SpikeMultTest');
+      eventStore.insertBatch([{ ...evt, timestamp: previousBase + i * 1000 }]);
+    }
+    for (let i = 0; i < 6; i++) {
+      const evt = createErrorEvent('SpikeMultTest');
+      eventStore.insertBatch([{ ...evt, timestamp: currentBase + i * 1000 }]);
+    }
+
+    // Default multiplier (2) — 3x > 2 => detected
+    const issuesDefault = await rule.analyze(makeContext());
+    expect(issuesDefault).toHaveLength(1);
+
+    // Custom multiplier (5) — 3x <= 5 => NOT detected
+    const issuesCustom = await rule.analyze(makeContext({
+      thresholds: { 'error-spikes': { spikeMultiplier: 5, minAbsoluteCount: 5 } },
+    }));
+    expect(issuesCustom).toHaveLength(0);
+  });
+
+  it('uses custom minAbsoluteCount from context', async () => {
+    const currentBase = NOW - HOUR / 2;
+
+    // 7 errors in current, 0 in previous => new spike
+    for (let i = 0; i < 7; i++) {
+      const evt = createErrorEvent('AbsCountTest');
+      eventStore.insertBatch([{ ...evt, timestamp: currentBase + i * 1000 }]);
+    }
+
+    // Default minAbsoluteCount (5) — 7 >= 5 => detected
+    const issuesDefault = await rule.analyze(makeContext());
+    expect(issuesDefault).toHaveLength(1);
+
+    // Custom minAbsoluteCount (10) — 7 < 10 => NOT detected
+    const issuesCustom = await rule.analyze(makeContext({
+      thresholds: { 'error-spikes': { spikeMultiplier: 2, minAbsoluteCount: 10 } },
+    }));
+    expect(issuesCustom).toHaveLength(0);
   });
 });
 

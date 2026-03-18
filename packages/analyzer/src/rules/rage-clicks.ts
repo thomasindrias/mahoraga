@@ -2,12 +2,12 @@ import type { Issue, MahoragaEvent, ClickPayload, Evidence, EventSummary } from 
 import { createFingerprint } from 'mahoraga-core';
 import type { DetectionRule, AnalysisContext } from '../rule.js';
 
-const RAGE_CLICK_THRESHOLD = 3;
-const RAGE_CLICK_WINDOW_MS = 1000;
+const DEFAULT_CLICK_COUNT = 3;
+const DEFAULT_WINDOW_MS = 1000;
 
 /**
  * Detects rage-click patterns: rapid repeated clicks on the same element.
- * A rage click is 3+ clicks on the same selector within 1 second.
+ * A rage click is 3+ clicks on the same selector within 1 second (configurable).
  */
 export class RageClickRule implements DetectionRule {
   readonly id = 'rage-clicks';
@@ -22,6 +22,10 @@ export class RageClickRule implements DetectionRule {
    * @returns Issues for each selector with rage clicks
    */
   async analyze(context: AnalysisContext): Promise<Issue[]> {
+    const thresholds = context.thresholds?.['rage-clicks'];
+    const clickCount = thresholds?.clickCount ?? DEFAULT_CLICK_COUNT;
+    const windowMs = thresholds?.windowMs ?? DEFAULT_WINDOW_MS;
+
     const events = context.eventStore.query({
       type: 'click',
       start: context.timeWindow.start,
@@ -54,15 +58,15 @@ export class RageClickRule implements DetectionRule {
       // Sort by timestamp
       groupEvents.sort((a, b) => a.timestamp - b.timestamp);
 
-      // Sliding window: find sequences of 3+ clicks within 1 second
-      for (let i = 0; i <= groupEvents.length - RAGE_CLICK_THRESHOLD; i++) {
-        const windowEnd = groupEvents[i]!.timestamp + RAGE_CLICK_WINDOW_MS;
+      // Sliding window: find sequences of N+ clicks within windowMs
+      for (let i = 0; i <= groupEvents.length - clickCount; i++) {
+        const windowEnd = groupEvents[i]!.timestamp + windowMs;
         let count = 0;
         for (let j = i; j < groupEvents.length && groupEvents[j]!.timestamp <= windowEnd; j++) {
           count++;
         }
 
-        if (count >= RAGE_CLICK_THRESHOLD) {
+        if (count >= clickCount) {
           const existing = selectorData.get(selector);
           if (existing) {
             existing.sessions.add(groupEvents[i]!.sessionId);

@@ -7,6 +7,8 @@ export * from './storage/events.js';
 export * from './storage/checkpoints.js';
 export * from './storage/issues.js';
 export * from './storage/runs.js';
+export * from './storage/suppressions.js';
 export * from './utils/hash.js';
 export * from './utils/retry.js';
 export * from './utils/rate-limiter.js';
+export * from './utils/url.js';

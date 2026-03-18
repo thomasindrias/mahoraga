@@ -50,10 +50,10 @@ agent -> core, mapper
 |---------|------|-------------|
 | `mahoraga-core` | `packages/core` | Zod schemas, SQLite storage, types, utilities (hash, dedup, retry, rate limiter), testing factories. Exports `mahoraga-core/testing` subpath for test helpers. |
 | `mahoraga-mapper` | `packages/mapper` | AST-based selector-to-source-file mapping. Parses TSX/JSX via TypeScript Compiler API, resolves CSS selectors to file:line:column. Competitive moat. |
-| `mahoraga-sources` | `packages/sources` | Pluggable source adapters. `SourceAdapter` interface with async iterable batch pulling. V1: Amplitude. Uses MSW for contract tests. |
+| `mahoraga-sources` | `packages/sources` | Pluggable source adapters. `SourceAdapter` interface with async iterable batch pulling. Amplitude + PostHog. Uses MSW for contract tests. |
 | `mahoraga-analyzer` | `packages/analyzer` | Detection rules engine. `DetectionRule` interface. V1 rules: rage-click, error-spike. V2 rules: dead-click, form-abandonment, slow-navigation, layout-shift, error-loop. Rules query SQLite directly. |
 | `mahoraga-agent` | `packages/agent` | Agent dispatcher with adaptation loop. Constructs prompts, manages git worktrees, invokes Claude Code CLI, validates fixes (build + test + diff size), creates PRs via `gh`. Competitive moat. |
-| `mahoraga-cli` | `packages/cli` | CLI entry point (`mahoraga`). Commands: `init`, `analyze`, `analyze --dry-run`, `inspect`, `status`, `gc`, `map`, `create-rule`. |
+| `mahoraga-cli` | `packages/cli` | CLI entry point (`mahoraga`). Commands: `init`, `analyze`, `analyze --dry-run`, `inspect`, `status`, `gc`, `map`, `create-rule`, `dismiss`. |
 
 ## Development Workflow
 
@@ -113,7 +113,7 @@ The agent's competitive moat. After generating a fix:
 ### Governance / Blast Radius Control
 - **allowedPaths / deniedPaths** -- glob patterns restricting which files the agent can modify
 - **confidenceThreshold** (default 0.7) -- below threshold produces a GitHub issue instead of a PR
-- **Cost budgets** -- per-issue (`$2`), per-run (`$20`), max dispatches per run (`5`)
+- **Cost budgets** -- per-issue (`$2`), per-run (`$20`), max dispatches per run (`5`). Enforced via `CostTracker` which stops dispatches when limits are reached.
 - **Diff size limits** -- rejects diffs exceeding `maxDiffLines` (default 500)
 - **Cooldown** -- failed fix attempts enter 7-day cooldown to avoid wasting credits
 
@@ -122,6 +122,15 @@ Agent operates in a fresh git worktree. `main` is never directly modified. Draft
 
 ### Data Retention
 Configurable `retentionDays` (default 30). Cleanup runs at the start of each `analyze` command. Manual cleanup via `mahoraga gc`.
+
+### Configurable Thresholds
+All 7 detection rules read thresholds from `context.thresholds` with fallback to defaults. Configure via `analysis.thresholds` in `mahoraga.config.ts`. All defaults match previous hardcoded values -- zero behavior change without configuration.
+
+### URL Normalization
+`normalizeUrl()` groups dynamic URLs (e.g., `/products/123` → `/products/:id`) using configurable route patterns. Integrated into slow-navigation and layout-shift rules. Configure via `analysis.routePatterns`.
+
+### False-Positive Suppression
+`SuppressionStore` persists suppressed fingerprints in SQLite. Suppressed issues are filtered after analysis and marked with `'suppressed'` status for audit trail. CLI: `mahoraga dismiss <fingerprint>`.
 
 ### Credential Resolution (priority order)
 1. Environment variables (`MAHORAGA_AMPLITUDE_API_KEY`, etc.)

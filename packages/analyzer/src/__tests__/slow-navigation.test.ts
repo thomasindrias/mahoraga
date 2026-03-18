@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createDatabase, EventStore } from 'mahoraga-core';
-import type { DatabaseManager } from 'mahoraga-core';
+import type { DatabaseManager, RuleThresholds } from 'mahoraga-core';
 import { createEvent, resetEventCounter } from 'mahoraga-core/testing';
 import { SlowNavigationRule } from '../rules/slow-navigation.js';
 import type { AnalysisContext } from '../rule.js';
@@ -16,8 +16,14 @@ const timeWindow = { start: NOW - HOUR, end: NOW };
 /** Previous window: the hour before that */
 const previousWindow = { start: NOW - 2 * HOUR, end: NOW - HOUR };
 
-function makeContext(): AnalysisContext {
-  return { eventStore, timeWindow, previousWindow };
+function makeContext(overrides?: { routePatterns?: string[]; thresholds?: Partial<RuleThresholds> }): AnalysisContext {
+  return {
+    eventStore,
+    timeWindow,
+    previousWindow,
+    routePatterns: overrides?.routePatterns,
+    thresholds: overrides?.thresholds ? { ...overrides.thresholds } as RuleThresholds : undefined,
+  };
 }
 
 beforeEach(() => {
@@ -435,5 +441,75 @@ describe('SlowNavigationRule', () => {
     for (const issue of issues) {
       expect(issue.frequency).toBe(2);
     }
+  });
+
+  it('groups dynamic routes with URL normalization', async () => {
+    const baseTime = NOW - HOUR / 2;
+
+    // /products/1->/details/1 and /products/2->/details/2 should group
+    const events = [
+      createEvent({
+        type: 'navigation',
+        sessionId: 'session-1',
+        timestamp: baseTime,
+        payload: { type: 'navigation', from: '/products/1', to: '/details/1', duration: 5000 },
+      }),
+      createEvent({
+        type: 'navigation',
+        sessionId: 'session-1',
+        timestamp: baseTime + 10000,
+        payload: { type: 'navigation', from: '/products/2', to: '/details/2', duration: 4500 },
+      }),
+      createEvent({
+        type: 'navigation',
+        sessionId: 'session-2',
+        timestamp: baseTime + 20000,
+        payload: { type: 'navigation', from: '/products/3', to: '/details/3', duration: 6000 },
+      }),
+    ];
+
+    eventStore.insertBatch(events);
+
+    // Without routePatterns — no grouping, 3 different route pairs
+    const issuesNoPattern = await rule.analyze(makeContext());
+    expect(issuesNoPattern).toHaveLength(0); // Each route pair has only 1 event
+
+    // With routePatterns — grouped into 1 route pair
+    const issuesWithPattern = await rule.analyze(makeContext({
+      routePatterns: ['/products/:id', '/details/:id'],
+    }));
+    expect(issuesWithPattern).toHaveLength(1);
+    expect(issuesWithPattern[0]!.title).toContain('/products/:id->/details/:id');
+  });
+
+  it('uses custom thresholdMs from context', async () => {
+    const baseTime = NOW - HOUR / 2;
+
+    // 3 navigations at 4000ms across 2 sessions — slow for default (3000ms), fast for custom (5000ms)
+    const events = [
+      createEvent({
+        type: 'navigation', sessionId: 'session-1', timestamp: baseTime,
+        payload: { type: 'navigation', from: '/a', to: '/b', duration: 4000 },
+      }),
+      createEvent({
+        type: 'navigation', sessionId: 'session-1', timestamp: baseTime + 10000,
+        payload: { type: 'navigation', from: '/a', to: '/b', duration: 4000 },
+      }),
+      createEvent({
+        type: 'navigation', sessionId: 'session-2', timestamp: baseTime + 20000,
+        payload: { type: 'navigation', from: '/a', to: '/b', duration: 4000 },
+      }),
+    ];
+    eventStore.insertBatch(events);
+
+    // Default threshold (3000ms) — 4000 > 3000 => detected
+    const issuesDefault = await rule.analyze(makeContext());
+    expect(issuesDefault).toHaveLength(1);
+
+    // Custom threshold (5000ms) — 4000 < 5000 => NOT detected
+    const issuesCustom = await rule.analyze(makeContext({
+      thresholds: { 'slow-navigation': { thresholdMs: 5000, minOccurrences: 3, minSessions: 2 } },
+    }));
+    expect(issuesCustom).toHaveLength(0);
   });
 });

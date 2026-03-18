@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createDatabase, EventStore } from 'mahoraga-core';
-import type { DatabaseManager } from 'mahoraga-core';
+import type { DatabaseManager, RuleThresholds } from 'mahoraga-core';
 import { createEvent, resetEventCounter } from 'mahoraga-core/testing';
 import type { AnalysisContext } from '../rule.js';
 import { FormAbandonmentRule } from '../rules/form-abandonment.js';
@@ -16,8 +16,13 @@ const timeWindow = { start: NOW - HOUR, end: NOW };
 /** Previous window: the hour before that */
 const previousWindow = { start: NOW - 2 * HOUR, end: NOW - HOUR };
 
-function makeContext(): AnalysisContext {
-  return { eventStore, timeWindow, previousWindow };
+function makeContext(overrides?: { thresholds?: Partial<RuleThresholds> }): AnalysisContext {
+  return {
+    eventStore,
+    timeWindow,
+    previousWindow,
+    thresholds: overrides?.thresholds ? { ...overrides.thresholds } as RuleThresholds : undefined,
+  };
 }
 
 beforeEach(() => {
@@ -244,5 +249,40 @@ describe('FormAbandonmentRule', () => {
 
     const selectors = issues.map((i) => i.affectedElements[0]!.selector).sort();
     expect(selectors).toEqual([form1, form2].sort());
+  });
+
+  it('uses custom minAbandonRate threshold from context', async () => {
+    const baseTime = NOW - HOUR / 2;
+    const formSelector = '#rate-form';
+
+    // 3 abandon, 3 submit = 50% rate
+    for (let i = 0; i < 3; i++) {
+      eventStore.insertBatch([createEvent({
+        type: 'form',
+        sessionId: `abandon-${i}`,
+        timestamp: baseTime + i * 100,
+        url: 'https://example.com/test',
+        payload: { type: 'form', formSelector, action: 'abandon' },
+      })]);
+    }
+    for (let i = 0; i < 3; i++) {
+      eventStore.insertBatch([createEvent({
+        type: 'form',
+        sessionId: `submit-${i}`,
+        timestamp: baseTime + 300 + i * 100,
+        url: 'https://example.com/test',
+        payload: { type: 'form', formSelector, action: 'submit' },
+      })]);
+    }
+
+    // Default minAbandonRate (0.4) — 50% >= 40% => detected
+    const issuesDefault = await rule.analyze(makeContext());
+    expect(issuesDefault).toHaveLength(1);
+
+    // Custom minAbandonRate (0.6) — 50% < 60% => NOT detected
+    const issuesCustom = await rule.analyze(makeContext({
+      thresholds: { 'form-abandonment': { minAbandonRate: 0.6, minSessions: 3 } },
+    }));
+    expect(issuesCustom).toHaveLength(0);
   });
 });

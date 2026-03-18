@@ -41,11 +41,15 @@ Human Review -> Merge
 
 ## Features
 
-- **Source adapters** — Pull behavioral data from Amplitude, PostHog, Sentry (V1: Amplitude)
+- **Source adapters** — Pull behavioral data from Amplitude and PostHog, with Sentry planned
 - **Detection rules** — Pluggable analysis engine (rage clicks, error spikes, dead clicks, form abandonment, slow navigation, layout shifts, error loops)
+- **Configurable thresholds** — Tune every detection rule's sensitivity via `analysis.thresholds` in config
+- **URL normalization** — Group dynamic URLs (`/products/123`, `/products/456`) into route patterns (`/products/:id`)
+- **False-positive suppression** — Permanently dismiss noisy issues with `mahoraga dismiss`, with audit trail
 - **Code mapper** — AST-based resolution from CSS selectors to exact source file locations
 - **Agent dispatcher** — Generates fixes, writes tests, validates via build/test/diff, and opens draft PRs
 - **Adaptation loop** — If a generated test fails, the agent retries with error context (up to 3 attempts)
+- **Cost budget enforcement** — Tracks actual dispatch costs and stops when per-run cost or dispatch limits are reached
 - **Blast radius control** — Allowed/denied paths, confidence thresholds, cost budgets, diff size limits
 - **Agent isolation** — Operates in fresh git worktrees; `main` is never directly modified
 
@@ -54,7 +58,7 @@ Human Review -> Merge
 ### Prerequisites
 
 - Node.js >= 20
-- An [Amplitude](https://amplitude.com) account (V1 source)
+- An [Amplitude](https://amplitude.com) or [PostHog](https://posthog.com) account
 - [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) (for agent dispatch)
 - [GitHub CLI](https://cli.github.com) (`gh`) for PR creation
 
@@ -80,14 +84,29 @@ import { defineConfig } from "mahoraga-core";
 
 export default defineConfig({
   sources: [
+    // Amplitude
     {
       adapter: "amplitude",
       apiKey: process.env.MAHORAGA_AMPLITUDE_API_KEY!,
       secretKey: process.env.MAHORAGA_AMPLITUDE_SECRET_KEY!,
     },
+    // Or PostHog
+    {
+      adapter: "posthog",
+      apiKey: process.env.MAHORAGA_POSTHOG_API_KEY!,
+      projectId: process.env.MAHORAGA_POSTHOG_PROJECT_ID!,
+      // host: "https://eu.posthog.com",  // optional, for self-hosted or EU cloud
+    },
   ],
   analysis: {
     rules: ["rage-clicks", "error-spikes", "dead-clicks", "form-abandonment", "slow-navigation", "layout-shifts", "error-loops"],
+    // Group dynamic URLs into route patterns
+    routePatterns: ["/products/:id", "/users/:userId/posts/:postId"],
+    // Tune detection sensitivity per rule
+    thresholds: {
+      "rage-clicks": { clickCount: 5, windowMs: 1000 },
+      "slow-navigation": { thresholdMs: 5000 },
+    },
   },
   agent: {
     provider: "claude-code",
@@ -108,6 +127,9 @@ Store credentials in `.mahoraga.env` (automatically gitignored):
 ```env
 MAHORAGA_AMPLITUDE_API_KEY=your-api-key
 MAHORAGA_AMPLITUDE_SECRET_KEY=your-secret-key
+# Or for PostHog:
+MAHORAGA_POSTHOG_API_KEY=your-personal-api-key
+MAHORAGA_POSTHOG_PROJECT_ID=your-project-id
 ```
 
 ### Run
@@ -118,6 +140,13 @@ npx mahoraga-cli analyze --dry-run
 
 # Run full pipeline: pull → analyze → dispatch → PR
 npx mahoraga-cli analyze
+
+# Suppress a false-positive issue
+npx mahoraga-cli dismiss <fingerprint> --reason "expected behavior"
+
+# List or undo suppressions
+npx mahoraga-cli dismiss --list
+npx mahoraga-cli dismiss --undo <fingerprint>
 
 # Inspect stored events and sessions
 npx mahoraga-cli inspect
@@ -150,7 +179,7 @@ This generates a rule class and test file with boilerplate. Follow the prompts t
 | Package | npm | Description |
 |---------|-----|-------------|
 | [`mahoraga-core`](packages/core) | [![npm](https://img.shields.io/npm/v/mahoraga-core.svg?label=)](https://www.npmjs.com/package/mahoraga-core) | Zod schemas, SQLite storage, types, utilities |
-| [`mahoraga-sources`](packages/sources) | [![npm](https://img.shields.io/npm/v/mahoraga-sources.svg?label=)](https://www.npmjs.com/package/mahoraga-sources) | Pluggable source adapters (V1: Amplitude) |
+| [`mahoraga-sources`](packages/sources) | [![npm](https://img.shields.io/npm/v/mahoraga-sources.svg?label=)](https://www.npmjs.com/package/mahoraga-sources) | Pluggable source adapters (Amplitude, PostHog) |
 | [`mahoraga-analyzer`](packages/analyzer) | [![npm](https://img.shields.io/npm/v/mahoraga-analyzer.svg?label=)](https://www.npmjs.com/package/mahoraga-analyzer) | Detection rules engine |
 | [`mahoraga-mapper`](packages/mapper) | [![npm](https://img.shields.io/npm/v/mahoraga-mapper.svg?label=)](https://www.npmjs.com/package/mahoraga-mapper) | AST-based selector-to-source mapping |
 | [`mahoraga-agent`](packages/agent) | [![npm](https://img.shields.io/npm/v/mahoraga-agent.svg?label=)](https://www.npmjs.com/package/mahoraga-agent) | Agent dispatcher with adaptation loop |
@@ -176,6 +205,7 @@ defineConfig({
   // Required: at least one source
   sources: [
     { adapter: "amplitude", apiKey: "...", secretKey: "..." },
+    { adapter: "posthog", apiKey: "...", projectId: "...", host: "..." },
   ],
 
   // Analysis (all optional)
@@ -183,6 +213,16 @@ defineConfig({
     windowDays: 3,                    // Days of data to analyze
     rules: ["rage-clicks", "error-spikes", "dead-clicks", "form-abandonment", "slow-navigation", "layout-shifts", "error-loops"],
     customRules: [],                  // Custom DetectionRule implementations
+    routePatterns: [],                // URL normalization: ["/products/:id"]
+    thresholds: {                     // Per-rule threshold overrides
+      "rage-clicks": { clickCount: 3, windowMs: 1000 },
+      "error-spikes": { spikeMultiplier: 2, minAbsoluteCount: 5 },
+      "dead-clicks": { minClickCount: 5, minSessions: 2, waitMs: 2000 },
+      "form-abandonment": { minAbandonRate: 0.4, minSessions: 3 },
+      "slow-navigation": { thresholdMs: 3000, minOccurrences: 3, minSessions: 2 },
+      "layout-shifts": { minPoorEvents: 3, minSessions: 2 },
+      "error-loops": { minOccurrences: 3, minSessions: 2 },
+    },
   },
 
   // Agent (all optional)

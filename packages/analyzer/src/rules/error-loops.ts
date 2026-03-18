@@ -2,8 +2,8 @@ import type { Issue, MahoragaEvent, ErrorPayload, Evidence, EventSummary } from 
 import { createFingerprint } from 'mahoraga-core';
 import type { DetectionRule, AnalysisContext } from '../rule.js';
 
-const MIN_LOOP_COUNT = 3;
-const MIN_SESSION_COUNT = 2;
+const DEFAULT_MIN_OCCURRENCES = 3;
+const DEFAULT_MIN_SESSIONS = 2;
 const MESSAGE_PREFIX_LENGTH = 100;
 
 /**
@@ -24,6 +24,10 @@ export class ErrorLoopRule implements DetectionRule {
    * @returns Issues for each error message with loops in 2+ sessions
    */
   async analyze(context: AnalysisContext): Promise<Issue[]> {
+    const thresholds = context.thresholds?.['error-loops'];
+    const minOccurrences = thresholds?.minOccurrences ?? DEFAULT_MIN_OCCURRENCES;
+    const minSessions = thresholds?.minSessions ?? DEFAULT_MIN_SESSIONS;
+
     const events = context.eventStore.query({
       type: 'error',
       start: context.timeWindow.start,
@@ -33,11 +37,11 @@ export class ErrorLoopRule implements DetectionRule {
     // Group by (sessionId, messagePrefix)
     const sessionGroups = groupBySessionAndMessage(events);
 
-    // Find loops: groups with count >= MIN_LOOP_COUNT
+    // Find loops: groups with count >= minOccurrences
     const loops = new Map<string, Array<{ sessionId: string; count: number; events: MahoragaEvent[] }>>();
 
     for (const [key, data] of sessionGroups) {
-      if (data.count >= MIN_LOOP_COUNT) {
+      if (data.count >= minOccurrences) {
         const messagePrefix = key.split('||')[1]!;
         if (!loops.has(messagePrefix)) {
           loops.set(messagePrefix, []);
@@ -54,7 +58,7 @@ export class ErrorLoopRule implements DetectionRule {
 
     // For each error message, check if 2+ sessions have loops
     for (const [messagePrefix, sessionLoops] of loops) {
-      if (sessionLoops.length < MIN_SESSION_COUNT) continue;
+      if (sessionLoops.length < minSessions) continue;
 
       // Calculate average loop count across affected sessions
       const avgLoopCount = sessionLoops.reduce((sum, s) => sum + s.count, 0) / sessionLoops.length;
