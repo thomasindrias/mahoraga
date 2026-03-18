@@ -108,4 +108,4 @@ See `@references/api-reference.md` for full type signatures.
 - **Not validating with Zod** — Invalid events logged and skipped, never silently dropped
 - **Forgetting cursor** — Breaks resume capability
 - **Loading all into memory** — Use async generators
-- **Hardcoding discriminative field** — Use selector for clicks, message for errors
+- **Hardcoding distinctive field** — Use selector for clicks, message for errors

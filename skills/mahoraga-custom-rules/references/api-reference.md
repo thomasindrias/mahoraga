@@ -184,16 +184,16 @@ export function createEvent(overrides?: Partial<MahoragaEvent>): MahoragaEvent;
 
 /**
  * Wrap events in a shared session.
- * @param events - Events to group
+ * @param events - Partial events to group
  * @returns Events with identical sessionId
  */
-export function createSession(events: MahoragaEvent[]): MahoragaEvent[];
+export function createSession(events: Partial<MahoragaEvent>[]): MahoragaEvent[];
 
 /**
  * Create a rage click sequence.
  * @param selector - Target element selector
  * @param count - Number of clicks
- * @param withinMs - Time span (default: 1000ms)
+ * @param withinMs - Time span (default: 800ms)
  */
 export function createRageClickSequence(
   selector: string,
@@ -204,7 +204,7 @@ export function createRageClickSequence(
 /**
  * Create an error event.
  * @param message - Error message
- * @param frequency - Error frequency (default: 1)
+ * @param frequency - Number of sessions affected (default: 1)
  */
 export function createErrorEvent(
   message: string,
@@ -226,11 +226,11 @@ export function createNavigationEvent(
 /**
  * Create a form interaction event.
  * @param formSelector - Form element selector
- * @param action - 'focus' | 'submit' | 'abandon'
+ * @param action - 'focus' | 'blur' | 'submit' | 'abandon'
  */
 export function createFormEvent(
   formSelector: string,
-  action: 'focus' | 'submit' | 'abandon'
+  action: 'focus' | 'blur' | 'submit' | 'abandon'
 ): MahoragaEvent;
 
 /**

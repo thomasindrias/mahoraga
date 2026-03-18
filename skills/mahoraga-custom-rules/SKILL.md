@@ -59,7 +59,7 @@ Test with in-memory SQLite and factories from `mahoraga-core/testing`:
 ```typescript
 const events = createRageClickSequence('button.submit', 5, 500);
 const session = createSession(events);
-eventStore.insert(session);
+eventStore.insertBatch(session);
 
 const issues = await rule.analyze({
   eventStore,
