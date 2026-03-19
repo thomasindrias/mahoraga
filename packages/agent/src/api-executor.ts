@@ -139,12 +139,7 @@ export class APIAgentExecutor implements AgentExecutor {
 
     try {
       for (let turn = 0; turn < MAX_TURNS; turn++) {
-        const response = await this.client.chat.completions.create({
-          model: this.model,
-          messages,
-          tools: TOOLS,
-          tool_choice: turn === MAX_TURNS - 1 ? 'none' : 'auto',
-        });
+        const response = await this.chatWithRetry(messages, turn === MAX_TURNS - 1);
 
         const choice = response.choices[0]!;
         const message = choice.message;
@@ -179,6 +174,32 @@ export class APIAgentExecutor implements AgentExecutor {
       const message = error instanceof Error ? error.message : String(error);
       return { success: false, error: message };
     }
+  }
+
+  private async chatWithRetry(
+    messages: OpenAI.ChatCompletionMessageParam[],
+    lastTurn: boolean,
+    maxRetries = 3,
+  ): Promise<OpenAI.ChatCompletion> {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await this.client.chat.completions.create({
+          model: this.model,
+          messages,
+          tools: TOOLS,
+          tool_choice: lastTurn ? 'none' : 'auto',
+        });
+      } catch (error: unknown) {
+        const isRateLimit =
+          error instanceof Error &&
+          (error.message.includes('429') || ('status' in error && (error as { status: number }).status === 429));
+        if (!isRateLimit || attempt === maxRetries) throw error;
+        const waitMs = Math.min(1000 * 2 ** attempt, 30_000);
+        console.warn(`Rate limited, retrying in ${waitMs}ms...`);
+        await new Promise((r) => setTimeout(r, waitMs));
+      }
+    }
+    throw new Error('Unreachable');
   }
 
   private async executeTool(

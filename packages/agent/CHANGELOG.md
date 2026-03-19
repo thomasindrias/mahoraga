@@ -1,5 +1,11 @@
 # mahoraga-agent
 
+## 0.3.1
+
+### Patch Changes
+
+- fix: add retry with backoff for 429 rate limit errors
+
 ## 0.3.0
 
 ### Minor Changes
