@@ -3,11 +3,12 @@ import { z } from 'zod';
 /** Source adapter configuration schema */
 export const SourceConfigSchema = z.object({
   adapter: z.string(),
+  module: z.string().optional(),
   apiKey: z.string().optional(),
   secretKey: z.string().optional(),
   projectId: z.string().optional(),
   host: z.string().optional(),
-});
+}).passthrough();
 
 /** Per-rule threshold overrides */
 export const RuleThresholdsSchema = z.object({
