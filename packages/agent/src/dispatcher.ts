@@ -108,10 +108,11 @@ export class AgentDispatcher {
     );
 
     if (!adaptationResult.success) {
+      const lastError = adaptationResult.attemptErrors.at(-1) ?? 'Unknown error';
       return {
         issueIds,
         status: 'no_fix_found',
-        summary: `Agent failed after ${adaptationResult.attempts} attempts`,
+        summary: `Agent failed after ${adaptationResult.attempts} attempts. Last: ${lastError}`,
         adaptationAttempts: adaptationResult.attempts,
         generatedTestPath: adaptationResult.generatedTest.testPath,
       };

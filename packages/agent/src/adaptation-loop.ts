@@ -70,9 +70,9 @@ export async function runAdaptationLoop(
     );
 
     if (!lastResult.success) {
-      attemptErrors.push(
-        `Attempt ${attempt + 1}: Agent failed — ${lastResult.error}`,
-      );
+      const errorMsg = `Attempt ${attempt + 1}: Agent failed — ${lastResult.error}`;
+      attemptErrors.push(errorMsg);
+      console.warn(errorMsg);
       continue;
     }
 
