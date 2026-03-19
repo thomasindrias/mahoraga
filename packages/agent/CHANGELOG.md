@@ -1,5 +1,11 @@
 # mahoraga-agent
 
+## 0.2.3
+
+### Patch Changes
+
+- Log agent attempt errors and include last error in dispatch summary
+
 ## 0.2.2
 
 ### Patch Changes

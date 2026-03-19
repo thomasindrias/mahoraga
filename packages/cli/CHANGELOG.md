@@ -1,5 +1,13 @@
 # mahoraga-cli
 
+## 0.3.5
+
+### Patch Changes
+
+- Log agent attempt errors and include last error in dispatch summary
+- Updated dependencies
+  - mahoraga-agent@0.2.3
+
 ## 0.3.4
 
 ### Patch Changes
