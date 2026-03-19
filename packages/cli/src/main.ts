@@ -86,7 +86,7 @@ export async function main(): Promise<void> {
       const config = await loadConfig(cwd);
       if (!config) return;
       const { createDatabase, EventStore } = await import('mahoraga-core');
-      const db = createDatabase(config.storage.dbPath);
+      const db = await createDatabase(config.storage.dbPath);
       const store = new EventStore(db.db);
       const cutoff = Date.now() - config.storage.retentionDays * 24 * 60 * 60 * 1000;
       const deleted = store.deleteOlderThan(cutoff);

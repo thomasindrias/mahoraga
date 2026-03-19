@@ -13,7 +13,7 @@ export async function runInspect(
   subcommand: 'events' | 'issues',
   options: { limit?: number } = {},
 ): Promise<void> {
-  const dbManager = createDatabase(config.storage.dbPath);
+  const dbManager = await createDatabase(config.storage.dbPath);
 
   try {
     if (subcommand === 'events') {

@@ -9,9 +9,9 @@ import type { Issue, RunError } from '../types/index.js';
 
 let dbManager: DatabaseManager;
 
-beforeEach(() => {
+beforeEach(async () => {
   resetEventCounter();
-  dbManager = createDatabase(':memory:');
+  dbManager = await createDatabase(':memory:');
 });
 
 afterEach(() => {

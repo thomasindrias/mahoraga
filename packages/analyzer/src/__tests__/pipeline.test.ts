@@ -20,9 +20,9 @@ describe('Pipeline integration: ingest -> analyze -> persist', () => {
   const timeWindow: TimeRange = { start: NOW - HOUR, end: NOW };
   const previousWindow: TimeRange = { start: NOW - 2 * HOUR, end: NOW - HOUR };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     resetEventCounter();
-    dbManager = createDatabase(':memory:');
+    dbManager = await createDatabase(':memory:');
     eventStore = new EventStore(dbManager.db);
     issueStore = new IssueStore(dbManager.db);
   });

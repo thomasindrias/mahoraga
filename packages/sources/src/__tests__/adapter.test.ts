@@ -230,13 +230,13 @@ describe('transformAmplitudeEvent', () => {
 });
 
 describe('PipelineRunner', () => {
-  let dbManager: ReturnType<typeof createDatabase>;
+  let dbManager: Awaited<ReturnType<typeof createDatabase>>;
   let eventStore: EventStore;
   let checkpointStore: CheckpointStore;
   let runner: PipelineRunner;
 
-  beforeEach(() => {
-    dbManager = createDatabase(':memory:');
+  beforeEach(async () => {
+    dbManager = await createDatabase(':memory:');
     eventStore = new EventStore(dbManager.db);
     checkpointStore = new CheckpointStore(dbManager.db);
     runner = new PipelineRunner(eventStore, checkpointStore);

@@ -43,10 +43,18 @@
     "check-exports": "attw --pack . --profile esm-only"
   },
   "dependencies": {
-    "better-sqlite3": "^12.8.0",
     "zod": "^4.3.6"
   },
+  "peerDependencies": {
+    "better-sqlite3": "^12.0.0"
+  },
+  "peerDependenciesMeta": {
+    "better-sqlite3": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "better-sqlite3": "^12.8.0",
     "@types/better-sqlite3": "^7.6.0",
     "tsup": "^8.0.0",
     "typescript": "^5.5.0",

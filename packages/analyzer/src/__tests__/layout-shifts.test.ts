@@ -27,9 +27,9 @@ function makeContext(overrides?: { routePatterns?: string[]; thresholds?: Partia
   };
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   resetEventCounter();
-  dbManager = createDatabase(':memory:');
+  dbManager = await createDatabase(':memory:');
   eventStore = new EventStore(dbManager.db);
 });
 
@@ -244,7 +244,7 @@ describe('LayoutShiftRule', () => {
     expect(issues[0]!.severity).toBe('critical'); // avg = 0.55
 
     // Test high: average CLS >= 0.25
-    dbManager = createDatabase(':memory:');
+    dbManager = await createDatabase(':memory:');
     eventStore = new EventStore(dbManager.db);
 
     const highEvents = [
@@ -293,7 +293,7 @@ describe('LayoutShiftRule', () => {
     expect(issues[0]!.severity).toBe('high'); // avg = 0.28
 
     // Test medium: average CLS >= 0.1
-    dbManager = createDatabase(':memory:');
+    dbManager = await createDatabase(':memory:');
     eventStore = new EventStore(dbManager.db);
 
     const mediumEvents = [

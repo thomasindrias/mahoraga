@@ -28,9 +28,9 @@ function makeContext(overrides?: { thresholds?: Partial<RuleThresholds> }): Anal
   };
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   resetEventCounter();
-  dbManager = createDatabase(':memory:');
+  dbManager = await createDatabase(':memory:');
   eventStore = new EventStore(dbManager.db);
 });
 

@@ -58,7 +58,7 @@ describe('runStatus', () => {
   });
 
   it('should show run history after creating a run', async () => {
-    const db = createDatabase(config.storage.dbPath);
+    const db = await createDatabase(config.storage.dbPath);
     const { RunStore } = await import('mahoraga-core');
     const runStore = new RunStore(db.db);
     runStore.create('test-run-1');
@@ -80,7 +80,7 @@ describe('runStatus', () => {
 
 describe('runInspect', () => {
   it('should show event count for events subcommand', async () => {
-    const db = createDatabase(config.storage.dbPath);
+    const db = await createDatabase(config.storage.dbPath);
     db.close();
 
     const logs: string[] = [];
@@ -94,7 +94,7 @@ describe('runInspect', () => {
   });
 
   it('should show issue groups for issues subcommand', async () => {
-    const db = createDatabase(config.storage.dbPath);
+    const db = await createDatabase(config.storage.dbPath);
     db.close();
 
     const logs: string[] = [];

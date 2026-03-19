@@ -24,7 +24,7 @@ export async function runDismiss(
   fingerprint: string | undefined,
   options: DismissOptions = {},
 ): Promise<void> {
-  const dbManager = createDatabase(config.storage.dbPath);
+  const dbManager = await createDatabase(config.storage.dbPath);
   const store = new SuppressionStore(dbManager.db);
 
   try {

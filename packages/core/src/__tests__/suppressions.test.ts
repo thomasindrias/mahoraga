@@ -6,8 +6,8 @@ import type { DatabaseManager } from '../storage/db.js';
 let dbManager: DatabaseManager;
 let store: SuppressionStore;
 
-beforeEach(() => {
-  dbManager = createDatabase(':memory:');
+beforeEach(async () => {
+  dbManager = await createDatabase(':memory:');
   store = new SuppressionStore(dbManager.db);
 });
 

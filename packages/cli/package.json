@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "@clack/prompts": "^1.1.0",
+    "better-sqlite3": "^12.8.0",
     "mahoraga-agent": "workspace:*",
     "mahoraga-analyzer": "workspace:*",
     "mahoraga-core": "workspace:*",

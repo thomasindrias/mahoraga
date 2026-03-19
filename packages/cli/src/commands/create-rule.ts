@@ -84,9 +84,9 @@ const HOUR = 60 * 60 * 1000;
 const timeWindow = { start: NOW - HOUR, end: NOW };
 const previousWindow = { start: NOW - 2 * HOUR, end: NOW - HOUR };
 
-beforeEach(() => {
+beforeEach(async () => {
   resetEventCounter();
-  dbManager = createDatabase(':memory:');
+  dbManager = await createDatabase(':memory:');
   eventStore = new EventStore(dbManager.db);
 });
 

@@ -35,7 +35,7 @@ export async function runAnalyze(
   cwd: string,
   options: AnalyzeOptions = {},
 ): Promise<void> {
-  const dbManager = createDatabase(config.storage.dbPath);
+  const dbManager = await createDatabase(config.storage.dbPath);
   const eventStore = new EventStore(dbManager.db);
   const checkpointStore = new CheckpointStore(dbManager.db);
   const issueStore = new IssueStore(dbManager.db);

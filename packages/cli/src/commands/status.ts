@@ -11,7 +11,7 @@ export async function runStatus(
   config: MahoragaConfig,
   options: { limit?: number } = {},
 ): Promise<void> {
-  const dbManager = createDatabase(config.storage.dbPath);
+  const dbManager = await createDatabase(config.storage.dbPath);
 
   try {
     const store = new RunStore(dbManager.db);

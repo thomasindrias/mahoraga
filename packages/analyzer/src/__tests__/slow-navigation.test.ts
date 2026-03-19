@@ -26,9 +26,9 @@ function makeContext(overrides?: { routePatterns?: string[]; thresholds?: Partia
   };
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   resetEventCounter();
-  dbManager = createDatabase(':memory:');
+  dbManager = await createDatabase(':memory:');
   eventStore = new EventStore(dbManager.db);
 });
 
@@ -211,7 +211,7 @@ describe('SlowNavigationRule', () => {
 
     // Clear and test high: 7000 < median <= 10000
     resetEventCounter();
-    dbManager = createDatabase(':memory:');
+    dbManager = await createDatabase(':memory:');
     eventStore = new EventStore(dbManager.db);
 
     const highEvents = [
@@ -258,7 +258,7 @@ describe('SlowNavigationRule', () => {
 
     // Clear and test medium: 5000 < median <= 7000
     resetEventCounter();
-    dbManager = createDatabase(':memory:');
+    dbManager = await createDatabase(':memory:');
     eventStore = new EventStore(dbManager.db);
 
     const mediumEvents = [
@@ -305,7 +305,7 @@ describe('SlowNavigationRule', () => {
 
     // Clear and test low: median <= 5000
     resetEventCounter();
-    dbManager = createDatabase(':memory:');
+    dbManager = await createDatabase(':memory:');
     eventStore = new EventStore(dbManager.db);
 
     const lowEvents = [
