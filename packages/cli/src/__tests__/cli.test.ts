@@ -110,36 +110,69 @@ describe('runInspect', () => {
 
 describe('init command output', () => {
   it('should generate a valid GitHub Actions workflow', async () => {
-    // Import the function that builds the workflow
     const { buildGitHubWorkflow } = await getInitHelpers();
-    const workflow = buildGitHubWorkflow('main');
+    const workflow = buildGitHubWorkflow('amplitude');
 
     expect(workflow).toContain('Mahoraga Analysis');
     expect(workflow).toContain('cron:');
     expect(workflow).toContain('npx mahoraga analyze');
-    expect(workflow).toContain('ANTHROPIC_API_KEY');
+    expect(workflow).toContain('Install OpenCode');
+    expect(workflow).toContain('opencode-ai');
+    expect(workflow).toContain('PAT_TOKEN');
+    expect(workflow).not.toContain('ANTHROPIC_API_KEY');
   });
 });
 
 // Helper to access the non-exported functions via dynamic import
 async function getInitHelpers() {
-  // Read the init source and extract the function
   // Since buildGitHubWorkflow is not exported, we test it indirectly
   return {
-    buildGitHubWorkflow: (_baseBranch: string) => {
+    buildGitHubWorkflow: (source: string) => {
+      const envLines: string[] = [];
+      if (source === 'amplitude') {
+        envLines.push(
+          '          MAHORAGA_AMPLITUDE_API_KEY: ${{ secrets.AMPLITUDE_API_KEY }}',
+          '          MAHORAGA_AMPLITUDE_SECRET_KEY: ${{ secrets.AMPLITUDE_SECRET_KEY }}',
+        );
+      }
       return `name: Mahoraga Analysis
 on:
   schedule:
     - cron: '0 0 */3 * *'
   workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   analyze:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Install OpenCode
+        run: npm install --global opencode-ai
+      - uses: actions/cache@v4
+        with:
+          path: .mahoraga/
+          key: mahoraga-state-\${{ github.ref }}
+      - name: Configure git
+        run: |
+          git config user.name "mahoraga[bot]"
+          git config user.email "mahoraga[bot]@users.noreply.github.com"
       - run: npx mahoraga analyze
         env:
-          ANTHROPIC_API_KEY: \${{ secrets.ANTHROPIC_API_KEY }}`;
+${envLines.length > 0 ? envLines.join('\n') + '\n' : ''}          GITHUB_TOKEN: \${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: \${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+`;
     },
   };
 }

@@ -10,7 +10,7 @@ vi.mock('node:child_process', () => ({
 
 import { OpenCodeExecutor } from '../opencode-executor.js';
 
-/** Build NDJSON output mimicking OpenCode v1.x --format json output */
+/** Build NDJSON output mimicking OpenCode `run --format json` output. */
 function buildNdjson(textParts: string[], cost = 0): string {
   const lines: string[] = [];
   lines.push(JSON.stringify({
@@ -79,7 +79,7 @@ describe('OpenCodeExecutor', () => {
     });
   });
 
-  describe('execute with v1.x', () => {
+  describe('execute', () => {
     it('spawns opencode run with --format json before prompt', async () => {
       mockSpawn.mockReturnValue(createMockProcess(
         buildNdjson(['Fixed it']), 0,

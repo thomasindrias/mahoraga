@@ -15,8 +15,7 @@ export interface AgentExecutionResult {
 }
 
 /**
- * Interface for executing AI agent commands.
- * Supports multiple model providers.
+ * Interface for executing AI agent commands via OpenCode CLI.
  */
 export interface AgentExecutor {
   /** Provider name */

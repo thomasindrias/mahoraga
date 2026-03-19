@@ -58,7 +58,7 @@ export default defineConfig({
     },
   ],
   agent: {
-    provider: 'claude-code',
+    provider: 'opencode',
     allowedPaths: ['src/**/*.tsx', 'src/**/*.ts'],
     deniedPaths: ['src/admin/**', '**/*.test.ts'],
     confidenceThreshold: 0.7,
