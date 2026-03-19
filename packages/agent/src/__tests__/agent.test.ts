@@ -52,7 +52,7 @@ const mockIssue: IssueGroup = {
 };
 
 const defaultConfig: AgentConfig = {
-  provider: 'claude-code',
+  provider: 'opencode',
   workflow: 'plan-then-implement',
   createPR: true,
   baseBranch: 'main',
