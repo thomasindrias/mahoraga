@@ -251,7 +251,7 @@ export async function runAnalyze(
   }
 }
 
-async function getAdapter(
+export async function getAdapter(
   sourceConfig: SourceConfig,
   cwd: string,
 ): Promise<SourceAdapter | null> {
