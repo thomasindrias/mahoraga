@@ -69,7 +69,11 @@ export class ClaudeCodeExecutor implements AgentExecutor {
     const { promisify } = await import('node:util');
     const exec = promisify(execFile);
 
-    const args = ['--print', '--output-format', 'json'];
+    const args = [
+      '--print',
+      '--output-format', 'json',
+      '--dangerously-skip-permissions',
+    ];
 
     if (options?.claudeMdPath) {
       args.push('--claude-md', options.claudeMdPath);
@@ -87,11 +91,19 @@ export class ClaudeCodeExecutor implements AgentExecutor {
       });
 
       const result = JSON.parse(stdout);
+      const isError = result.is_error === true || result.subtype === 'error';
+
+      if (isError) {
+        return {
+          success: false,
+          error: result.result ?? 'Agent returned an error',
+        };
+      }
+
       return {
         success: true,
-        diff: result.diff,
-        plan: result.plan,
-        costUsd: result.cost_usd,
+        diff: result.result,
+        costUsd: result.total_cost_usd,
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
