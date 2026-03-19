@@ -56,14 +56,13 @@ describe('getAdapter', () => {
     });
 
     it('loads custom adapter from module with default export', async () => {
-      // Create a fixture adapter module with default export
       const adapterPath = join(tempDir, 'custom-adapter.mjs');
       writeFileSync(
         adapterPath,
         `
 export default class CustomAdapter {
-  getName() { return 'custom'; }
-  async pull() { return []; }
+  get name() { return 'custom'; }
+  async *pull() {}
 }
 `,
       );
@@ -75,18 +74,17 @@ export default class CustomAdapter {
       const adapter = await getAdapter(config, tempDir);
 
       expect(adapter).not.toBeNull();
-      expect(adapter?.getName()).toBe('custom');
+      expect(adapter?.name).toBe('custom');
     });
 
     it('loads custom adapter from module with named adapter export', async () => {
-      // Create a fixture adapter module with named 'adapter' export
       const adapterPath = join(tempDir, 'named-adapter.mjs');
       writeFileSync(
         adapterPath,
         `
 export class adapter {
-  getName() { return 'named'; }
-  async pull() { return []; }
+  get name() { return 'named'; }
+  async *pull() {}
 }
 `,
       );
@@ -98,11 +96,10 @@ export class adapter {
       const adapter = await getAdapter(config, tempDir);
 
       expect(adapter).not.toBeNull();
-      expect(adapter?.getName()).toBe('named');
+      expect(adapter?.name).toBe('named');
     });
 
     it('instantiates adapter class from module export', async () => {
-      // Create a fixture adapter module that exports a class
       const adapterPath = join(tempDir, 'class-adapter.mjs');
       writeFileSync(
         adapterPath,
@@ -111,8 +108,8 @@ export default class MyAdapter {
   constructor() {
     this.initialized = true;
   }
-  getName() { return 'initialized'; }
-  async pull() { return []; }
+  get name() { return 'initialized'; }
+  async *pull() {}
 }
 `,
       );
@@ -128,14 +125,13 @@ export default class MyAdapter {
     });
 
     it('returns adapter instance directly if already instantiated', async () => {
-      // Create a fixture adapter module that exports an instance
       const adapterPath = join(tempDir, 'instance-adapter.mjs');
       writeFileSync(
         adapterPath,
         `
 class MyAdapter {
-  getName() { return 'instance'; }
-  async pull() { return []; }
+  get name() { return 'instance'; }
+  async *pull() {}
 }
 export default new MyAdapter();
 `,
@@ -148,7 +144,7 @@ export default new MyAdapter();
       const adapter = await getAdapter(config, tempDir);
 
       expect(adapter).not.toBeNull();
-      expect(adapter?.getName()).toBe('instance');
+      expect(adapter?.name).toBe('instance');
     });
 
     it('returns null when module does not export default or adapter', async () => {
@@ -156,13 +152,12 @@ export default new MyAdapter();
       const origWarn = console.warn;
       console.warn = (...args: unknown[]) => logs.push(args.join(' '));
 
-      // Create a fixture adapter module with wrong export name
       const adapterPath = join(tempDir, 'no-export-adapter.mjs');
       writeFileSync(
         adapterPath,
         `
 export class SomeOtherClass {
-  getName() { return 'wrong'; }
+  get name() { return 'wrong'; }
 }
 `,
       );
@@ -179,18 +174,16 @@ export class SomeOtherClass {
       expect(logs.some((l) => l.includes('does not export default or adapter'))).toBe(true);
     });
 
-    it('returns null gracefully when module path is invalid', async () => {
+    it('throws when module path is invalid', async () => {
       const config: SourceConfig = {
         adapter: 'custom',
         module: './non-existent-module.mjs',
       };
 
-      // Should not throw, just return null
       await expect(getAdapter(config, tempDir)).rejects.toThrow();
     });
 
     it('resolves module path relative to cwd', async () => {
-      // Create a nested directory structure
       const nestedDir = join(tempDir, 'adapters');
       mkdirSync(nestedDir, { recursive: true });
 
@@ -199,8 +192,8 @@ export class SomeOtherClass {
         adapterPath,
         `
 export default class NestedAdapter {
-  getName() { return 'nested'; }
-  async pull() { return []; }
+  get name() { return 'nested'; }
+  async *pull() {}
 }
 `,
       );
@@ -212,7 +205,7 @@ export default class NestedAdapter {
       const adapter = await getAdapter(config, tempDir);
 
       expect(adapter).not.toBeNull();
-      expect(adapter?.getName()).toBe('nested');
+      expect(adapter?.name).toBe('nested');
     });
   });
 });
