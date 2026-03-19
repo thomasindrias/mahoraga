@@ -11,7 +11,7 @@ import type { MahoragaConfig, TimeRange, RunError, SourceConfig } from 'mahoraga
 import { PipelineRunner, AmplitudeAdapter, PostHogAdapter } from 'mahoraga-sources';
 import type { SourceAdapter } from 'mahoraga-sources';
 import { AnalysisEngine, RageClickRule, ErrorSpikeRule, DeadClickRule, FormAbandonmentRule, SlowNavigationRule, LayoutShiftRule, ErrorLoopRule } from 'mahoraga-analyzer';
-import { AgentDispatcher, ClaudeCodeExecutor, OpenCodeExecutor, APIAgentExecutor, CostTracker, createWorktree, cleanupWorktree } from 'mahoraga-agent';
+import { AgentDispatcher, OpenCodeExecutor, CostTracker, createWorktree, cleanupWorktree } from 'mahoraga-agent';
 import type { AgentExecutor } from 'mahoraga-agent';
 import { randomUUID } from 'node:crypto';
 
@@ -283,37 +283,7 @@ export async function getAdapter(
   }
 }
 
-const API_KEY_ENV_VARS: Record<string, string> = {
-  openai: 'OPENAI_API_KEY',
-  gemini: 'GEMINI_API_KEY',
-  openrouter: 'OPENROUTER_API_KEY',
-};
-
 /** Create the appropriate agent executor based on provider config. */
-function createExecutor(agentConfig: MahoragaConfig['agent']): AgentExecutor {
-  const { provider } = agentConfig;
-
-  if (provider === 'claude-code') {
-    return new ClaudeCodeExecutor();
-  }
-
-  if (provider === 'opencode') {
-    return new OpenCodeExecutor();
-  }
-
-  const envVar = API_KEY_ENV_VARS[provider];
-  const apiKey = agentConfig.apiKey ?? (envVar ? process.env[envVar] : undefined);
-
-  if (!apiKey) {
-    throw new Error(
-      `No API key for provider "${provider}". Set agent.apiKey in config or ${envVar} env var.`,
-    );
-  }
-
-  return new APIAgentExecutor({
-    provider,
-    apiKey,
-    model: agentConfig.model,
-    baseURL: agentConfig.baseURL,
-  });
+function createExecutor(_agentConfig: MahoragaConfig['agent']): AgentExecutor {
+  return new OpenCodeExecutor();
 }
