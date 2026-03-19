@@ -251,6 +251,7 @@ export async function runAnalyze(
   }
 }
 
+/** Resolve a source adapter by name, supporting custom modules via dynamic import. */
 export async function getAdapter(
   sourceConfig: SourceConfig,
   cwd: string,

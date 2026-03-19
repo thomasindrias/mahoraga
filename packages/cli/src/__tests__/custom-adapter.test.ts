@@ -33,7 +33,7 @@ describe('getAdapter', () => {
     });
 
     it('returns null for unknown adapter name', async () => {
-      const config: SourceConfig = { adapter: 'unknown-adapter' as any };
+      const config = { adapter: 'unknown-adapter' } as SourceConfig;
       const adapter = await getAdapter(config, tempDir);
 
       expect(adapter).toBeNull();
@@ -124,7 +124,7 @@ export default class MyAdapter {
       const adapter = await getAdapter(config, tempDir);
 
       expect(adapter).not.toBeNull();
-      expect((adapter as any).initialized).toBe(true);
+      expect((adapter as unknown as { initialized: boolean }).initialized).toBe(true);
     });
 
     it('returns adapter instance directly if already instantiated', async () => {
