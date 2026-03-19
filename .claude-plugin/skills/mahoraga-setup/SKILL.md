@@ -14,7 +14,8 @@ Mahoraga is NOT a tracker — it's the brain that sits on top of existing analyt
 - Node.js >=20
 - Analytics credentials (Amplitude API key/secret key OR PostHog project API key)
 - `gh` CLI installed and authenticated (for creating PRs)
-- `ANTHROPIC_API_KEY` environment variable (for agent dispatch)
+- `opencode-ai` CLI installed (`npm install --global opencode-ai`)
+- `.opencode.json` with AI provider configuration
 
 ## Quick Start
 
@@ -46,7 +47,7 @@ export default defineConfig({
     rules: ['rage-clicks', 'error-spikes', 'dead-clicks', 'form-abandonment', 'slow-navigation', 'layout-shifts', 'error-loops'],
   },
   agent: {
-    provider: 'claude-code',
+    provider: 'opencode',
     baseBranch: 'main',
     draftPR: true,
     maxCostPerIssue: 2,
@@ -112,4 +113,4 @@ npx mahoraga-cli analyze
 - Forgetting to add credentials to `.mahoraga.env`
 - Not having `gh` CLI installed or authenticated
 - Running full `analyze` without testing `--dry-run` first
-- Missing `ANTHROPIC_API_KEY` environment variable
+- Missing `.opencode.json` provider configuration

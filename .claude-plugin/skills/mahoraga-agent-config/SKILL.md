@@ -76,19 +76,23 @@ Mahoraga's competitive moat:
 
 **Suppression**: `mahoraga dismiss <issue-id>` persists in SQLite, survives future runs.
 
-## Provider & Advanced Options
+## Provider Configuration
 
-- `provider`: `'claude-code'` (default). `'gemini'` and `'openai'` are defined in the schema but not yet implemented.
-- `claudeMdPath`: path to CLAUDE.md for the agent's context
+- `provider`: `'opencode'` (only supported value). OpenCode is provider-agnostic — configure your AI provider in `.opencode.json`
 - `agentMdPath`: path to AGENTS.md for agent-specific instructions
-- `skills`: array of skill names to make available to the agent
-- `mcpServers`: array of MCP server names for the agent to use
 - `workflow`: `'plan-then-implement'` (only supported value)
+
+### Prerequisites
+
+- `opencode-ai` CLI installed (`npm install --global opencode-ai`)
+- `.opencode.json` with provider config and `"permission": { "*": "allow" }`
+- Authenticated `gh` CLI (for PR creation)
 
 ## Common Mistakes
 
 - **`maxCostPerRun` too low**: Set ≥$10 for multiple issues
-- **Missing env vars**: Requires `ANTHROPIC_API_KEY` and authenticated `gh` CLI
+- **Missing `.opencode.json`**: OpenCode needs provider config. Run `npx mahoraga-cli init` to scaffold
+- **Missing `gh` CLI auth**: Required for PR creation — run `gh auth login`
 - **No `allowedPaths` in large repos**: Agent may modify unexpected files
 - **`confidenceThreshold` too high**: Lower to 0.5 to include medium-severity issues
 - **Blocked by cooldown**: Check `mahoraga status`, use `dismiss` to clear suppressions
