@@ -200,9 +200,7 @@ describe('MahoragaConfigSchema', () => {
   it('should reject removed provider values', () => {
     expect(() => defineConfig({
       sources: [{ adapter: 'amplitude' }],
-      agent: {
-        provider: 'gemini' as any,
-      },
+      agent: { provider: 'gemini' } as unknown as Parameters<typeof defineConfig>[0]['agent'],
     })).toThrow();
   });
 
@@ -210,23 +208,22 @@ describe('MahoragaConfigSchema', () => {
     const config = defineConfig({
       sources: [{ adapter: 'amplitude' }],
       agent: {
-        model: 'gpt-4o' as any,
-        apiKey: 'sk-xxx' as any,
-        baseURL: 'https://api.example.com' as any,
-        claudeMdPath: '/path/to/claude.md' as any,
-        skills: ['skill1'] as any,
-        mcpServers: ['server1'] as any,
-      },
+        model: 'gpt-4o',
+        apiKey: 'sk-xxx',
+        baseURL: 'https://api.example.com',
+        claudeMdPath: '/path/to/claude.md',
+        skills: ['skill1'],
+        mcpServers: ['server1'],
+      } as unknown as Parameters<typeof defineConfig>[0]['agent'],
     });
 
     // Zod 4 strips unknown keys by default
-    expect((config.agent as any).model).toBeUndefined();
-    expect((config.agent as any).apiKey).toBeUndefined();
-    expect((config.agent as any).baseURL).toBeUndefined();
-    expect((config.agent as any).claudeMdPath).toBeUndefined();
-    expect((config.agent as any).skills).toBeUndefined();
-    expect((config.agent as any).mcpServers).toBeUndefined();
-    // agentMdPath should still be allowed (we're keeping it)
+    expect((config.agent as Record<string, unknown>).model).toBeUndefined();
+    expect((config.agent as Record<string, unknown>).apiKey).toBeUndefined();
+    expect((config.agent as Record<string, unknown>).baseURL).toBeUndefined();
+    expect((config.agent as Record<string, unknown>).claudeMdPath).toBeUndefined();
+    expect((config.agent as Record<string, unknown>).skills).toBeUndefined();
+    expect((config.agent as Record<string, unknown>).mcpServers).toBeUndefined();
     expect(config.agent.provider).toBe('opencode');
   });
 });
