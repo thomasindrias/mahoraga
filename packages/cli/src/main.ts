@@ -141,23 +141,38 @@ Commands:
 }
 
 async function loadConfig(cwd: string) {
-  const configPath = resolve(cwd, 'mahoraga.config.ts');
-  if (!existsSync(configPath)) {
+  const extensions = ['ts', 'mjs', 'js'];
+  let configPath: string | null = null;
+
+  for (const ext of extensions) {
+    const candidate = resolve(cwd, `mahoraga.config.${ext}`);
+    if (existsSync(candidate)) {
+      configPath = candidate;
+      break;
+    }
+  }
+
+  if (!configPath) {
     console.error(
-      'No mahoraga.config.ts found. Run: npx mahoraga init',
+      'No mahoraga.config.{ts,mjs,js} found. Run: npx mahoraga init',
     );
     process.exit(1);
   }
 
   try {
-    // Use dynamic import for the config file
-    // In production this would need tsx or ts-node
     const mod = await import(configPath);
     return mod.default;
   } catch (error) {
-    console.error(
-      `Failed to load config: ${error instanceof Error ? error.message : String(error)}`,
-    );
+    const isTs = configPath.endsWith('.ts');
+    if (isTs) {
+      console.error(
+        `Failed to load TypeScript config. Ensure tsx is installed:\n  npm install -D tsx\n\nOr use mahoraga.config.mjs instead.\n\nError: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    } else {
+      console.error(
+        `Failed to load config: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
     process.exit(1);
   }
 }
