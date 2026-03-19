@@ -52,7 +52,7 @@ agent -> core, mapper
 | `mahoraga-mapper` | `packages/mapper` | AST-based selector-to-source-file mapping. Parses TSX/JSX via TypeScript Compiler API, resolves CSS selectors to file:line:column. Competitive moat. |
 | `mahoraga-sources` | `packages/sources` | Pluggable source adapters. `SourceAdapter` interface with async iterable batch pulling. Amplitude + PostHog. Uses MSW for contract tests. |
 | `mahoraga-analyzer` | `packages/analyzer` | Detection rules engine. `DetectionRule` interface. V1 rules: rage-click, error-spike. V2 rules: dead-click, form-abandonment, slow-navigation, layout-shift, error-loop. Rules query SQLite directly. |
-| `mahoraga-agent` | `packages/agent` | Agent dispatcher with adaptation loop. Constructs prompts, manages git worktrees, invokes Claude Code CLI, validates fixes (build + test + diff size), creates PRs via `gh`. Competitive moat. |
+| `mahoraga-agent` | `packages/agent` | Agent dispatcher with adaptation loop. Constructs prompts, manages git worktrees, invokes OpenCode CLI, validates fixes (build + test + diff size), creates PRs via `gh`. Competitive moat. |
 | `mahoraga-cli` | `packages/cli` | CLI entry point (`mahoraga`). Commands: `init`, `analyze`, `analyze --dry-run`, `inspect`, `status`, `gc`, `map`, `create-rule`, `dismiss`. |
 
 ## Development Workflow
@@ -136,6 +136,7 @@ All 7 detection rules read thresholds from `context.thresholds` with fallback to
 1. Environment variables (`MAHORAGA_AMPLITUDE_API_KEY`, etc.)
 2. `.mahoraga.env` file (gitignored)
 3. Config file (`mahoraga.config.ts`) referencing `process.env`
+4. `.opencode.json` for AI provider credentials
 
 Credentials are never stored in SQLite or logged.
 

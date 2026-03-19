@@ -34,7 +34,7 @@ Analyze (pluggable detection rules)
     | produce Issue reports
 Map (AST-based selector-to-source-file resolution)
     | resolve CSS selectors to source locations
-Dispatch (Claude Code CLI agent)
+Dispatch (OpenCode CLI agent)
     | create PR with plan + fix
 Human Review -> Merge
 ```
@@ -59,7 +59,7 @@ Human Review -> Merge
 
 - Node.js >= 20
 - An [Amplitude](https://amplitude.com) or [PostHog](https://posthog.com) account
-- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) (for agent dispatch)
+- [OpenCode CLI](https://opencode.ai) (for agent dispatch)
 - [GitHub CLI](https://cli.github.com) (`gh`) for PR creation
 
 ### Install
@@ -109,7 +109,7 @@ export default defineConfig({
     },
   },
   agent: {
-    provider: "claude-code",
+    provider: "opencode",
     allowedPaths: ["src/**"],
     deniedPaths: ["src/generated/**"],
   },
@@ -227,7 +227,7 @@ defineConfig({
 
   // Agent (all optional)
   agent: {
-    provider: "claude-code",          // "claude-code" | "gemini" | "openai"
+    provider: "opencode",             // "opencode" only
     baseBranch: "main",
     draftPR: true,                    // Create PRs as drafts
     maxRetries: 3,                    // Adaptation loop retries
@@ -270,6 +270,47 @@ Mahoraga includes a Claude Code plugin with 4 skills that help AI coding agents 
 | `mahoraga-agent-config` | Configure agent dispatch, governance, and cost controls |
 
 The plugin auto-discovers from `.claude-plugin/` when cloning the repo. Skills work with Claude Code and any agent that supports the superpowers skills format.
+
+## Troubleshooting
+
+### GITHUB_TOKEN Hijacks AI Provider
+
+OpenCode auto-detects `GITHUB_TOKEN` and defaults to GitHub Models, which returns 403 errors. Mahoraga strips `GITHUB_TOKEN` from the agent's environment automatically, but if you see provider errors in CI, ensure your `.opencode.json` explicitly sets the provider.
+
+### Permission Config for CI
+
+OpenCode requires explicit permission grants for non-interactive mode. Your `.opencode.json` must include:
+
+```json
+{
+  "permission": { "*": "allow" }
+}
+```
+
+Without this, OpenCode blocks on tool approval prompts with no TTY.
+
+### PAT_TOKEN for PR Creation
+
+GitHub organization policies often restrict `GITHUB_TOKEN` from creating pull requests. Create a fine-grained Personal Access Token with:
+- **Contents:** Read and write
+- **Pull requests:** Read and write
+
+Store it as `PAT_TOKEN` in repository secrets. The generated workflow uses `PAT_TOKEN || GITHUB_TOKEN` as fallback.
+
+### Agent Reports Success but No Files Changed
+
+If the AI agent claims success but creates no diff, Mahoraga's adaptation loop detects this and retries. If all retries fail, check:
+- The prompt is specific enough for the agent to locate the right files
+- `.opencode.json` provider config points to a capable model
+- The worktree has the expected source files
+
+### Stale Remote Branches
+
+Failed agent runs may leave remote branches (e.g. `mahoraga/fix-error-spikes-...`). Prune them periodically:
+
+```bash
+git branch -r | grep 'origin/mahoraga/' | sed 's|origin/||' | xargs -I{} git push origin --delete {}
+```
 
 ## Contributing
 

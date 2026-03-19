@@ -10,14 +10,20 @@ AI agent dispatcher with adaptation loop for [Mahoraga](https://github.com/thoma
 npm install mahoraga-agent
 ```
 
+## Prerequisites
+
+- `opencode-ai` CLI installed (`npm install --global opencode-ai`)
+- `.opencode.json` with provider config and `"permission": { "*": "allow" }`
+- `gh` CLI authenticated (for PR creation)
+
 ## What It Does
 
-Takes a detected UI issue, generates a fix using an AI coding agent, validates the fix (build + test + diff size), and opens a draft PR — all in an isolated git worktree.
+Takes a detected UI issue, generates a fix using an AI coding agent (via OpenCode), validates the fix (build + test + diff size), and opens a draft PR — all in an isolated git worktree.
 
 ## Usage
 
 ```typescript
-import { AgentDispatcher, ClaudeCodeExecutor } from 'mahoraga-agent';
+import { AgentDispatcher, OpenCodeExecutor } from 'mahoraga-agent';
 import { FileSystemCodeMapper } from 'mahoraga-mapper';
 import { defineConfig } from 'mahoraga-core';
 
@@ -29,7 +35,7 @@ const config = defineConfig({
   },
 });
 
-const executor = new ClaudeCodeExecutor();
+const executor = new OpenCodeExecutor();
 const mapper = new FileSystemCodeMapper('./src');
 await mapper.buildIndex();
 
@@ -43,10 +49,11 @@ const result = await dispatcher.dispatch([issueGroup], '/path/to/worktree');
 The agent's core differentiator:
 
 1. **Generate fix** — AI agent produces a code change
-2. **Create test** — Generate a localized test mimicking the user journey
-3. **Run test** — Execute the test against the fix
-4. **Retry** — If the test fails, feed error output back to the agent (up to `maxRetries`)
-5. **Validate** — Only proceed to PR if build passes, tests pass, and diff is within limits
+2. **Verify changes** — Check that files were actually modified
+3. **Create test** — Generate a localized test mimicking the user journey
+4. **Run test** — Execute the test against the fix
+5. **Retry** — If the test fails, feed error output back to the agent (up to `maxRetries`)
+6. **Validate** — Only proceed to PR if build passes, tests pass, and diff is within limits
 
 ## Governance Controls
 
