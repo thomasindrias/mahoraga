@@ -1,6 +1,6 @@
 {
   "name": "mahoraga-mapper",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "AST-based code-to-event mapping for Mahoraga",
   "license": "MIT",
   "author": "Thomas Indrias <thomasindrias@gmail.com>",

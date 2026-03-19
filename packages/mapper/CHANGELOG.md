@@ -1,5 +1,12 @@
 # mahoraga-mapper
 
+## 0.1.5
+
+### Patch Changes
+
+- Updated dependencies [1f0086e]
+  - mahoraga-core@0.3.0
+
 ## 0.1.4
 
 ### Patch Changes

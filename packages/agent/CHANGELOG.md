@@ -1,5 +1,13 @@
 # mahoraga-agent
 
+## 0.2.1
+
+### Patch Changes
+
+- Updated dependencies [1f0086e]
+  - mahoraga-core@0.3.0
+  - mahoraga-mapper@0.1.5
+
 ## 0.2.0
 
 ### Minor Changes
