@@ -2,9 +2,12 @@ import type { AgentExecutor, AgentExecutionResult, AgentExecuteOptions } from '.
 
 /**
  * OpenCode CLI executor.
- * Shells out to the `opencode` CLI in non-interactive mode (`opencode run`).
+ * Shells out to the `opencode` CLI in non-interactive mode.
  * OpenCode is provider-agnostic — it supports OpenAI, Anthropic, Gemini,
  * Groq, OpenRouter, AWS Bedrock, and Azure via its own config (.opencode.json).
+ *
+ * Supports both v0.x (`-p "prompt" -f json -q`) and v1.x (`opencode run "prompt" --format json`).
+ * Version is auto-detected at runtime.
  */
 export class OpenCodeExecutor implements AgentExecutor {
   readonly provider = 'opencode';
@@ -17,9 +20,11 @@ export class OpenCodeExecutor implements AgentExecutor {
   ): Promise<AgentExecutionResult> {
     const { spawn } = await import('node:child_process');
 
-    // OpenCode CLI: `opencode run "prompt" --format json`
-    // --format json outputs NDJSON events (step_start, text, tool_call, step_finish)
-    const args = ['run', prompt, '--format', 'json'];
+    // Detect version to determine correct flags
+    const version = await this.detectVersion(workDir);
+    const args = version === 'v1'
+      ? ['run', prompt, '--format', 'json']
+      : ['-p', prompt, '-f', 'json', '-q'];
 
     try {
       const stdout = await new Promise<string>((resolve, reject) => {
@@ -52,39 +57,79 @@ export class OpenCodeExecutor implements AgentExecutor {
         child.stdin!.end();
       });
 
-      // Parse NDJSON output — extract text parts from events
-      const textParts: string[] = [];
-      let totalCost = 0;
-
-      for (const line of stdout.split('\n')) {
-        if (!line.trim()) continue;
-        try {
-          const event = JSON.parse(line);
-          if (event.type === 'text' && event.part?.text) {
-            textParts.push(event.part.text);
-          }
-          if (event.type === 'step_finish' && typeof event.part?.cost === 'number') {
-            totalCost += event.part.cost;
-          }
-        } catch {
-          // Skip non-JSON lines
-        }
-      }
-
-      const response = textParts.join('');
-
-      if (!response) {
-        return { success: false, error: 'OpenCode produced no text response' };
-      }
-
-      return {
-        success: true,
-        diff: response,
-        costUsd: totalCost > 0 ? totalCost : undefined,
-      };
+      return this.parseOutput(stdout);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       return { success: false, error: message };
     }
+  }
+
+  /**
+   * Detect OpenCode version to determine correct CLI flags.
+   * v1.x has `opencode run` subcommand, v0.x uses `-p` flag.
+   */
+  private async detectVersion(cwd: string): Promise<'v0' | 'v1'> {
+    const { execFile } = await import('node:child_process');
+    const { promisify } = await import('node:util');
+    const exec = promisify(execFile);
+
+    try {
+      const { stdout } = await exec('opencode', ['--version'], { cwd, timeout: 5_000 });
+      const ver = stdout.trim();
+      // v1.x versions are >= 1.0.0
+      const major = parseInt(ver.split('.')[0] ?? '0', 10);
+      return major >= 1 ? 'v1' : 'v0';
+    } catch {
+      return 'v0'; // Default to v0 flags if detection fails
+    }
+  }
+
+  /**
+   * Parse OpenCode output, supporting both v0.x single JSON and v1.x NDJSON.
+   */
+  private parseOutput(stdout: string): AgentExecutionResult {
+    // Try v0.x format first: single JSON object with { response: "..." }
+    try {
+      const parsed = JSON.parse(stdout.trim());
+      if (parsed.response) {
+        return { success: true, diff: parsed.response };
+      }
+    } catch {
+      // Not single JSON — try NDJSON
+    }
+
+    // Try v1.x NDJSON format: multiple JSON lines with type=text events
+    const textParts: string[] = [];
+    let totalCost = 0;
+
+    for (const line of stdout.split('\n')) {
+      if (!line.trim()) continue;
+      try {
+        const event = JSON.parse(line);
+        if (event.type === 'text' && event.part?.text) {
+          textParts.push(event.part.text);
+        }
+        if (event.type === 'step_finish' && typeof event.part?.cost === 'number') {
+          totalCost += event.part.cost;
+        }
+      } catch {
+        // Skip non-JSON lines
+      }
+    }
+
+    if (textParts.length > 0) {
+      return {
+        success: true,
+        diff: textParts.join(''),
+        costUsd: totalCost > 0 ? totalCost : undefined,
+      };
+    }
+
+    // If we got here with non-empty output, return it as-is
+    if (stdout.trim()) {
+      return { success: true, diff: stdout.trim() };
+    }
+
+    return { success: false, error: 'OpenCode produced no text response' };
   }
 }
