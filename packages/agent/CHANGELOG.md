@@ -1,5 +1,11 @@
 # mahoraga-agent
 
+## 0.5.1
+
+### Patch Changes
+
+- Fix OpenCode executor CLI flags: use `opencode run <prompt> --format json` instead of invalid `-p - -f json -q` flags. Parse NDJSON output correctly. Exclude `.opencode/` artifacts from git staging.
+
 ## 0.5.0
 
 ### Minor Changes
