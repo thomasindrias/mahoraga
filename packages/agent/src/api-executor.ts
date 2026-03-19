@@ -109,6 +109,7 @@ export class APIAgentExecutor implements AgentExecutor {
   private client: OpenAI;
   private model: string;
 
+  /** @param config - Provider configuration */
   constructor(config: {
     provider: string;
     apiKey: string;
@@ -125,10 +126,11 @@ export class APIAgentExecutor implements AgentExecutor {
     });
   }
 
+  /** @inheritdoc */
   async execute(
     prompt: string,
     workDir: string,
-    options?: AgentExecuteOptions,
+    _options?: AgentExecuteOptions,
   ): Promise<AgentExecutionResult> {
     const messages: OpenAI.ChatCompletionMessageParam[] = [
       { role: 'system', content: SYSTEM_PROMPT },
