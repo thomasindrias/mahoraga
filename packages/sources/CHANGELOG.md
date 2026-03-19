@@ -1,5 +1,12 @@
 # mahoraga-sources
 
+## 0.2.5
+
+### Patch Changes
+
+- Updated dependencies [f04a335]
+  - mahoraga-core@0.6.0
+
 ## 0.2.4
 
 ### Patch Changes

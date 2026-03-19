@@ -1,5 +1,12 @@
 # mahoraga-analyzer
 
+## 0.3.5
+
+### Patch Changes
+
+- Updated dependencies [f04a335]
+  - mahoraga-core@0.6.0
+
 ## 0.3.4
 
 ### Patch Changes
