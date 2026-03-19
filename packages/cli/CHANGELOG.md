@@ -1,5 +1,17 @@
 # mahoraga-cli
 
+## 0.3.2
+
+### Patch Changes
+
+- Add custom adapter support to init command and fix workflow generation
+
+  - Add 'Custom adapter' option to interactive source selector
+  - Generate correct config template for custom adapters
+  - Make GitHub Actions workflow source-aware (no Amplitude env vars for custom)
+  - Fix workflow command from `npx mahoraga-cli analyze` to `npx mahoraga analyze`
+  - Update GitHub Actions versions to v4
+
 ## 0.3.1
 
 ### Patch Changes
