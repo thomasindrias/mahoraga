@@ -192,21 +192,33 @@ on:
     - cron: '0 0 */3 * *'  # Every 3 days
   workflow_dispatch: {}
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   analyze:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
       - uses: actions/cache@v4
         with:
           path: .mahoraga/
           key: mahoraga-state-\${{ github.ref }}
+      - name: Configure git
+        run: |
+          git config user.name "mahoraga[bot]"
+          git config user.email "mahoraga[bot]@users.noreply.github.com"
       - run: npx mahoraga analyze
         env:
 ${envLines.join('\n')}
