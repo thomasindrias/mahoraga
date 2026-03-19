@@ -144,7 +144,7 @@ export class AgentDispatcher {
     }
 
     // Create PR if configured
-    if (!this.config.createPR) {
+    if (this.config.createPR === false) {
       return {
         issueIds,
         status: 'pr_created',

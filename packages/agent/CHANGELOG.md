@@ -1,5 +1,11 @@
 # mahoraga-agent
 
+## 0.3.5
+
+### Patch Changes
+
+- fix: default createPR to true when not explicitly set to false
+
 ## 0.3.4
 
 ### Patch Changes
