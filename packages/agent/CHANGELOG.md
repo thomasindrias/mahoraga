@@ -1,5 +1,11 @@
 # mahoraga-agent
 
+## 0.3.4
+
+### Patch Changes
+
+- fix: handle missing postChecks config with safe defaults
+
 ## 0.3.3
 
 ### Patch Changes

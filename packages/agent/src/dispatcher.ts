@@ -205,6 +205,8 @@ export class AgentDispatcher {
     const { promisify } = await import('node:util');
     const exec = promisify(execFile);
 
+    const postChecks = this.config.postChecks ?? { build: false, test: false, maxDiffLines: 500 };
+
     // Check diff size
     try {
       const { stdout } = await exec('git', ['diff', '--stat', 'HEAD'], {
@@ -214,7 +216,7 @@ export class AgentDispatcher {
       const diffLines = stdout.split('\n').length;
       const sizeCheck = checkDiffSize(
         diffLines,
-        this.config.postChecks.maxDiffLines,
+        postChecks.maxDiffLines,
       );
       if (!sizeCheck.allowed) {
         return { status: 'diff_too_large', summary: sizeCheck.reason! };
@@ -241,7 +243,7 @@ export class AgentDispatcher {
     }
 
     // Run build check
-    if (this.config.postChecks.build) {
+    if (postChecks.build) {
       try {
         await exec('npm', ['run', 'build', '--if-present'], {
           cwd: workDir,
@@ -255,7 +257,7 @@ export class AgentDispatcher {
     }
 
     // Run test check
-    if (this.config.postChecks.test) {
+    if (postChecks.test) {
       try {
         await exec('npm', ['test', '--if-present'], {
           cwd: workDir,
