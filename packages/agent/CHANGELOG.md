@@ -1,5 +1,11 @@
 # mahoraga-agent
 
+## 0.5.2
+
+### Patch Changes
+
+- Support both OpenCode v0.x (`-p "prompt" -f json -q`) and v1.x (`opencode run "prompt" --format json`) CLI flags with auto-detection. Parse both single JSON and NDJSON output formats.
+
 ## 0.5.1
 
 ### Patch Changes
