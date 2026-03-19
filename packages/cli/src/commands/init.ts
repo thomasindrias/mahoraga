@@ -15,6 +15,7 @@ export async function runInit(cwd: string): Promise<void> {
     options: [
       { value: 'amplitude', label: 'Amplitude' },
       { value: 'posthog', label: 'PostHog (coming soon)', hint: 'V2' },
+      { value: 'custom', label: 'Custom adapter', hint: 'Bring your own source' },
     ],
   });
 
@@ -72,7 +73,7 @@ export async function runInit(cwd: string): Promise<void> {
     mkdirSync(workflowDir, { recursive: true });
     writeFileSync(
       join(workflowDir, 'mahoraga.yml'),
-      buildGitHubWorkflow(baseBranch as string),
+      buildGitHubWorkflow(source as string),
     );
     s.stop('GitHub Actions workflow generated');
   }
@@ -81,15 +82,24 @@ export async function runInit(cwd: string): Promise<void> {
 }
 
 function buildConfigFile(source: string, baseBranch: string): string {
+  const sourceBlock =
+    source === 'custom'
+      ? `    {
+      adapter: 'custom',
+      module: './adapters/my-adapter.mjs',
+      // Add any adapter-specific config here
+    },`
+      : `    {
+      adapter: '${source}',
+      apiKey: process.env.MAHORAGA_${source.toUpperCase()}_API_KEY!,
+      secretKey: process.env.MAHORAGA_${source.toUpperCase()}_SECRET_KEY!,
+    },`;
+
   return `import { defineConfig } from 'mahoraga-core';
 
 export default defineConfig({
   sources: [
-    {
-      adapter: '${source}',
-      apiKey: process.env.MAHORAGA_${source.toUpperCase()}_API_KEY!,
-      secretKey: process.env.MAHORAGA_${source.toUpperCase()}_SECRET_KEY!,
-    },
+${sourceBlock}
   ],
 
   analysis: {
@@ -138,6 +148,8 @@ function buildEnvTemplate(source: string): string {
   if (source === 'amplitude') {
     lines.push('MAHORAGA_AMPLITUDE_API_KEY=');
     lines.push('MAHORAGA_AMPLITUDE_SECRET_KEY=');
+  } else if (source === 'custom') {
+    lines.push('# Add any env vars your custom adapter needs');
   }
 
   lines.push('');
@@ -164,7 +176,16 @@ function updateGitignore(cwd: string): void {
   }
 }
 
-function buildGitHubWorkflow(_baseBranch: string): string {
+function buildGitHubWorkflow(source: string): string {
+  const envLines = ['          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}'];
+
+  if (source === 'amplitude') {
+    envLines.unshift(
+      '          MAHORAGA_AMPLITUDE_API_KEY: ${{ secrets.AMPLITUDE_API_KEY }}',
+      '          MAHORAGA_AMPLITUDE_SECRET_KEY: ${{ secrets.AMPLITUDE_SECRET_KEY }}',
+    );
+  }
+
   return `name: Mahoraga Analysis
 on:
   schedule:
@@ -175,22 +196,20 @@ jobs:
   analyze:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v5
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'pnpm'
-      - run: pnpm install
-      - uses: actions/cache@v6
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/cache@v4
         with:
           path: .mahoraga/
           key: mahoraga-state-\${{ github.ref }}
-      - run: npx mahoraga-cli analyze
+      - run: npx mahoraga analyze
         env:
-          MAHORAGA_AMPLITUDE_API_KEY: \${{ secrets.AMPLITUDE_API_KEY }}
-          MAHORAGA_AMPLITUDE_SECRET_KEY: \${{ secrets.AMPLITUDE_SECRET_KEY }}
-          ANTHROPIC_API_KEY: \${{ secrets.ANTHROPIC_API_KEY }}
+${envLines.join('\n')}
           GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
 `;
 }
