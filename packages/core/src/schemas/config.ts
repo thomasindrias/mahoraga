@@ -65,17 +65,8 @@ export const PostChecksSchema = z.object({
 
 /** Agent configuration schema with governance controls */
 export const AgentConfigSchema = z.object({
-  provider: z.enum(['claude-code', 'opencode', 'gemini', 'openai', 'openrouter']).default('claude-code'),
-  /** Model name (e.g. 'gpt-4o', 'gemini-2.5-pro'). Provider-specific defaults apply. */
-  model: z.string().optional(),
-  /** API key for the provider. Falls back to env vars (OPENAI_API_KEY, GEMINI_API_KEY). */
-  apiKey: z.string().optional(),
-  /** Custom base URL for OpenAI-compatible APIs */
-  baseURL: z.string().optional(),
-  claudeMdPath: z.string().optional(),
+  provider: z.enum(['opencode']).default('opencode'),
   agentMdPath: z.string().optional(),
-  skills: z.array(z.string()).optional(),
-  mcpServers: z.array(z.string()).optional(),
   workflow: z.literal('plan-then-implement').default('plan-then-implement'),
   createPR: z.boolean().default(true),
   baseBranch: z.string().default('main'),

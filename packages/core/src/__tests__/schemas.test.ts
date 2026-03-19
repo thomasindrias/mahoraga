@@ -169,7 +169,7 @@ describe('MahoragaConfigSchema', () => {
     expect(config.analysis.windowDays).toBe(3);
     expect(config.analysis.routePatterns).toEqual([]);
     expect(config.analysis.thresholds['rage-clicks'].clickCount).toBe(3);
-    expect(config.agent.provider).toBe('claude-code');
+    expect(config.agent.provider).toBe('opencode');
     expect(config.agent.maxRetries).toBe(3);
     expect(config.agent.confidenceThreshold).toBe(0.7);
     expect(config.agent.allowedPaths).toEqual([]);
@@ -183,7 +183,7 @@ describe('MahoragaConfigSchema', () => {
     const config = defineConfig({
       sources: [{ adapter: 'amplitude', apiKey: 'key', secretKey: 'secret' }],
       agent: {
-        provider: 'claude-code',
+        provider: 'opencode',
         allowedPaths: ['src/'],
         deniedPaths: ['src/auth/'],
         confidenceThreshold: 0.8,
@@ -195,5 +195,38 @@ describe('MahoragaConfigSchema', () => {
     expect(config.agent.deniedPaths).toEqual(['src/auth/']);
     expect(config.agent.confidenceThreshold).toBe(0.8);
     expect(config.agent.maxRetries).toBe(5);
+  });
+
+  it('should reject removed provider values', () => {
+    expect(() => defineConfig({
+      sources: [{ adapter: 'amplitude' }],
+      agent: {
+        provider: 'gemini' as any,
+      },
+    })).toThrow();
+  });
+
+  it('should strip removed agent fields without error', () => {
+    const config = defineConfig({
+      sources: [{ adapter: 'amplitude' }],
+      agent: {
+        model: 'gpt-4o' as any,
+        apiKey: 'sk-xxx' as any,
+        baseURL: 'https://api.example.com' as any,
+        claudeMdPath: '/path/to/claude.md' as any,
+        skills: ['skill1'] as any,
+        mcpServers: ['server1'] as any,
+      },
+    });
+
+    // Zod 4 strips unknown keys by default
+    expect((config.agent as any).model).toBeUndefined();
+    expect((config.agent as any).apiKey).toBeUndefined();
+    expect((config.agent as any).baseURL).toBeUndefined();
+    expect((config.agent as any).claudeMdPath).toBeUndefined();
+    expect((config.agent as any).skills).toBeUndefined();
+    expect((config.agent as any).mcpServers).toBeUndefined();
+    // agentMdPath should still be allowed (we're keeping it)
+    expect(config.agent.provider).toBe('opencode');
   });
 });
