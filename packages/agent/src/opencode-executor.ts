@@ -40,8 +40,15 @@ export class OpenCodeExecutor implements AgentExecutor {
         stderr: string;
         exitCode: number | null;
       }>((resolve, reject) => {
+        // Strip GITHUB_TOKEN from env to prevent OpenCode from auto-detecting
+        // GitHub Models as provider. OpenCode should use .opencode.json config instead.
+        // GH_TOKEN is preserved for git operations.
+        const env = { ...process.env };
+        delete env.GITHUB_TOKEN;
+
         const child = spawn('opencode', args, {
           cwd: workDir,
+          env,
           stdio: ['pipe', 'pipe', 'pipe'],
           timeout: options?.timeoutMs ?? 300_000,
         });

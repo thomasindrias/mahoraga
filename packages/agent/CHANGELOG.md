@@ -1,5 +1,11 @@
 # mahoraga-agent
 
+## 0.5.6
+
+### Patch Changes
+
+- Strip GITHUB_TOKEN from OpenCode env to prevent auto-detection of GitHub Models as provider
+
 ## 0.5.5
 
 ### Patch Changes
