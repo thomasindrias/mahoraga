@@ -1,5 +1,11 @@
 # mahoraga-agent
 
+## 0.3.2
+
+### Patch Changes
+
+- fix: auto-detect test runner (vitest/jest/bun) instead of hardcoding vitest
+
 ## 0.3.1
 
 ### Patch Changes
