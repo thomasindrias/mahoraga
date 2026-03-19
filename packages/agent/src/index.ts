@@ -1,4 +1,5 @@
 export * from './executor.js';
+export * from './api-executor.js';
 export * from './prompt-builder.js';
 export * from './test-generator.js';
 export * from './adaptation-loop.js';
