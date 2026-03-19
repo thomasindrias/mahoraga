@@ -2,7 +2,7 @@ import type { AgentExecutor, AgentExecutionResult, AgentExecuteOptions } from '.
 
 /**
  * OpenCode CLI executor.
- * Shells out to the `opencode` CLI in non-interactive mode (-p).
+ * Shells out to the `opencode` CLI in non-interactive mode (`opencode run`).
  * OpenCode is provider-agnostic — it supports OpenAI, Anthropic, Gemini,
  * Groq, OpenRouter, AWS Bedrock, and Azure via its own config (.opencode.json).
  */
@@ -17,7 +17,9 @@ export class OpenCodeExecutor implements AgentExecutor {
   ): Promise<AgentExecutionResult> {
     const { spawn } = await import('node:child_process');
 
-    const args = ['-p', '-', '-f', 'json', '-q'];
+    // OpenCode CLI: `opencode run "prompt" --format json`
+    // --format json outputs NDJSON events (step_start, text, tool_call, step_finish)
+    const args = ['run', prompt, '--format', 'json'];
 
     try {
       const stdout = await new Promise<string>((resolve, reject) => {
@@ -40,37 +42,46 @@ export class OpenCodeExecutor implements AgentExecutor {
           if (code === 0) {
             resolve(out);
           } else {
-            // On failure, try to extract response from JSON stdout
-            try {
-              const parsed = JSON.parse(out);
-              if (parsed.response) {
-                reject(new Error(parsed.response));
-                return;
-              }
-            } catch {
-              // Not JSON — fall through
-            }
             reject(new Error(stderr || out || `Process exited with code ${code}`));
           }
         });
 
         child.on('error', reject);
 
-        child.stdin!.write(prompt);
+        // Close stdin immediately — prompt is passed as CLI arg
         child.stdin!.end();
       });
 
-      // Parse JSON output — OpenCode returns { response: "..." } with -f json
-      try {
-        const parsed = JSON.parse(stdout);
-        if (parsed.response) {
-          return { success: true, diff: parsed.response };
+      // Parse NDJSON output — extract text parts from events
+      const textParts: string[] = [];
+      let totalCost = 0;
+
+      for (const line of stdout.split('\n')) {
+        if (!line.trim()) continue;
+        try {
+          const event = JSON.parse(line);
+          if (event.type === 'text' && event.part?.text) {
+            textParts.push(event.part.text);
+          }
+          if (event.type === 'step_finish' && typeof event.part?.cost === 'number') {
+            totalCost += event.part.cost;
+          }
+        } catch {
+          // Skip non-JSON lines
         }
-      } catch {
-        // Not JSON — use raw output
       }
 
-      return { success: true, diff: stdout };
+      const response = textParts.join('');
+
+      if (!response) {
+        return { success: false, error: 'OpenCode produced no text response' };
+      }
+
+      return {
+        success: true,
+        diff: response,
+        costUsd: totalCost > 0 ? totalCost : undefined,
+      };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       return { success: false, error: message };

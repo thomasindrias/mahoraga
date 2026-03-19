@@ -45,8 +45,8 @@ export async function createPR(
   const exec = promisify(execFile);
 
   try {
-    // Stage and commit agent changes
-    await exec('git', ['add', '-A'], { cwd: options.workDir, timeout: 10_000 });
+    // Stage agent changes, excluding tool artifacts
+    await exec('git', ['add', '-A', '--', '.', ':!.opencode/', ':!.claude/'], { cwd: options.workDir, timeout: 10_000 });
 
     // Check if there are changes to commit
     try {

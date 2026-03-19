@@ -10,6 +10,29 @@ vi.mock('node:child_process', () => ({
 
 import { OpenCodeExecutor } from '../opencode-executor.js';
 
+/** Build NDJSON output mimicking OpenCode's --format json output */
+function buildNdjson(textParts: string[], cost = 0): string {
+  const lines: string[] = [];
+  lines.push(JSON.stringify({
+    type: 'step_start',
+    sessionID: 'ses_test',
+    part: { type: 'step-start' },
+  }));
+  for (const text of textParts) {
+    lines.push(JSON.stringify({
+      type: 'text',
+      sessionID: 'ses_test',
+      part: { type: 'text', text },
+    }));
+  }
+  lines.push(JSON.stringify({
+    type: 'step_finish',
+    sessionID: 'ses_test',
+    part: { type: 'step-finish', reason: 'stop', cost },
+  }));
+  return lines.join('\n') + '\n';
+}
+
 function createMockProcess(
   stdoutData: string,
   exitCode: number,
@@ -24,7 +47,6 @@ function createMockProcess(
   (proc as unknown as Record<string, unknown>).stderr = stderr;
   (proc as unknown as Record<string, unknown>).stdin = stdin;
 
-  // Emit data + close asynchronously
   setTimeout(() => {
     if (stdoutData) stdout.push(Buffer.from(stdoutData));
     stdout.push(null);
@@ -49,16 +71,17 @@ describe('OpenCodeExecutor', () => {
   });
 
   describe('execute', () => {
-    it('spawns opencode with correct args for non-interactive mode', async () => {
-      const jsonOutput = JSON.stringify({ response: 'Fixed the bug by adding null check' });
-      mockSpawn.mockReturnValue(createMockProcess(jsonOutput, 0));
+    it('spawns opencode run with correct args', async () => {
+      mockSpawn.mockReturnValue(createMockProcess(
+        buildNdjson(['Fixed it']), 0,
+      ));
 
       const executor = new OpenCodeExecutor();
       await executor.execute('Fix the null error', '/tmp/work');
 
       expect(mockSpawn).toHaveBeenCalledWith(
         'opencode',
-        expect.arrayContaining(['-p', '-', '-f', 'json', '-q']),
+        ['run', 'Fix the null error', '--format', 'json'],
         expect.objectContaining({
           cwd: '/tmp/work',
           stdio: ['pipe', 'pipe', 'pipe'],
@@ -66,14 +89,19 @@ describe('OpenCodeExecutor', () => {
       );
     });
 
-    it('passes prompt via stdin', async () => {
+    it('closes stdin immediately (prompt is passed as CLI arg)', async () => {
       const writtenChunks: string[] = [];
       const proc = new EventEmitter() as ChildProcess;
       const stdout = new Readable({ read() {} });
       const stderr = new Readable({ read() {} });
+      let stdinEnded = false;
       const stdin = new Writable({
         write(chunk, _enc, cb) {
           writtenChunks.push(chunk.toString());
+          cb();
+        },
+        final(cb) {
+          stdinEnded = true;
           cb();
         },
       });
@@ -83,7 +111,7 @@ describe('OpenCodeExecutor', () => {
       (proc as unknown as Record<string, unknown>).stdin = stdin;
 
       setTimeout(() => {
-        stdout.push(Buffer.from(JSON.stringify({ response: 'done' })));
+        stdout.push(Buffer.from(buildNdjson(['done'])));
         stdout.push(null);
         stderr.push(null);
         proc.emit('close', 0);
@@ -92,16 +120,15 @@ describe('OpenCodeExecutor', () => {
       mockSpawn.mockReturnValue(proc);
 
       const executor = new OpenCodeExecutor();
-      await executor.execute('Fix the bug in Cart.tsx', '/tmp/work');
+      await executor.execute('Fix it', '/tmp/work');
 
-      expect(writtenChunks.join('')).toBe('Fix the bug in Cart.tsx');
+      expect(writtenChunks).toHaveLength(0);
+      expect(stdinEnded).toBe(true);
     });
 
-    it('returns success with response text on exit code 0', async () => {
-      const jsonOutput = JSON.stringify({
-        response: 'Added null check for character.createdAt',
-      });
-      mockSpawn.mockReturnValue(createMockProcess(jsonOutput, 0));
+    it('extracts text from NDJSON events', async () => {
+      const output = buildNdjson(['Added null check', ' for character.createdAt']);
+      mockSpawn.mockReturnValue(createMockProcess(output, 0));
 
       const executor = new OpenCodeExecutor();
       const result = await executor.execute('Fix null error', '/tmp/work');
@@ -110,25 +137,38 @@ describe('OpenCodeExecutor', () => {
       expect(result.diff).toBe('Added null check for character.createdAt');
     });
 
-    it('returns success with plain text when JSON has no response field', async () => {
-      const jsonOutput = JSON.stringify({ message: 'some other format' });
-      mockSpawn.mockReturnValue(createMockProcess(jsonOutput, 0));
+    it('extracts cost from step_finish events', async () => {
+      const output = buildNdjson(['Fixed'], 0.05);
+      mockSpawn.mockReturnValue(createMockProcess(output, 0));
 
       const executor = new OpenCodeExecutor();
       const result = await executor.execute('Fix it', '/tmp/work');
 
       expect(result.success).toBe(true);
-      expect(result.diff).toBe(jsonOutput);
+      expect(result.costUsd).toBe(0.05);
     });
 
-    it('returns success with raw output when stdout is not valid JSON', async () => {
-      mockSpawn.mockReturnValue(createMockProcess('Fix applied successfully', 0));
+    it('returns no costUsd when cost is 0', async () => {
+      const output = buildNdjson(['Fixed'], 0);
+      mockSpawn.mockReturnValue(createMockProcess(output, 0));
 
       const executor = new OpenCodeExecutor();
       const result = await executor.execute('Fix it', '/tmp/work');
 
       expect(result.success).toBe(true);
-      expect(result.diff).toBe('Fix applied successfully');
+      expect(result.costUsd).toBeUndefined();
+    });
+
+    it('returns failure when no text events in output', async () => {
+      const output = JSON.stringify({ type: 'step_start', part: {} }) + '\n' +
+        JSON.stringify({ type: 'step_finish', part: { cost: 0 } }) + '\n';
+      mockSpawn.mockReturnValue(createMockProcess(output, 0));
+
+      const executor = new OpenCodeExecutor();
+      const result = await executor.execute('Fix it', '/tmp/work');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('no text response');
     });
 
     it('returns failure on non-zero exit code', async () => {
@@ -167,8 +207,7 @@ describe('OpenCodeExecutor', () => {
     });
 
     it('uses custom timeout from options', async () => {
-      const jsonOutput = JSON.stringify({ response: 'done' });
-      mockSpawn.mockReturnValue(createMockProcess(jsonOutput, 0));
+      mockSpawn.mockReturnValue(createMockProcess(buildNdjson(['done']), 0));
 
       const executor = new OpenCodeExecutor();
       await executor.execute('Fix it', '/tmp/work', { timeoutMs: 60_000 });
@@ -181,8 +220,7 @@ describe('OpenCodeExecutor', () => {
     });
 
     it('uses default 5-minute timeout when not specified', async () => {
-      const jsonOutput = JSON.stringify({ response: 'done' });
-      mockSpawn.mockReturnValue(createMockProcess(jsonOutput, 0));
+      mockSpawn.mockReturnValue(createMockProcess(buildNdjson(['done']), 0));
 
       const executor = new OpenCodeExecutor();
       await executor.execute('Fix it', '/tmp/work');
@@ -192,17 +230,6 @@ describe('OpenCodeExecutor', () => {
         expect.any(Array),
         expect.objectContaining({ timeout: 300_000 }),
       );
-    });
-
-    it('returns error text from JSON response field on non-zero exit', async () => {
-      const errorJson = JSON.stringify({ response: 'Could not find the file' });
-      mockSpawn.mockReturnValue(createMockProcess(errorJson, 1));
-
-      const executor = new OpenCodeExecutor();
-      const result = await executor.execute('Fix it', '/tmp/work');
-
-      expect(result.success).toBe(false);
-      expect(result.error).toBe('Could not find the file');
     });
 
     it('prefers stderr over stdout for error messages on failure', async () => {
@@ -215,6 +242,17 @@ describe('OpenCodeExecutor', () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('fatal: something broke');
+    });
+
+    it('handles non-JSON lines in output gracefully', async () => {
+      const output = 'some debug log\n' + buildNdjson(['Fixed the bug']);
+      mockSpawn.mockReturnValue(createMockProcess(output, 0));
+
+      const executor = new OpenCodeExecutor();
+      const result = await executor.execute('Fix it', '/tmp/work');
+
+      expect(result.success).toBe(true);
+      expect(result.diff).toBe('Fixed the bug');
     });
   });
 });
