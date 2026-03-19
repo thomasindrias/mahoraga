@@ -100,9 +100,21 @@ export class AgentDispatcher {
         executeOptions: {
           timeoutMs: this.config.timeoutMs,
           maxCostUsd: this.config.maxCostPerIssue,
-          claudeMdPath: this.config.claudeMdPath,
-          skills: this.config.skills,
-          mcpServers: this.config.mcpServers,
+        },
+        fileChangeChecker: async (dir: string) => {
+          try {
+            const { execFile } = await import('node:child_process');
+            const { promisify } = await import('node:util');
+            const exec = promisify(execFile);
+            const { stdout } = await exec('git', ['diff', '--stat', 'HEAD'], {
+              cwd: dir,
+              timeout: 10_000,
+            });
+            return stdout.trim().length > 0;
+          } catch {
+            // If git diff fails, skip the check (don't block the pipeline)
+            return true;
+          }
         },
       },
     );
