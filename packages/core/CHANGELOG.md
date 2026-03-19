@@ -1,5 +1,19 @@
 # mahoraga-core
 
+## 0.6.0
+
+### Minor Changes
+
+- f04a335: OpenCode-first provider consolidation.
+
+  - Removed ClaudeCodeExecutor, APIAgentExecutor, and openai dependency
+  - Simplified config to opencode-only provider
+  - Removed v0.x OpenCode support
+  - Added NDJSON error event parsing
+  - Added file-change detection in adaptation loop
+  - Updated init workflow template for OpenCode + PAT_TOKEN
+  - Added .opencode.json scaffolding to init command
+
 ## 0.5.1
 
 ### Patch Changes
