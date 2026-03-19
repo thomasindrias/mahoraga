@@ -1,6 +1,6 @@
 {
   "name": "mahoraga-agent",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "AI agent dispatcher with adaptation loop for Mahoraga",
   "license": "MIT",
   "author": "Thomas Indrias <thomasindrias@gmail.com>",

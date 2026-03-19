@@ -122,7 +122,7 @@ describe('OpenCodeExecutor', () => {
       mockVersionDetection('1.2.10');
     });
 
-    it('spawns opencode run with --format json for v1.x', async () => {
+    it('spawns opencode run with --format json before prompt for v1.x', async () => {
       mockSpawn.mockReturnValue(createMockProcess(
         buildNdjson(['Fixed it']), 0,
       ));
@@ -132,7 +132,7 @@ describe('OpenCodeExecutor', () => {
 
       expect(mockSpawn).toHaveBeenCalledWith(
         'opencode',
-        ['run', 'Fix the null error', '--format', 'json'],
+        ['run', '--format', 'json', 'Fix the null error'],
         expect.objectContaining({
           cwd: '/tmp/work',
           stdio: ['pipe', 'pipe', 'pipe'],
@@ -175,7 +175,7 @@ describe('OpenCodeExecutor', () => {
   });
 
   describe('common behavior', () => {
-    it('returns failure when no text in output', async () => {
+    it('returns failure with diagnostics when no text in output', async () => {
       mockSpawn.mockReturnValue(createMockProcess('', 0));
 
       const executor = new OpenCodeExecutor();
@@ -183,9 +183,10 @@ describe('OpenCodeExecutor', () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('no text response');
+      expect(result.error).toContain('version=v0');
     });
 
-    it('returns failure on non-zero exit code', async () => {
+    it('returns failure with diagnostics on non-zero exit code', async () => {
       mockSpawn.mockReturnValue(
         createMockProcess('', 1, 'Error: opencode crashed'),
       );
@@ -195,9 +196,10 @@ describe('OpenCodeExecutor', () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('opencode crashed');
+      expect(result.error).toContain('exit=1');
     });
 
-    it('returns failure when spawn emits ENOENT error', async () => {
+    it('returns failure with diagnostics when spawn emits ENOENT error', async () => {
       const proc = new EventEmitter() as ChildProcess;
       const stdout = new Readable({ read() {} });
       const stderr = new Readable({ read() {} });
@@ -218,6 +220,7 @@ describe('OpenCodeExecutor', () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('ENOENT');
+      expect(result.error).toContain('spawn error');
     });
 
     it('uses custom timeout from options', async () => {
@@ -290,6 +293,24 @@ describe('OpenCodeExecutor', () => {
         ['-p', 'Fix it', '-f', 'json', '-q'],
         expect.any(Object),
       );
+    });
+
+    it('includes version detection failure in diagnostics', async () => {
+      mockExecFile.mockImplementation((_cmd: string, _args: string[], _opts: unknown, cb?: (err: Error | null) => void) => {
+        if (cb) {
+          cb(new Error('ENOENT'));
+          return;
+        }
+        throw new Error('ENOENT');
+      });
+
+      mockSpawn.mockReturnValue(createMockProcess('', 0));
+
+      const executor = new OpenCodeExecutor();
+      const result = await executor.execute('Fix it', '/tmp/work');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('detect-failed');
     });
   });
 });

@@ -1,5 +1,12 @@
 # mahoraga-cli
 
+## 0.6.4
+
+### Patch Changes
+
+- Updated dependencies
+  - mahoraga-agent@0.5.4
+
 ## 0.6.3
 
 ### Patch Changes

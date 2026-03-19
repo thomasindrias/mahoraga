@@ -1,5 +1,11 @@
 # mahoraga-agent
 
+## 0.5.4
+
+### Patch Changes
+
+- Fix OpenCode v1.x CLI args order: flags must come before the variadic message argument. Also embed full diagnostics (version, exit code, stderr) into error messages for CI visibility.
+
 ## 0.5.3
 
 ### Patch Changes
