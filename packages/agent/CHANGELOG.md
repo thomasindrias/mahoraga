@@ -1,5 +1,11 @@
 # mahoraga-agent
 
+## 0.2.4
+
+### Patch Changes
+
+- Use stdin for prompt delivery to Claude Code CLI to handle multi-line prompts
+
 ## 0.2.3
 
 ### Patch Changes
