@@ -1,5 +1,11 @@
 # mahoraga-agent
 
+## 0.3.3
+
+### Patch Changes
+
+- fix: commit and push agent changes before PR creation, log dispatch errors
+
 ## 0.3.2
 
 ### Patch Changes

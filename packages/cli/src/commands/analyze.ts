@@ -217,10 +217,12 @@ export async function runAnalyze(
           console.log(`No fix: ${result.summary}`);
         }
       } catch (error) {
-        costTracker.recordDispatch(1.0); // Count failed dispatch against budget
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        console.error(`Dispatch error: ${errorMsg}`);
+        costTracker.recordDispatch(1.0);
         errors.push({
           phase: 'dispatch',
-          message: error instanceof Error ? error.message : String(error),
+          message: errorMsg,
           timestamp: Date.now(),
         });
       } finally {

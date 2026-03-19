@@ -155,7 +155,15 @@ export class AgentDispatcher {
       };
     }
 
-    const branchName = `mahoraga/fix-${primaryIssue.ruleId}-${Date.now()}`;
+    // Get the current branch name from the worktree (set by analyze.ts)
+    const { execFile } = await import('node:child_process');
+    const { promisify } = await import('node:util');
+    const execFn = promisify(execFile);
+    const { stdout: branchOut } = await execFn('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
+      cwd: workDir,
+      timeout: 10_000,
+    });
+    const branchName = branchOut.trim();
     const prResult = await createPR(branchName, issues, adaptationResult, {
       baseBranch: this.config.baseBranch,
       draft: this.config.draftPR,
