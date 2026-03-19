@@ -1,5 +1,13 @@
 # mahoraga-cli
 
+## 0.3.4
+
+### Patch Changes
+
+- Fix Claude Code executor: add --dangerously-skip-permissions for CI, parse correct JSON output format
+- Updated dependencies
+  - mahoraga-agent@0.2.2
+
 ## 0.3.3
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # mahoraga-agent
 
+## 0.2.2
+
+### Patch Changes
+
+- Fix Claude Code executor: add --dangerously-skip-permissions for CI, parse correct JSON output format
+
 ## 0.2.1
 
 ### Patch Changes
