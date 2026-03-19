@@ -1,5 +1,20 @@
 # mahoraga-cli
 
+## 0.5.0
+
+### Minor Changes
+
+- feat: add OpenRouter as AI provider for access to Claude, Llama, DeepSeek, etc.
+
+### Patch Changes
+
+- Updated dependencies
+  - mahoraga-agent@0.4.0
+  - mahoraga-core@0.5.0
+  - mahoraga-analyzer@0.3.3
+  - mahoraga-mapper@0.1.7
+  - mahoraga-sources@0.2.3
+
 ## 0.4.5
 
 ### Patch Changes

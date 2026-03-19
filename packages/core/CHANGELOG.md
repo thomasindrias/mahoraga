@@ -1,5 +1,11 @@
 # mahoraga-core
 
+## 0.5.0
+
+### Minor Changes
+
+- feat: add OpenRouter as AI provider for access to Claude, Llama, DeepSeek, etc.
+
 ## 0.4.0
 
 ### Minor Changes

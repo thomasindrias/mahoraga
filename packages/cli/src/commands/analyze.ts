@@ -286,6 +286,7 @@ export async function getAdapter(
 const API_KEY_ENV_VARS: Record<string, string> = {
   openai: 'OPENAI_API_KEY',
   gemini: 'GEMINI_API_KEY',
+  openrouter: 'OPENROUTER_API_KEY',
 };
 
 /** Create the appropriate agent executor based on provider config. */

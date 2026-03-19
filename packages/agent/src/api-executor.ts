@@ -7,6 +7,10 @@ const PROVIDER_DEFAULTS: Record<string, { baseURL: string; model: string }> = {
     baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/',
     model: 'gemini-2.5-pro',
   },
+  openrouter: {
+    baseURL: 'https://openrouter.ai/api/v1',
+    model: 'anthropic/claude-sonnet-4',
+  },
 };
 
 const MAX_TURNS = 30;
