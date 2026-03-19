@@ -58,6 +58,24 @@ export async function runInit(cwd: string): Promise<void> {
   writeFileSync(join(cwd, '.mahoraga.env'), envContent);
   s.stop('Environment template created');
 
+  // Scaffold .opencode.json if it doesn't exist
+  const opencodePath = join(cwd, '.opencode.json');
+  if (!existsSync(opencodePath)) {
+    s.start('Creating OpenCode configuration');
+    writeFileSync(opencodePath, JSON.stringify({
+      provider: {
+        default: 'anthropic',
+        anthropic: {
+          model: 'claude-sonnet-4-20250514',
+        },
+      },
+      permission: {
+        '*': 'allow',
+      },
+    }, null, 2) + '\n');
+    s.stop('OpenCode configuration created');
+  }
+
   // Create .mahoraga directory
   mkdirSync(join(cwd, '.mahoraga'), { recursive: true });
 
@@ -78,7 +96,7 @@ export async function runInit(cwd: string): Promise<void> {
     s.stop('GitHub Actions workflow generated');
   }
 
-  p.outro('Setup complete! Next steps:\n  1. Fill in .mahoraga.env with your API keys\n  2. Run: npx mahoraga analyze --dry-run');
+  p.outro('Setup complete! Next steps:\n  1. Fill in .mahoraga.env with your analytics API keys\n  2. Configure your AI provider in .opencode.json\n  3. Run: npx mahoraga analyze --dry-run');
 }
 
 function buildConfigFile(source: string, baseBranch: string): string {
@@ -108,8 +126,7 @@ ${sourceBlock}
   },
 
   agent: {
-    provider: 'claude-code',
-    claudeMdPath: './CLAUDE.md',
+    provider: 'opencode',
     workflow: 'plan-then-implement',
     createPR: true,
     draftPR: true,
@@ -153,8 +170,7 @@ function buildEnvTemplate(source: string): string {
   }
 
   lines.push('');
-  lines.push('# Required for agent dispatch');
-  lines.push('ANTHROPIC_API_KEY=');
+  lines.push('# AI provider credentials are configured in .opencode.json');
   lines.push('');
 
   return lines.join('\n');
@@ -162,7 +178,7 @@ function buildEnvTemplate(source: string): string {
 
 function updateGitignore(cwd: string): void {
   const gitignorePath = join(cwd, '.gitignore');
-  const entries = ['.mahoraga/', '.mahoraga.env'];
+  const entries = ['.mahoraga/', '.mahoraga.env', '.opencode/'];
   let content = '';
 
   if (existsSync(gitignorePath)) {
@@ -177,10 +193,10 @@ function updateGitignore(cwd: string): void {
 }
 
 function buildGitHubWorkflow(source: string): string {
-  const envLines = ['          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}'];
+  const envLines: string[] = [];
 
   if (source === 'amplitude') {
-    envLines.unshift(
+    envLines.push(
       '          MAHORAGA_AMPLITUDE_API_KEY: ${{ secrets.AMPLITUDE_API_KEY }}',
       '          MAHORAGA_AMPLITUDE_SECRET_KEY: ${{ secrets.AMPLITUDE_SECRET_KEY }}',
     );
@@ -200,17 +216,17 @@ jobs:
   analyze:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: '22'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
-      - name: Install Claude Code
-        run: npm install -g @anthropic-ai/claude-code
+      - name: Install OpenCode
+        run: npm install --global opencode-ai
       - uses: actions/cache@v4
         with:
           path: .mahoraga/
@@ -221,7 +237,7 @@ jobs:
           git config user.email "mahoraga[bot]@users.noreply.github.com"
       - run: npx mahoraga analyze
         env:
-${envLines.join('\n')}
-          GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+${envLines.length > 0 ? envLines.join('\n') + '\n' : ''}          GITHUB_TOKEN: \${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: \${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
 `;
 }
