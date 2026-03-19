@@ -4,10 +4,8 @@ import { EventEmitter, Readable, Writable } from 'node:stream';
 
 // Mock child_process
 const mockSpawn = vi.fn();
-const mockExecFile = vi.fn();
 vi.mock('node:child_process', () => ({
   spawn: (...args: unknown[]) => mockSpawn(...args),
-  execFile: (...args: unknown[]) => mockExecFile(...args),
 }));
 
 import { OpenCodeExecutor } from '../opencode-executor.js';
@@ -35,6 +33,15 @@ function buildNdjson(textParts: string[], cost = 0): string {
   return lines.join('\n') + '\n';
 }
 
+/** Build NDJSON error event */
+function buildNdjsonWithError(errorMsg: string): string {
+  return JSON.stringify({
+    type: 'error',
+    sessionID: 'ses_test',
+    part: { type: 'error', error: errorMsg },
+  }) + '\n';
+}
+
 function createMockProcess(
   stdoutData: string,
   exitCode: number,
@@ -60,24 +67,9 @@ function createMockProcess(
   return proc;
 }
 
-/** Mock execFile to simulate version detection */
-function mockVersionDetection(version: string) {
-  mockExecFile.mockImplementation((_cmd: string, _args: string[], _opts: unknown, cb?: (err: Error | null, result: { stdout: string }) => void) => {
-    if (cb) {
-      cb(null, { stdout: version });
-      return;
-    }
-    // promisify compatibility
-    return { stdout: version };
-  });
-}
-
 describe('OpenCodeExecutor', () => {
   beforeEach(() => {
     mockSpawn.mockReset();
-    mockExecFile.mockReset();
-    // Default: simulate v0.x detection
-    mockVersionDetection('0.0.55');
   });
 
   describe('constructor', () => {
@@ -87,42 +79,8 @@ describe('OpenCodeExecutor', () => {
     });
   });
 
-  describe('execute with v0.x', () => {
-    it('spawns opencode with -p flag for v0.x', async () => {
-      const jsonOutput = JSON.stringify({ response: 'Fixed the bug' });
-      mockSpawn.mockReturnValue(createMockProcess(jsonOutput, 0));
-
-      const executor = new OpenCodeExecutor();
-      await executor.execute('Fix the null error', '/tmp/work');
-
-      expect(mockSpawn).toHaveBeenCalledWith(
-        'opencode',
-        ['-p', 'Fix the null error', '-f', 'json', '-q'],
-        expect.objectContaining({
-          cwd: '/tmp/work',
-          stdio: ['pipe', 'pipe', 'pipe'],
-        }),
-      );
-    });
-
-    it('parses v0.x single JSON response', async () => {
-      const jsonOutput = JSON.stringify({ response: 'Added null check' });
-      mockSpawn.mockReturnValue(createMockProcess(jsonOutput, 0));
-
-      const executor = new OpenCodeExecutor();
-      const result = await executor.execute('Fix it', '/tmp/work');
-
-      expect(result.success).toBe(true);
-      expect(result.diff).toBe('Added null check');
-    });
-  });
-
   describe('execute with v1.x', () => {
-    beforeEach(() => {
-      mockVersionDetection('1.2.10');
-    });
-
-    it('spawns opencode run with --format json before prompt for v1.x', async () => {
+    it('spawns opencode run with --format json before prompt', async () => {
       mockSpawn.mockReturnValue(createMockProcess(
         buildNdjson(['Fixed it']), 0,
       ));
@@ -175,18 +133,17 @@ describe('OpenCodeExecutor', () => {
   });
 
   describe('common behavior', () => {
-    it('returns failure with diagnostics when no text in output', async () => {
+    it('returns failure when no output is produced', async () => {
       mockSpawn.mockReturnValue(createMockProcess('', 0));
 
       const executor = new OpenCodeExecutor();
       const result = await executor.execute('Fix it', '/tmp/work');
 
       expect(result.success).toBe(false);
-      expect(result.error).toContain('no text response');
-      expect(result.error).toContain('version=v0');
+      expect(result.error).toContain('no output');
     });
 
-    it('returns failure with diagnostics on non-zero exit code', async () => {
+    it('returns failure on non-zero exit code', async () => {
       mockSpawn.mockReturnValue(
         createMockProcess('', 1, 'Error: opencode crashed'),
       );
@@ -196,10 +153,9 @@ describe('OpenCodeExecutor', () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('opencode crashed');
-      expect(result.error).toContain('exit=1');
     });
 
-    it('returns failure with diagnostics when spawn emits ENOENT error', async () => {
+    it('returns failure when spawn emits ENOENT error', async () => {
       const proc = new EventEmitter() as ChildProcess;
       const stdout = new Readable({ read() {} });
       const stderr = new Readable({ read() {} });
@@ -224,8 +180,7 @@ describe('OpenCodeExecutor', () => {
     });
 
     it('uses custom timeout from options', async () => {
-      const jsonOutput = JSON.stringify({ response: 'done' });
-      mockSpawn.mockReturnValue(createMockProcess(jsonOutput, 0));
+      mockSpawn.mockReturnValue(createMockProcess(buildNdjson(['done']), 0));
 
       const executor = new OpenCodeExecutor();
       await executor.execute('Fix it', '/tmp/work', { timeoutMs: 60_000 });
@@ -238,8 +193,7 @@ describe('OpenCodeExecutor', () => {
     });
 
     it('uses default 5-minute timeout when not specified', async () => {
-      const jsonOutput = JSON.stringify({ response: 'done' });
-      mockSpawn.mockReturnValue(createMockProcess(jsonOutput, 0));
+      mockSpawn.mockReturnValue(createMockProcess(buildNdjson(['done']), 0));
 
       const executor = new OpenCodeExecutor();
       await executor.execute('Fix it', '/tmp/work');
@@ -262,7 +216,6 @@ describe('OpenCodeExecutor', () => {
     });
 
     it('handles non-JSON lines in NDJSON output gracefully', async () => {
-      mockVersionDetection('1.2.10');
       const output = 'some debug log\n' + buildNdjson(['Fixed the bug']);
       mockSpawn.mockReturnValue(createMockProcess(output, 0));
 
@@ -272,45 +225,44 @@ describe('OpenCodeExecutor', () => {
       expect(result.success).toBe(true);
       expect(result.diff).toBe('Fixed the bug');
     });
+  });
 
-    it('defaults to v0 flags when version detection fails', async () => {
-      mockExecFile.mockImplementation((_cmd: string, _args: string[], _opts: unknown, cb?: (err: Error | null) => void) => {
-        if (cb) {
-          cb(new Error('ENOENT'));
-          return;
-        }
-        throw new Error('ENOENT');
-      });
-
-      const jsonOutput = JSON.stringify({ response: 'done' });
-      mockSpawn.mockReturnValue(createMockProcess(jsonOutput, 0));
-
-      const executor = new OpenCodeExecutor();
-      await executor.execute('Fix it', '/tmp/work');
-
-      expect(mockSpawn).toHaveBeenCalledWith(
-        'opencode',
-        ['-p', 'Fix it', '-f', 'json', '-q'],
-        expect.any(Object),
-      );
-    });
-
-    it('includes version detection failure in diagnostics', async () => {
-      mockExecFile.mockImplementation((_cmd: string, _args: string[], _opts: unknown, cb?: (err: Error | null) => void) => {
-        if (cb) {
-          cb(new Error('ENOENT'));
-          return;
-        }
-        throw new Error('ENOENT');
-      });
-
-      mockSpawn.mockReturnValue(createMockProcess('', 0));
+  describe('NDJSON error events', () => {
+    it('returns failure when NDJSON contains error event', async () => {
+      const ndjson = buildNdjsonWithError('API rate limit exceeded');
+      mockSpawn.mockReturnValue(createMockProcess(ndjson, 0));
 
       const executor = new OpenCodeExecutor();
       const result = await executor.execute('Fix it', '/tmp/work');
 
       expect(result.success).toBe(false);
-      expect(result.error).toContain('detect-failed');
+      expect(result.error).toContain('API rate limit exceeded');
+    });
+
+    it('returns failure with error even if text events exist', async () => {
+      const ndjson = buildNdjson(['Starting...']) + buildNdjsonWithError('Provider returned 403');
+      mockSpawn.mockReturnValue(createMockProcess(ndjson, 0));
+
+      const executor = new OpenCodeExecutor();
+      const result = await executor.execute('Fix it', '/tmp/work');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Provider returned 403');
+    });
+
+    it('handles error event with text field instead of error field', async () => {
+      const ndjson = JSON.stringify({
+        type: 'error',
+        sessionID: 'ses_test',
+        part: { type: 'error', text: 'Something went wrong' },
+      }) + '\n';
+      mockSpawn.mockReturnValue(createMockProcess(ndjson, 0));
+
+      const executor = new OpenCodeExecutor();
+      const result = await executor.execute('Fix it', '/tmp/work');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Something went wrong');
     });
   });
 });

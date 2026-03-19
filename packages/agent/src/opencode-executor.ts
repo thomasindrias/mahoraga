@@ -5,9 +5,6 @@ import type { AgentExecutor, AgentExecutionResult, AgentExecuteOptions } from '.
  * Shells out to the `opencode` CLI in non-interactive mode.
  * OpenCode is provider-agnostic — it supports OpenAI, Anthropic, Gemini,
  * Groq, OpenRouter, AWS Bedrock, and Azure via its own config (.opencode.json).
- *
- * Supports both v0.x (`-p "prompt" -f json -q`) and v1.x (`opencode run --format json "prompt"`).
- * Version is auto-detected at runtime.
  */
 export class OpenCodeExecutor implements AgentExecutor {
   readonly provider = 'opencode';
@@ -19,20 +16,7 @@ export class OpenCodeExecutor implements AgentExecutor {
     options?: AgentExecuteOptions,
   ): Promise<AgentExecutionResult> {
     const { spawn } = await import('node:child_process');
-
-    // Detect version to determine correct flags
-    const { version, raw: versionRaw } = await this.detectVersion(workDir);
-    // v1.x: flags MUST come before the variadic message argument
-    const args = version === 'v1'
-      ? ['run', '--format', 'json', prompt]
-      : ['-p', prompt, '-f', 'json', '-q'];
-
-    const diagnostics: string[] = [
-      `version=${version}(${versionRaw})`,
-      `args[0..2]=${args.slice(0, 3).join(' ')}`,
-      `promptLen=${prompt.length}`,
-      `cwd=${workDir}`,
-    ];
+    const args = ['run', '--format', 'json', prompt];
 
     try {
       const { stdout, stderr, exitCode } = await new Promise<{
@@ -40,9 +24,6 @@ export class OpenCodeExecutor implements AgentExecutor {
         stderr: string;
         exitCode: number | null;
       }>((resolve, reject) => {
-        // Strip GITHUB_TOKEN from env to prevent OpenCode from auto-detecting
-        // GitHub Models as provider. OpenCode should use .opencode.json config instead.
-        // GH_TOKEN is preserved for git operations.
         const env = { ...process.env };
         delete env.GITHUB_TOKEN;
 
@@ -72,68 +53,37 @@ export class OpenCodeExecutor implements AgentExecutor {
         child.stdin!.end();
       });
 
-      diagnostics.push(`exit=${exitCode}`, `stdoutLen=${stdout.length}`, `stderrLen=${stderr.length}`);
-
       if (exitCode !== 0) {
-        const errorDetail = stderr || stdout || `exit code ${exitCode}`;
         return {
           success: false,
-          error: `[${diagnostics.join(', ')}] ${errorDetail.slice(0, 1000)}`,
+          error: (stderr || stdout || `exit code ${exitCode}`).slice(0, 1000),
         };
       }
 
-      return this.parseOutput(stdout, diagnostics);
+      return this.parseOutput(stdout);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      return {
-        success: false,
-        error: `[${diagnostics.join(', ')}] spawn error: ${message}`,
-      };
+      return { success: false, error: `spawn error: ${message}` };
     }
   }
 
   /**
-   * Detect OpenCode version to determine correct CLI flags.
-   * v1.x has `opencode run` subcommand, v0.x uses `-p` flag.
+   * Parse OpenCode NDJSON output.
+   * @param stdout - Raw stdout from OpenCode process
+   * @returns Parsed execution result
    */
-  private async detectVersion(cwd: string): Promise<{ version: 'v0' | 'v1'; raw: string }> {
-    const { execFile } = await import('node:child_process');
-    const { promisify } = await import('node:util');
-    const exec = promisify(execFile);
-
-    try {
-      const { stdout } = await exec('opencode', ['--version'], { cwd, timeout: 5_000 });
-      const raw = stdout.trim();
-      const major = parseInt(raw.split('.')[0] ?? '0', 10);
-      return { version: major >= 1 ? 'v1' : 'v0', raw };
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      return { version: 'v0', raw: `detect-failed:${msg.slice(0, 100)}` };
-    }
-  }
-
-  /**
-   * Parse OpenCode output, supporting both v0.x single JSON and v1.x NDJSON.
-   */
-  private parseOutput(stdout: string, diagnostics: string[]): AgentExecutionResult {
-    // Try v0.x format first: single JSON object with { response: "..." }
-    try {
-      const parsed = JSON.parse(stdout.trim());
-      if (parsed.response) {
-        return { success: true, diff: parsed.response };
-      }
-    } catch {
-      // Not single JSON — try NDJSON
-    }
-
-    // Try v1.x NDJSON format: multiple JSON lines with type=text events
+  private parseOutput(stdout: string): AgentExecutionResult {
     const textParts: string[] = [];
+    const errors: string[] = [];
     let totalCost = 0;
 
     for (const line of stdout.split('\n')) {
       if (!line.trim()) continue;
       try {
         const event = JSON.parse(line);
+        if (event.type === 'error') {
+          errors.push(event.part?.error ?? event.part?.text ?? 'Unknown error');
+        }
         if (event.type === 'text' && event.part?.text) {
           textParts.push(event.part.text);
         }
@@ -145,6 +95,11 @@ export class OpenCodeExecutor implements AgentExecutor {
       }
     }
 
+    // Error events take priority
+    if (errors.length > 0) {
+      return { success: false, error: errors.join('; ') };
+    }
+
     if (textParts.length > 0) {
       return {
         success: true,
@@ -153,14 +108,14 @@ export class OpenCodeExecutor implements AgentExecutor {
       };
     }
 
-    // If we got here with non-empty output, return it as-is
+    // Non-empty raw output as fallback
     if (stdout.trim()) {
       return { success: true, diff: stdout.trim() };
     }
 
     return {
       success: false,
-      error: `[${diagnostics.join(', ')}] OpenCode produced no text response. Raw output: ${stdout.slice(0, 500)}`,
+      error: `OpenCode produced no output. Raw: ${stdout.slice(0, 500)}`,
     };
   }
 }
