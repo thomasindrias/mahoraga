@@ -62,7 +62,6 @@ export class OpenCodeExecutor implements AgentExecutor {
 
         child.on('error', reject);
 
-        // Close stdin immediately — prompt is passed as CLI arg
         child.stdin!.end();
       });
 

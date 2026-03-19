@@ -76,6 +76,10 @@ export async function runAdaptationLoop(
       continue;
     }
 
+    // Log what the agent returned for debugging
+    const diffPreview = lastResult.diff?.slice(0, 500) ?? '(no diff)';
+    console.log(`Attempt ${attempt + 1}: Agent succeeded. Cost: $${lastResult.costUsd?.toFixed(4) ?? 'N/A'}. Output preview: ${diffPreview}`);
+
     // Run the generated test
     let testError: string | null;
     try {

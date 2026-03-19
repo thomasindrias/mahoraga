@@ -1,5 +1,11 @@
 # mahoraga-agent
 
+## 0.5.5
+
+### Patch Changes
+
+- Add agent output preview logging to adaptation loop for CI debugging
+
 ## 0.5.4
 
 ### Patch Changes
