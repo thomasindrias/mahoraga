@@ -1,3 +1,4 @@
+import * as path from 'node:path';
 import {
   createDatabase,
   EventStore,
@@ -6,7 +7,7 @@ import {
   RunStore,
   SuppressionStore,
 } from 'mahoraga-core';
-import type { MahoragaConfig, TimeRange, RunError } from 'mahoraga-core';
+import type { MahoragaConfig, TimeRange, RunError, SourceConfig } from 'mahoraga-core';
 import { PipelineRunner, AmplitudeAdapter, PostHogAdapter } from 'mahoraga-sources';
 import type { SourceAdapter } from 'mahoraga-sources';
 import { AnalysisEngine, RageClickRule, ErrorSpikeRule, DeadClickRule, FormAbandonmentRule, SlowNavigationRule, LayoutShiftRule, ErrorLoopRule } from 'mahoraga-analyzer';
@@ -66,7 +67,7 @@ export async function runAnalyze(
 
     for (const sourceConfig of config.sources) {
       try {
-        const adapter = getAdapterByName(sourceConfig.adapter);
+        const adapter = await getAdapter(sourceConfig, cwd);
         if (!adapter) {
           console.warn(`Unknown adapter: ${sourceConfig.adapter}`);
           continue;
@@ -250,12 +251,29 @@ export async function runAnalyze(
   }
 }
 
-function getAdapterByName(name: string): SourceAdapter | null {
-  switch (name) {
+async function getAdapter(
+  sourceConfig: SourceConfig,
+  cwd: string,
+): Promise<SourceAdapter | null> {
+  switch (sourceConfig.adapter) {
     case 'amplitude':
       return new AmplitudeAdapter();
     case 'posthog':
       return new PostHogAdapter();
+    case 'custom': {
+      if (!sourceConfig.module) {
+        console.warn('Custom adapter requires a "module" field');
+        return null;
+      }
+      const modulePath = path.resolve(cwd, sourceConfig.module);
+      const mod = await import(modulePath);
+      const AdapterClass = mod.default ?? mod.adapter;
+      if (!AdapterClass) {
+        console.warn(`Module ${sourceConfig.module} does not export default or adapter`);
+        return null;
+      }
+      return typeof AdapterClass === 'function' ? new AdapterClass() : AdapterClass;
+    }
     default:
       return null;
   }
