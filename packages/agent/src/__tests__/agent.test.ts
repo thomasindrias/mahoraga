@@ -295,6 +295,27 @@ describe('runAdaptationLoop', () => {
     expect(result.success).toBe(false);
     expect(result.attemptErrors[0]).toContain('runner exploded');
   });
+
+  it('should treat agent success with no file changes as failure and retry', async () => {
+    const executor = new MockAgentExecutor([
+      { success: true, diff: 'some output' }, // attempt 1: no files changed
+      { success: true, diff: 'real fix' },     // attempt 2: files changed
+    ]);
+
+    const result = await runAdaptationLoop(executor, 'fix it', mockIssue, '/tmp', {
+      maxRetries: 2,
+      testRunner: async () => null, // test always passes
+      fileChangeChecker: async () => {
+        // First call: no changes, second call: changes exist
+        return executor.getCallCount() >= 2;
+      },
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.attempts).toBe(2);
+    expect(result.attemptErrors).toHaveLength(1);
+    expect(result.attemptErrors[0]).toContain('no file changes');
+  });
 });
 
 describe('PR creation helpers', () => {

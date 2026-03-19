@@ -28,6 +28,8 @@ export interface AdaptationOptions {
   executeOptions?: AgentExecuteOptions;
   /** Function to run the generated test. Returns null if passed, error message if failed. */
   testRunner?: (test: GeneratedTest) => Promise<string | null>;
+  /** Check if agent actually modified files. Returns true if changes exist. */
+  fileChangeChecker?: (workDir: string) => Promise<boolean>;
 }
 
 /**
@@ -76,9 +78,14 @@ export async function runAdaptationLoop(
       continue;
     }
 
-    // Log what the agent returned for debugging
-    const diffPreview = lastResult.diff?.slice(0, 500) ?? '(no diff)';
-    console.log(`Attempt ${attempt + 1}: Agent succeeded. Cost: $${lastResult.costUsd?.toFixed(4) ?? 'N/A'}. Output preview: ${diffPreview}`);
+    // Check if agent actually changed files
+    if (options.fileChangeChecker) {
+      const hasChanges = await options.fileChangeChecker(workDir);
+      if (!hasChanges) {
+        attemptErrors.push(`Attempt ${attempt + 1}: Agent reported success but no file changes detected`);
+        continue;
+      }
+    }
 
     // Run the generated test
     let testError: string | null;
