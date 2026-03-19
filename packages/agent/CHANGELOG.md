@@ -1,5 +1,11 @@
 # mahoraga-agent
 
+## 0.5.3
+
+### Patch Changes
+
+- Add diagnostic logging to OpenCode executor for CI debugging
+
 ## 0.5.2
 
 ### Patch Changes
