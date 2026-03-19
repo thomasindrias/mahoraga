@@ -65,12 +65,10 @@ export class ClaudeCodeExecutor implements AgentExecutor {
     workDir: string,
     options?: AgentExecuteOptions,
   ): Promise<AgentExecutionResult> {
-    const { execFile } = await import('node:child_process');
-    const { promisify } = await import('node:util');
-    const exec = promisify(execFile);
+    const { spawn } = await import('node:child_process');
 
     const args = [
-      '--print',
+      '--print', '-',
       '--output-format', 'json',
       '--dangerously-skip-permissions',
     ];
@@ -84,10 +82,33 @@ export class ClaudeCodeExecutor implements AgentExecutor {
     }
 
     try {
-      const { stdout } = await exec('claude', [...args, prompt], {
-        cwd: workDir,
-        timeout: options?.timeoutMs ?? 300_000,
-        maxBuffer: 10 * 1024 * 1024,
+      const stdout = await new Promise<string>((resolve, reject) => {
+        const child = spawn('claude', args, {
+          cwd: workDir,
+          stdio: ['pipe', 'pipe', 'pipe'],
+          timeout: options?.timeoutMs ?? 300_000,
+        });
+
+        const chunks: Buffer[] = [];
+        const errChunks: Buffer[] = [];
+
+        child.stdout.on('data', (chunk: Buffer) => chunks.push(chunk));
+        child.stderr.on('data', (chunk: Buffer) => errChunks.push(chunk));
+
+        child.on('close', (code) => {
+          const out = Buffer.concat(chunks).toString('utf-8');
+          if (code === 0) {
+            resolve(out);
+          } else {
+            const stderr = Buffer.concat(errChunks).toString('utf-8');
+            reject(new Error(stderr || out || `Process exited with code ${code}`));
+          }
+        });
+
+        child.on('error', reject);
+
+        child.stdin.write(prompt);
+        child.stdin.end();
       });
 
       const result = JSON.parse(stdout);
