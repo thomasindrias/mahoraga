@@ -1,5 +1,13 @@
 # mahoraga-cli
 
+## 0.3.7
+
+### Patch Changes
+
+- Extract human-readable error from Claude Code JSON error output
+- Updated dependencies
+  - mahoraga-agent@0.2.5
+
 ## 0.3.6
 
 ### Patch Changes

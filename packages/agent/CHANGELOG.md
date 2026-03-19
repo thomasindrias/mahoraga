@@ -1,5 +1,11 @@
 # mahoraga-agent
 
+## 0.2.5
+
+### Patch Changes
+
+- Extract human-readable error from Claude Code JSON error output
+
 ## 0.2.4
 
 ### Patch Changes
