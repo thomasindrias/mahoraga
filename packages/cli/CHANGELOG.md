@@ -1,5 +1,11 @@
 # mahoraga-cli
 
+## 0.3.3
+
+### Patch Changes
+
+- Fix generated GitHub Actions workflow to include Claude Code installation, git config, and PR permissions
+
 ## 0.3.2
 
 ### Patch Changes
