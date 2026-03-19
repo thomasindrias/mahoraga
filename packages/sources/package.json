@@ -1,6 +1,6 @@
 {
   "name": "mahoraga-sources",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Pluggable source adapters for Mahoraga",
   "license": "MIT",
   "author": "Thomas Indrias <thomasindrias@gmail.com>",

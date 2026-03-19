@@ -1,5 +1,21 @@
 # mahoraga-agent
 
+## 0.5.0
+
+### Minor Changes
+
+- feat: add OpenCode executor for provider-agnostic AI coding agent
+
+  OpenCode supports any AI provider (OpenAI, Anthropic, Gemini, Groq, OpenRouter,
+  AWS Bedrock, Azure) via its own configuration. Set provider to "opencode" in
+  mahoraga config to use it.
+
+### Patch Changes
+
+- Updated dependencies
+  - mahoraga-core@0.5.1
+  - mahoraga-mapper@0.1.8
+
 ## 0.4.0
 
 ### Minor Changes
