@@ -128,6 +128,15 @@ export class ClaudeCodeExecutor implements AgentExecutor {
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
+      // Claude Code may exit non-zero but still output valid JSON with error details
+      try {
+        const parsed = JSON.parse(message);
+        if (parsed.result) {
+          return { success: false, error: parsed.result };
+        }
+      } catch {
+        // Not JSON — use raw message
+      }
       return {
         success: false,
         error: message,
