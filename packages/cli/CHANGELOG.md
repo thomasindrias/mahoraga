@@ -1,5 +1,20 @@
 # mahoraga-cli
 
+## 0.4.0
+
+### Minor Changes
+
+- Add provider-agnostic API executor supporting OpenAI and Gemini for agent dispatch
+
+### Patch Changes
+
+- Updated dependencies
+  - mahoraga-agent@0.3.0
+  - mahoraga-core@0.4.0
+  - mahoraga-analyzer@0.3.2
+  - mahoraga-mapper@0.1.6
+  - mahoraga-sources@0.2.2
+
 ## 0.3.7
 
 ### Patch Changes

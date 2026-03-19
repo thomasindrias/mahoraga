@@ -1,5 +1,17 @@
 # mahoraga-agent
 
+## 0.3.0
+
+### Minor Changes
+
+- Add provider-agnostic API executor supporting OpenAI and Gemini for agent dispatch
+
+### Patch Changes
+
+- Updated dependencies
+  - mahoraga-core@0.4.0
+  - mahoraga-mapper@0.1.6
+
 ## 0.2.5
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # mahoraga-core
 
+## 0.4.0
+
+### Minor Changes
+
+- Add provider-agnostic API executor supporting OpenAI and Gemini for agent dispatch
+
 ## 0.3.0
 
 ### Minor Changes

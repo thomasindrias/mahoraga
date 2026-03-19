@@ -1,6 +1,6 @@
 {
   "name": "mahoraga-analyzer",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Pluggable detection rules engine for Mahoraga",
   "license": "MIT",
   "author": "Thomas Indrias <thomasindrias@gmail.com>",
