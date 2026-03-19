@@ -1,5 +1,21 @@
 # mahoraga-sources
 
+## 0.2.0
+
+### Minor Changes
+
+- b053a99: feat: PostHog source adapter
+
+  New `PostHogAdapter` pulls events from PostHog's API with pagination support, Bearer auth, and self-hosted instance support. Maps PostHog events ($pageview, $autocapture, $exception, $web_vitals) to MahoragaEvent types.
+
+### Patch Changes
+
+- Updated dependencies [b053a99]
+- Updated dependencies
+- Updated dependencies [b053a99]
+- Updated dependencies [b053a99]
+  - mahoraga-core@0.2.0
+
 ## 0.1.3
 
 ### Patch Changes
