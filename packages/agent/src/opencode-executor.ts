@@ -26,6 +26,8 @@ export class OpenCodeExecutor implements AgentExecutor {
       ? ['run', prompt, '--format', 'json']
       : ['-p', prompt, '-f', 'json', '-q'];
 
+    console.log(`[OpenCode] version=${version}, args[0..2]=${args.slice(0, 3).join(' ')}, prompt length=${prompt.length}, cwd=${workDir}`);
+
     try {
       const stdout = await new Promise<string>((resolve, reject) => {
         const child = spawn('opencode', args, {
@@ -44,6 +46,8 @@ export class OpenCodeExecutor implements AgentExecutor {
           const out = Buffer.concat(chunks).toString('utf-8');
           const stderr = Buffer.concat(errChunks).toString('utf-8');
 
+          console.log(`[OpenCode] exit code=${code}, stdout length=${out.length}, stderr length=${stderr.length}`);
+          if (stderr) console.warn(`[OpenCode] stderr: ${stderr.slice(0, 500)}`);
           if (code === 0) {
             resolve(out);
           } else {
