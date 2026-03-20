@@ -1,5 +1,14 @@
 # mahoraga-cli
 
+## 0.7.2
+
+### Patch Changes
+
+- 89d5ed6: docs: fix stale package READMEs — PostHog now Available, add all 7 rules, fix adapter signature, correct rules default
+- Updated dependencies [89d5ed6]
+  - mahoraga-sources@0.2.6
+  - mahoraga-analyzer@0.3.6
+
 ## 0.7.1
 
 ### Patch Changes

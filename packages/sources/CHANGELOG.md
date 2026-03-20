@@ -1,5 +1,11 @@
 # mahoraga-sources
 
+## 0.2.6
+
+### Patch Changes
+
+- 89d5ed6: docs: fix stale package READMEs — PostHog now Available, add all 7 rules, fix adapter signature, correct rules default
+
 ## 0.2.5
 
 ### Patch Changes
