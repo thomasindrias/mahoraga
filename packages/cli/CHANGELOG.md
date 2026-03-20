@@ -1,5 +1,11 @@
 # mahoraga-cli
 
+## 0.7.1
+
+### Patch Changes
+
+- c4fff87: docs: V5 docs & plugin consistency pass — fix README discrepancies, correct plugin skill CLI references, add 5 missing slash commands, update packages/cli README
+
 ## 0.7.0
 
 ### Minor Changes
