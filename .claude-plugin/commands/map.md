@@ -1,17 +1,16 @@
 ---
-description: Map a CSS selector to its source file location
-argument-hint: <selector>
+description: Rebuild Mahoraga code-to-event index
 allowed-tools: Bash(npx:*)
 ---
 
-Run `npx mahoraga-cli map "$ARGUMENTS"` to resolve the CSS selector to its source file location using AST-based analysis.
+Run `npx mahoraga-cli map` to rebuild the code-to-event index using AST-based analysis of the project's source files.
 
-Present the results showing:
-- File path, line number, and column
-- Component name (if resolved)
-- Confidence level
+After the command completes, summarize:
+- Number of source files scanned
+- Components and selectors indexed
+- Any warnings or errors
 
-If no results found, suggest:
-- Checking the selector syntax
+If the command fails, suggest:
 - Ensuring the project has been built recently
-- Trying a more specific or less specific selector
+- Checking that `mahoraga.config.ts` exists
+- Verifying Node.js >= 20

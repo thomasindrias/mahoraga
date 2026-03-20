@@ -66,14 +66,16 @@ Human Review -> Merge
 
 ```bash
 # npm
-npm install mahoraga-cli mahoraga-core
+npm install mahoraga-cli
 
 # pnpm
-pnpm add mahoraga-cli mahoraga-core
+pnpm add mahoraga-cli
 
 # Or try it without installing
 npx mahoraga-cli --help
 ```
+
+> To use schemas and types directly in your code, also install `mahoraga-core`.
 
 ### Configure
 
@@ -104,7 +106,7 @@ export default defineConfig({
     routePatterns: ["/products/:id", "/users/:userId/posts/:postId"],
     // Tune detection sensitivity per rule
     thresholds: {
-      "rage-clicks": { clickCount: 5, windowMs: 1000 },
+      "rage-clicks": { clickCount: 3, windowMs: 1000 },
       "slow-navigation": { thresholdMs: 5000 },
     },
   },
@@ -148,14 +150,15 @@ npx mahoraga-cli dismiss <fingerprint> --reason "expected behavior"
 npx mahoraga-cli dismiss --list
 npx mahoraga-cli dismiss --undo <fingerprint>
 
-# Inspect stored events and sessions
-npx mahoraga-cli inspect
+# Query stored events or detected issues
+npx mahoraga-cli inspect events
+npx mahoraga-cli inspect issues
 
 # Check agent dispatch status
 npx mahoraga-cli status
 
-# Map a CSS selector to its source file
-npx mahoraga-cli map ".btn-submit"
+# Rebuild code-to-event index
+npx mahoraga-cli map
 
 # Clean up old data
 npx mahoraga-cli gc
@@ -228,9 +231,13 @@ defineConfig({
   // Agent (all optional)
   agent: {
     provider: "opencode",             // "opencode" only
+    workflow: "plan-then-implement",   // Only supported workflow
+    agentMdPath: "path/to/AGENTS.md", // Optional: agent-specific instructions
+    createPR: true,                   // Whether to create PRs (default: true)
     baseBranch: "main",
     draftPR: true,                    // Create PRs as drafts
     maxRetries: 3,                    // Adaptation loop retries
+    timeoutMs: 300000,                // Max dispatch time in ms (5 min)
     maxCostPerIssue: 2,               // USD budget per issue
     maxCostPerRun: 20,                // USD budget per run
     maxDispatchesPerRun: 5,

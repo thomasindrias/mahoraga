@@ -37,10 +37,12 @@ mahoraga analyze
 | `init` | Generate configuration file and initialize database |
 | `analyze` | Pull events, detect issues, dispatch agents |
 | `analyze --dry-run` | Detect issues without dispatching agents |
-| `inspect [id]` | View stored events, sessions, or a specific issue |
+| `inspect events\|issues` | Query stored events or detected issue groups |
 | `status` | Show pipeline status and dispatch history |
 | `gc` | Clean up events older than `retentionDays` |
-| `map <selector>` | Map a CSS selector to its source file location |
+| `map` | Rebuild code-to-event index |
+| `dismiss <fingerprint>` | Suppress false-positive issues |
+| `create-rule` | Scaffold a custom detection rule |
 
 ## Configuration
 
@@ -77,7 +79,8 @@ Store in `.mahoraga.env` (automatically gitignored) or set as environment variab
 |----------|--------|
 | `MAHORAGA_AMPLITUDE_API_KEY` | Amplitude |
 | `MAHORAGA_AMPLITUDE_SECRET_KEY` | Amplitude |
-| `MAHORAGA_POSTHOG_API_KEY` | PostHog (planned) |
+| `MAHORAGA_POSTHOG_API_KEY` | PostHog |
+| `MAHORAGA_POSTHOG_PROJECT_ID` | PostHog |
 | `MAHORAGA_SENTRY_DSN` | Sentry (planned) |
 
 ## License

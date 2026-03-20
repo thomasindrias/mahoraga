@@ -74,7 +74,7 @@ Mahoraga's competitive moat:
 
 **Cooldown**: Failed fixes enter 7-day cooldown to avoid wasting credits.
 
-**Suppression**: `mahoraga dismiss <issue-id>` persists in SQLite, survives future runs.
+**Suppression**: `mahoraga dismiss <fingerprint>` persists in SQLite, survives future runs.
 
 ## Provider Configuration
 

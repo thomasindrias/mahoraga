@@ -99,8 +99,8 @@ npx mahoraga-cli analyze
 | `inspect events\|issues` | Query local SQLite data |
 | `status` | Pipeline run history |
 | `gc` | Manual data cleanup |
-| `map <selector>` | CSS selector to source mapping |
-| `dismiss <issue-id>` | Suppress false positives |
+| `map` | Rebuild code-to-event index |
+| `dismiss <fingerprint>` | Suppress false positives |
 | `create-rule` | Scaffold custom detection rule |
 
 ## Cross-References
