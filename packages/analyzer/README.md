@@ -40,6 +40,11 @@ console.log(issues);
 |------|---------|
 | `RageClickRule` | 3+ clicks on the same element within 1 second |
 | `ErrorSpikeRule` | Abnormal increase in JavaScript errors vs previous window |
+| `DeadClickRule` | Clicks on elements that produce no response |
+| `FormAbandonmentRule` | Users starting but not completing form submissions |
+| `SlowNavigationRule` | Page transitions exceeding performance thresholds |
+| `LayoutShiftRule` | Excessive layout shifts degrading user experience |
+| `ErrorLoopRule` | Repeated identical errors within a session |
 
 ## Writing a Custom Rule
 

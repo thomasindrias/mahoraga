@@ -41,7 +41,7 @@ console.log(result);
 | Source | Status | Adapter |
 |--------|--------|---------|
 | Amplitude | Available | `AmplitudeAdapter` |
-| PostHog | Planned | — |
+| PostHog | Available | `PostHogAdapter` |
 | Sentry | Planned | — |
 
 ## Writing a Custom Adapter
@@ -49,15 +49,15 @@ console.log(result);
 Implement the `SourceAdapter` interface:
 
 ```typescript
-import type { SourceAdapter, AdapterConfig } from 'mahoraga-sources';
-import type { TimeRange } from 'mahoraga-core';
+import type { SourceAdapter, AdapterConfig, PullBatch } from 'mahoraga-sources';
+import type { TimeRange, Cursor } from 'mahoraga-core';
 
 export class MyAdapter implements SourceAdapter {
   name = 'my-source';
 
-  async *pull(config: AdapterConfig, timeRange: TimeRange, cursor?: string) {
+  async *pull(config: AdapterConfig, timeRange: TimeRange, _cursor?: Cursor): AsyncIterable<PullBatch> {
     // Yield batches of normalized events
-    yield { events: [...], cursor: 'next-page-token' };
+    yield { events: [...], cursor: { value: 'next-page-token', updatedAt: Date.now() } };
   }
 }
 ```

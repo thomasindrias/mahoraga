@@ -214,7 +214,8 @@ defineConfig({
   // Analysis (all optional)
   analysis: {
     windowDays: 3,                    // Days of data to analyze
-    rules: ["rage-clicks", "error-spikes", "dead-clicks", "form-abandonment", "slow-navigation", "layout-shifts", "error-loops"],
+    rules: ["rage-clicks", "error-spikes"],  // Default; add more as needed:
+    // "dead-clicks", "form-abandonment", "slow-navigation", "layout-shifts", "error-loops"
     customRules: [],                  // Custom DetectionRule implementations
     routePatterns: [],                // URL normalization: ["/products/:id"]
     thresholds: {                     // Per-rule threshold overrides

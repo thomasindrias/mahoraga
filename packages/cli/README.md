@@ -42,6 +42,8 @@ mahoraga analyze
 | `gc` | Clean up events older than `retentionDays` |
 | `map` | Rebuild code-to-event index |
 | `dismiss <fingerprint>` | Suppress false-positive issues |
+| `dismiss --list` | Show all active suppressions |
+| `dismiss --undo <fingerprint>` | Remove a suppression |
 | `create-rule` | Scaffold a custom detection rule |
 
 ## Configuration

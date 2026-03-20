@@ -12,5 +12,4 @@ After the command completes, summarize:
 
 If the command fails, suggest:
 - Ensuring the project has been built recently
-- Checking that `mahoraga.config.ts` exists
 - Verifying Node.js >= 20
